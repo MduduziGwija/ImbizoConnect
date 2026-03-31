@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ImbizoConnect</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #0c3864; --navy-mid: #1A3558;
+  --gold: #F4A535; --gold-light: #FFF3DC; --gold-dark: #C07E10;
+  --teal: #1D9E75; --teal-light: #E1F5EE;
+  --cream: #FDFAF4; --white: #FFFFFF;
+  --text-main: #0B1F3A; --text-muted: #5A6B80; --text-light: #8EA0B4;
+  --border: rgba(11,31,58,0.1); --border-strong: rgba(11,31,58,0.2);
+  --danger: #E24B4A; --danger-light: #FCEBEB;
+  --radius: 12px; --radius-sm: 8px; --radius-lg: 20px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--text-main); min-height: 100vh; font-size: 15px; line-height: 1.6; }
+h1,h2,h3,h4,h5 { font-family: 'Syne', sans-serif; line-height: 1.2; }
+
+nav { background: var(--navy); padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 60px; position: sticky; top: 0; z-index: 100; }
+.logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 20px; color: var(--white); letter-spacing: -0.5px; }
+.logo span { color: var(--gold); }
+.nav-links { display: flex; gap: 0; list-style: none; }
+.nav-links button { background: none; border: none; color: rgba(255,255,255,0.6); font-family: 'DM Sans', sans-serif; font-size: 14px; padding: 8px 16px; cursor: pointer; border-radius: var(--radius-sm); transition: all 0.2s; }
+.nav-links button:hover, .nav-links button.active { color: var(--white); background: rgba(255,255,255,0.1); }
+.nav-links button.active { color: var(--gold); }
+.nav-cta { background: var(--gold) !important; color: var(--navy) !important; font-weight: 600 !important; }
+
+.screen { display: none; animation: fadeIn 0.3s ease; }
+.screen.active { display: block; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+.hero { background: var(--navy); padding: 5rem 2rem 4rem; text-align: center; position: relative; overflow: hidden; }
+.hero::before { content:''; position:absolute; inset:0; background: radial-gradient(ellipse 80% 60% at 50% 120%, rgba(244,165,53,0.15) 0%, transparent 70%); pointer-events:none; }
+.hero-badge { display:inline-flex; align-items:center; gap:6px; background:rgba(244,165,53,0.15); border:1px solid rgba(244,165,53,0.3); color:var(--gold); font-size:12px; font-weight:500; padding:6px 14px; border-radius:100px; margin-bottom:1.5rem; letter-spacing:0.5px; }
+.hero h1 { font-size: clamp(2.2rem,5vw,3.5rem); font-weight:800; color:var(--white); max-width:700px; margin:0 auto 1rem; letter-spacing:-1px; }
+.hero h1 span { color:var(--gold); font-style:italic; }
+.hero p { font-size:1.05rem; color:rgba(255,255,255,0.65); max-width:520px; margin:0 auto 2.5rem; font-weight:300; }
+.hero-actions { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+
+.btn-primary { background:var(--gold); color:var(--navy); border:none; padding:14px 28px; border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif; font-size:15px; font-weight:600; cursor:pointer; transition:all 0.2s; }
+.btn-primary:hover { background:#e09620; transform:translateY(-1px); }
+.btn-outline { background:none; color:var(--navy); border:1.5px solid var(--border-strong); padding:10px 20px; border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif; font-size:14px; cursor:pointer; transition:all 0.2s; }
+.btn-outline:hover { border-color:var(--navy); background:rgba(11,31,58,0.04); }
+.btn-secondary { background:rgba(255,255,255,0.08); color:var(--white); border:1px solid rgba(255,255,255,0.2); padding:14px 28px; border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif; font-size:15px; cursor:pointer; transition:all 0.2s; }
+.btn-secondary:hover { background:rgba(255,255,255,0.14); }
+
+.stats-strip { background:var(--white); border-bottom:1px solid var(--border); display:grid; grid-template-columns:repeat(4,1fr); }
+.stat-item { padding:1.5rem; border-right:1px solid var(--border); text-align:center; }
+.stat-item:last-child { border-right:none; }
+.stat-num { font-family:'Syne',sans-serif; font-size:1.8rem; font-weight:700; color:var(--navy); }
+.stat-label { font-size:12px; color:var(--text-muted); margin-top:2px; }
+
+.main-content { max-width:1100px; margin:0 auto; padding:2rem; }
+.steps-row { display:grid; grid-template-columns:repeat(3,1fr); gap:1.5rem; margin:2.5rem 0; }
+.step-card { background:var(--white); border:1px solid var(--border); border-radius:var(--radius); padding:1.5rem; }
+.step-num { width:36px; height:36px; background:var(--navy); color:var(--gold); border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:'Syne',sans-serif; font-weight:700; font-size:14px; margin-bottom:1rem; }
+.step-card h3 { font-size:15px; font-weight:700; margin-bottom:0.4rem; }
+.step-card p { font-size:13px; color:var(--text-muted); line-height:1.5; }
+
+.app-layout { display:grid; grid-template-columns:1fr 340px; gap:1.5rem; margin-top:1.5rem; }
+.section-title { font-family:'Syne',sans-serif; font-size:18px; font-weight:700; margin-bottom:0.35rem; }
+.section-sub { font-size:13px; color:var(--text-muted); margin-bottom:1rem; }
+.card { background:var(--white); border:1px solid var(--border); border-radius:var(--radius); padding:1.5rem; margin-bottom:1rem; }
+
+.page-header { padding:1.5rem 0 0.5rem; }
+.page-header h2 { font-size:22px; font-weight:700; }
+.page-header p { font-size:14px; color:var(--text-muted); margin-top:2px; }
+
+.filter-bar { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:1rem; }
+.filter-pill { padding:6px 14px; border:1px solid var(--border-strong); border-radius:100px; font-size:12px; font-weight:500; cursor:pointer; background:var(--white); color:var(--text-muted); transition:all 0.15s; }
+.filter-pill:hover { border-color:var(--navy); color:var(--navy); }
+.filter-pill.active { background:var(--navy); color:var(--white); border-color:var(--navy); }
+
+.institutions-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-top:1rem; }
+.institution-card { border:1.5px solid var(--border); border-radius:var(--radius-sm); padding:12px 14px; cursor:pointer; transition:all 0.2s; position:relative; background:var(--white); }
+.institution-card:hover { border-color:var(--navy); }
+.institution-card.selected { border-color:var(--teal); background:var(--teal-light); }
+.institution-card.selected .inst-check { opacity:1; }
+.inst-check { position:absolute; top:10px; right:10px; width:20px; height:20px; background:var(--teal); border-radius:50%; display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity 0.2s; }
+.inst-check::after { content:''; width:5px; height:9px; border:2px solid white; border-top:none; border-left:none; transform:rotate(45deg) translateY(-1px); }
+.inst-name { font-family:'Syne',sans-serif; font-weight:700; font-size:13px; color:var(--navy); margin-bottom:2px; }
+.inst-type { font-size:11px; color:var(--text-muted); margin-bottom:6px; }
+.inst-fee { font-size:11px; font-weight:500; }
+.inst-fee.free { color:var(--teal); }
+.inst-fee.paid { color:var(--gold-dark); }
+
+.course-input-group { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:1rem; }
+.form-group { margin-bottom:1rem; }
+label { display:block; font-size:12px; font-weight:500; color:var(--text-muted); margin-bottom:5px; text-transform:uppercase; letter-spacing:0.5px; }
+select, input[type="text"], input[type="email"], input[type="tel"], input[type="number"] {
+  width:100%; padding:10px 12px; border:1px solid var(--border-strong); border-radius:var(--radius-sm);
+  font-family:'DM Sans',sans-serif; font-size:14px; color:var(--text-main); background:var(--white);
+  appearance:none; -webkit-appearance:none; outline:none; transition:border-color 0.2s;
+}
+select:focus, input:focus { border-color:var(--navy); }
+select { cursor:pointer; }
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+
+.availability-tag { display:inline-block; font-size:11px; padding:3px 9px; border-radius:100px; font-weight:500; margin:2px; }
+.available { background:var(--teal-light); color:var(--teal); }
+.unavailable { background:var(--danger-light); color:var(--danger); }
+.availability-row { display:flex; gap:6px; flex-wrap:wrap; margin-top:6px; }
+
+/* STEP TABS */
+.step-tabs { display:flex; background:var(--white); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; margin-bottom:1.5rem; }
+.step-tab { flex:1; padding:14px 8px; border:none; background:none; font-family:'DM Sans',sans-serif; font-size:13px; cursor:pointer; border-right:1px solid var(--border); transition:all 0.2s; color:var(--text-muted); text-align:center; }
+.step-tab:last-child { border-right:none; }
+.step-tab.active { background:var(--gold-light); color:var(--navy); }
+.step-tab.done { color:var(--teal); }
+.step-tab-num { font-family:'Syne',sans-serif; font-weight:700; font-size:10px; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:2px; color:var(--text-light); display:block; }
+.step-tab.active .step-tab-num { color:var(--gold-dark); }
+.step-tab.done .step-tab-num { color:var(--teal); }
+
+/* DOCUMENTS */
+.doc-upload-item { display:flex; align-items:center; gap:14px; padding:14px; border:1.5px dashed var(--border-strong); border-radius:var(--radius-sm); margin-bottom:10px; cursor:pointer; transition:all 0.2s; background:var(--white); }
+.doc-upload-item:hover { border-color:var(--navy); background:var(--cream); }
+.doc-upload-item.uploaded { border-style:solid; border-color:var(--teal); background:var(--teal-light); }
+.doc-icon { width:40px; height:40px; border-radius:var(--radius-sm); display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; background:var(--cream); }
+.doc-upload-item.uploaded .doc-icon { background:var(--teal-light); }
+.doc-info { flex:1; }
+.doc-info .doc-name { font-size:14px; font-weight:500; }
+.doc-info .doc-hint { font-size:12px; color:var(--text-muted); margin-top:1px; }
+.doc-status { font-size:12px; font-weight:600; white-space:nowrap; }
+.doc-status.pending { color:var(--text-light); }
+.doc-status.done { color:var(--teal); }
+
+/* ELIGIBILITY */
+.eligibility-banner { border-radius:var(--radius); padding:1.25rem 1.5rem; margin-bottom:1rem; display:flex; align-items:flex-start; gap:14px; }
+.eligibility-banner.pass { background:var(--teal-light); border:1px solid rgba(29,158,117,0.25); }
+.eligibility-banner.fail { background:var(--danger-light); border:1px solid rgba(226,75,74,0.25); }
+.eligibility-banner.warn { background:var(--gold-light); border:1px solid rgba(192,126,16,0.25); }
+.elig-icon { font-size:22px; flex-shrink:0; margin-top:1px; }
+.elig-title { font-family:'Syne',sans-serif; font-size:14px; font-weight:700; margin-bottom:3px; }
+.elig-detail { font-size:13px; color:var(--text-muted); line-height:1.5; }
+
+.elig-table { width:100%; border-collapse:collapse; font-size:13px; }
+.elig-table th { font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-muted); font-weight:500; padding:8px 10px; text-align:left; border-bottom:1px solid var(--border); }
+.elig-table td { padding:10px; border-bottom:1px solid var(--border); vertical-align:middle; }
+.elig-table tr:last-child td { border-bottom:none; }
+.elig-badge { display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:600; padding:3px 10px; border-radius:100px; white-space:nowrap; }
+.elig-yes { background:var(--teal-light); color:var(--teal); }
+.elig-no { background:var(--danger-light); color:var(--danger); }
+.elig-cond { background:var(--gold-light); color:var(--gold-dark); }
+
+/* SIDEBAR */
+.sidebar-sticky { position:sticky; top:76px; }
+.checkout-card { background:var(--white); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; }
+.checkout-header { background:var(--navy); padding:1rem 1.5rem; }
+.checkout-header h3 { color:var(--white); font-size:14px; font-weight:700; }
+.checkout-body { padding:1.25rem 1.5rem; }
+.checkout-line { display:flex; justify-content:space-between; align-items:flex-start; padding:8px 0; border-bottom:1px solid var(--border); font-size:13px; gap:8px; }
+.checkout-line:last-of-type { border-bottom:none; }
+.checkout-line .inst-label { color:var(--text-muted); flex:1; }
+.checkout-line .fee-amount { font-weight:500; white-space:nowrap; }
+.checkout-line .fee-amount.free { color:var(--teal); }
+.checkout-total { border-top:2px solid var(--navy); margin-top:0.5rem; padding-top:0.75rem; display:flex; justify-content:space-between; font-family:'Syne',sans-serif; font-weight:700; font-size:18px; }
+.checkout-footer { padding:1rem 1.5rem; background:var(--cream); border-top:1px solid var(--border); }
+.checkout-footer .btn-primary { width:100%; padding:13px; font-size:14px; }
+.empty-state { text-align:center; padding:2rem 0; color:var(--text-light); font-size:13px; }
+
+/* CAREER GUIDE */
+.career-hero { background:var(--navy); border-radius:var(--radius-lg); padding:3rem 2rem; text-align:center; margin-bottom:2rem; position:relative; overflow:hidden; }
+.career-hero::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse 70% 80% at 50% 110%, rgba(29,158,117,0.25) 0%, transparent 70%); }
+.career-hero h2 { color:var(--white); font-size:2rem; position:relative; }
+.career-hero p { color:rgba(255,255,255,0.6); margin-top:0.5rem; font-size:15px; position:relative; }
+
+/* SUBJECT ROWS */
+.subject-row { display:grid; grid-template-columns:28px 1fr 120px; gap:10px; align-items:center; margin-bottom:10px; }
+.subject-row-num { font-family:'Syne',sans-serif; font-weight:700; font-size:12px; color:var(--text-muted); text-align:center; }
+.lo-hint { font-size:11px; color:var(--text-muted); font-style:italic; margin-top:-6px; margin-bottom:10px; padding-left:38px; }
+
+.aps-display { background:var(--navy); color:var(--white); border-radius:var(--radius); padding:1.25rem 1.5rem; display:flex; align-items:center; gap:16px; margin-bottom:1rem; }
+.aps-score { font-family:'Syne',sans-serif; font-size:2.5rem; font-weight:800; color:var(--gold); line-height:1; }
+.aps-label { font-size:12px; color:rgba(255,255,255,0.6); margin-top:4px; }
+.aps-divider { width:1px; height:48px; background:rgba(255,255,255,0.15); flex-shrink:0; }
+.aps-desc { font-size:13px; color:rgba(255,255,255,0.7); line-height:1.5; }
+.aps-desc strong { color:var(--white); }
+
+.subject-breakdown { width:100%; border-collapse:collapse; font-size:13px; }
+.subject-breakdown th { font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-muted); font-weight:500; padding:6px 10px; text-align:left; border-bottom:1px solid var(--border); }
+.subject-breakdown td { padding:8px 10px; border-bottom:1px solid var(--border); }
+.subject-breakdown tr:last-child td { border-bottom:none; }
+.aps-pt-badge { display:inline-block; width:28px; height:28px; border-radius:50%; background:var(--navy); color:var(--gold); font-family:'Syne',sans-serif; font-weight:700; font-size:12px; text-align:center; line-height:28px; }
+.aps-pt-lo { background:var(--cream); color:var(--text-muted); }
+
+.career-card { background:var(--white); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:1rem; overflow:hidden; transition:box-shadow 0.2s; }
+.career-card:hover { box-shadow:0 4px 20px rgba(11,31,58,0.08); }
+.career-card-header { display:flex; align-items:center; gap:14px; padding:1.25rem 1.5rem; cursor:pointer; }
+.career-icon { width:44px; height:44px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
+.career-card-header h3 { font-size:15px; font-weight:700; }
+.career-card-header .meta { font-size:12px; color:var(--text-muted); margin-top:2px; }
+.avg-salary { margin-left:auto; text-align:right; flex-shrink:0; }
+.avg-salary .amount { font-family:'Syne',sans-serif; font-weight:700; font-size:16px; color:var(--teal); }
+.avg-salary .label { font-size:10px; color:var(--text-light); display:block; }
+.career-card-body { padding:0 1.5rem 1.5rem; border-top:1px solid var(--border); display:none; }
+.career-card-body.open { display:block; padding-top:1rem; }
+.career-body-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+.career-detail-label { font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px; font-weight:500; }
+.career-detail-value { font-size:13px; line-height:1.5; }
+.uni-pill { display:inline-block; background:var(--gold-light); color:var(--gold-dark); font-size:11px; font-weight:500; padding:3px 9px; border-radius:100px; margin:2px; border:1px solid rgba(192,126,16,0.2); }
+.match-badge { display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:600; padding:3px 10px; border-radius:100px; }
+.match-strong { background:var(--teal-light); color:var(--teal); }
+.match-moderate { background:var(--gold-light); color:var(--gold-dark); }
+
+
+/* Required field error state */
+input.required-error {
+  border-color: var(--danger);
+  background: var(--danger-light);
+}
+
+/* Helper text below inputs */
+.helper-text {
+  font-size: 12px;
+  color: var(--text-light);
+  margin-top: 4px;
+  display: block;
+}
+``
+
+@media(max-width:768px){
+  .app-layout{grid-template-columns:1fr;}
+  .stats-strip{grid-template-columns:repeat(2,1fr);}
+  .steps-row{grid-template-columns:1fr;}
+  .career-body-grid{grid-template-columns:1fr;}
+  .institutions-grid{grid-template-columns:1fr;}
+  .form-row,.course-input-group{grid-template-columns:1fr;}
+  .subject-row{grid-template-columns:28px 1fr 100px;}
+  .step-tab { font-size:11px; padding:10px 4px; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Imbizo<span>Connect</span></div>
+  <ul class="nav-links">
+    <li><button onclick="showScreen('home')" id="nav-home" class="active">Home</button></li>
+    <li><button onclick="showScreen('apply')" id="nav-apply">Apply</button></li>
+    <li><button onclick="showScreen('career')" id="nav-career">Career Guide</button></li>
+    <li><button onclick="showScreen('apply')" class="nav-cta">Start Application</button></li>
+  </ul>
+</nav>
+
+
+
+
+<!-- ═══════════════ HOME ═══════════════ -->
+<div id="screen-home" class="screen active">
+  <div class="hero">
+    <div class="hero-badge">🇿🇦 For South African Students</div>
+    <h1>One application.<br><span>Multiple opportunities.</span></h1>
+    <p>Smarter applications, smoother futures.</p>
+    <div class="hero-actions">
+      <button class="btn-primary" onclick="showScreen('apply')">Start Your Application</button>
+      <button class="btn-secondary" onclick="showScreen('career')">Explore Careers First</button>
+    </div>
+ 
+    <div id="screen-home" class="screen active">
+  ...
+</div>
+``
+  </div>
+
+  <div class="stats-strip">
+    <div class="stat-item"><div class="stat-num">26</div><div class="stat-label">Partner Universities</div></div>
+    <div class="stat-item"><div class="stat-num">1,200+</div><div class="stat-label">Programmes Listed</div></div>
+    <div class="stat-item"><div class="stat-num">1</div><div class="stat-label">Application to Fill</div></div>
+    <div class="stat-item"><div class="stat-num">Free</div><div class="stat-label">Platform Fee</div></div>
+  </div>
+
+  <div class="main-content">
+    <div class="page-header"><h2>How it works</h2><p>Apply smarter, not harder</p></div>
+    <div class="steps-row">
+      <div class="step-card"><div class="step-num">1</div><h3>Enter your details once</h3><p>Fill in your personal info, matric results, and upload your documents — one time, shared across all applications.</p></div>
+      <div class="step-card"><div class="step-num">2</div><h3>We check your eligibility</h3><p>Before you pay, we assess whether your marks meet minimum entry requirements at each institution you've selected.</p></div>
+      <div class="step-card"><div class="step-num">3</div><h3>Pay once at checkout</h3><p>See all application fees in a single total. Pay once — we distribute to each institution on your behalf.</p></div>
+    </div>
+    <div style="background:var(--navy);border-radius:var(--radius-lg);padding:2.5rem;display:flex;align-items:center;gap:2rem;flex-wrap:wrap;">
+      <div style="flex:1;min-width:200px;">
+        <div style="font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:700;color:white;margin-bottom:0.5rem;">Don't know what to study?</div>
+        <div style="font-size:14px;color:rgba(255,255,255,0.6);line-height:1.6;">Enter your 7 matric subjects and marks — our Career Guide calculates your APS and shows what you qualify for.</div>
+      </div>
+      
+      
+      
+      <button class="btn-primary" onclick="showScreen('career')" style="flex-shrink:0;">Try Career Guide →</button>
+    </div>
+  </div>
+
+  <!-- CONTACT / GITHUB -->
+<div class="main-content">
+  <div class="card" style="background:var(--navy);color:white;overflow:hidden;">
+    <div style="display:grid;grid-template-columns:1.2fr 1fr;gap:2rem;align-items:center;">
+
+      <div>
+        <div class="section-title" style="color:white;font-size:22px;">
+          Concept by Mduduzi Gwija
+        </div>
+        <p style="color:rgba(255,255,255,0.7);margin:0.5rem 0 1.25rem;max-width:520px;">
+          ImbizoConnect is a concept project focused on simplifying university applications for South African students.
+          I’m transitioning into tech and building practical, real-world systems that solve everyday problems.
+        </p>
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <a href="https://mduduzigwija.github.io/Mduduzi-Gwija-Profile-Site-1/"
+             target="_blank"
+             class="btn-primary"
+             style="text-decoration:none;">
+            View My GitHub →
+          </a>
+
+          <a href="mailto:mduduzigwija@gmail.com"
+             class="btn-secondary"
+             style="text-decoration:none;">
+            Contact Me
+          </a>
+        </div>
+      </div>
+
+      <div style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);
+                  border-radius:var(--radius);padding:1.5rem;">
+        <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:0.75rem;">
+          Quick Links
+        </div>
+
+        <div style="font-size:13px;line-height:2;color:rgba(255,255,255,0.75);">
+          <div>📧 mduduzigwija@gmail.com</div>
+          <div>
+            💻
+            <a href="https://mduduzigwija.github.io/Mduduzi-Gwija-Profile-Site-1/"
+               target="_blank"
+               style="color:var(--gold);text-decoration:none;">
+              GitHub Profile
+            </a>
+          </div>
+    
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+</div>
+
+<!-- ═══════════════ APPLY ═══════════════ -->
+<div id="screen-apply" class="screen">
+  <div class="main-content">
+    <div class="page-header"><h2>Your Application</h2><p>Fill in once. Apply to many.</p></div>
+
+    <div class="step-tabs">
+      <button class="step-tab active" id="tab-1" onclick="goToStep(1)"><span class="step-tab-num">Step 1</span>Personal Details</button>
+      <button class="step-tab" id="tab-2" onclick="goToStep(2)"><span class="step-tab-num">Step 2</span>Institutions &amp; Courses</button>
+      <button class="step-tab" id="tab-3" onclick="goToStep(3)"><span class="step-tab-num">Step 3</span>Documents</button>
+      <button class="step-tab" id="tab-4" onclick="goToStep(4)"><span class="step-tab-num">Step 4</span>Eligibility Check</button>
+      <button class="step-tab" id="tab-5" onclick="goToStep(5)"><span class="step-tab-num">Step 5</span>Review &amp; Pay</button>
+    </div>
+
+    <!-- STEP 1: PERSONAL DETAILS -->
+    <div id="step-1" class="step-content">
+      <div class="app-layout">
+        <div>
+          <div class="card">
+            <div class="section-title">Personal Details</div>
+            <div class="section-sub">Your information is shared securely with your selected institutions.</div>
+            <div class="form-row">
+              <div class="form-group"><label>First Name</label><input type="text" id="firstName"></div>
+              <div class="form-group"><label>Last Name</label><input type="text" id="lastName"></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>Email Address</label><input type="email" id="email"></div>
+              <div class="form-group"><label>Cell Number</label><input type="tel" id="cell"></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>SA ID Number</label><input type="text" id="idNumber">
+              
+<small class="helper-text">
+  For site testing purposes, any ID number will be accepted.
+</small>
+</div>
+              <div class="form-group"><label>Province</label>
+                <select><option>Gauteng</option><option>Western Cape</option><option>KwaZulu-Natal</option><option>Eastern Cape</option><option>Limpopo</option><option>Mpumalanga</option><option>North West</option><option>Free State</option><option>Northern Cape</option></select>
+              </div>
+            </div>
+            
+              <div class="form-group"><label>Year Applying For</label>
+                <select><option>2026</option><option>2027</option></select>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="section-title">School Details</div>
+            <div class="form-row">
+              <div class="form-group"><label>High School Name</label><input type="text" value="Johannesburg High School"></div>
+              <div class="form-group"><label>Matric Year</label>
+                <select><option>2024</option><option>2023</option><option>2022</option><option>Completing 2025</option></select>
+              </div>
+            </div>
+            <div class="form-group"><label>School EMIS Number (optional)</label><input type="text" placeholder="e.g. 700350089"></div>
+          </div>
+        </div>
+        <div>
+          <div class="sidebar-sticky">
+            <div class="card" style="background:var(--navy);">
+              <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:white;margin-bottom:0.75rem;">Application checklist</div>
+              <div style="font-size:13px;color:rgba(255,255,255,0.5);line-height:2.3;">
+                <div style="color:rgba(255,255,255,0.9);">● Personal details</div>
+                <div>○ Institutions selected</div>
+                <div>○ Courses selected</div>
+                <div>○ Documents uploaded</div>
+                <div>○ Eligibility confirmed</div>
+                <div>○ Payment made</div>
+              </div>
+            </div>
+            <button class="btn-primary" onclick="validateStep1()" style="width:100%;padding:13px;margin-top:1rem;">Next: Institutions &amp; Courses →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2: INSTITUTIONS & COURSES -->
+    <div id="step-2" class="step-content" style="display:none;">
+      <div class="app-layout">
+        <div>
+          <div class="card">
+            <div class="section-title">Choose Your Courses</div>
+            <div class="section-sub">Select your field of study and preferred courses. We'll show which institutions offer them.</div>
+            <div class="course-input-group">
+              <div class="form-group">
+                <label>Field of Study</label>
+                <select id="field-select" onchange="filterCourses()">
+                  <option value="">— Select a field —</option>
+                  <option value="health">Health Sciences</option>
+                  <option value="engineering">Engineering &amp; Technology</option>
+                  <option value="commerce">Commerce &amp; Management</option>
+                  <option value="law">Law</option>
+                  <option value="humanities">Humanities &amp; Social Sciences</option>
+                  <option value="education">Education</option>
+                  <option value="ict">Information &amp; Communication Tech</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>1st Choice Course</label>
+                <select id="course1-select" onchange="updateAvailability()"><option>— Select field first —</option></select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>2nd Choice Course <span style="font-weight:400;text-transform:none;color:var(--text-light);">(optional fallback)</span></label>
+              <select id="course2-select"><option>— Optional: select an alternate course —</option></select>
+            </div>
+            <div id="availability-info" style="display:none;margin-top:0.75rem;padding:1rem;background:var(--teal-light);border-radius:var(--radius-sm);border:1px solid rgba(29,158,117,0.2);">
+              <div style="font-size:11px;font-weight:600;color:var(--teal);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;">Course availability at your selected institutions</div>
+              <div id="availability-tags" class="availability-row"></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="section-title">Select Institutions</div>
+            <div class="section-sub">Pick the universities you want to apply to. Application fees are shown per institution — you pay all at once at checkout.</div>
+            <div class="filter-bar">
+              <span class="filter-pill active" onclick="filterInst(this,'all')">All</span>
+              <span class="filter-pill" onclick="filterInst(this,'university')">Universities</span>
+              <span class="filter-pill" onclick="filterInst(this,'technology')">UoTs</span>
+              <span class="filter-pill" onclick="filterInst(this,'distance')">Distance</span>
+              <span class="filter-pill" onclick="filterInst(this,'free')">No Fee</span>
+            </div>
+            <div class="institutions-grid" id="institutions-grid"></div>
+          </div>
+        </div>
+        <div>
+          <div class="sidebar-sticky">
+            <div class="checkout-card">
+              <div class="checkout-header"><h3>Selected Institutions</h3></div>
+              <div class="checkout-body" id="checkout-body-2"><div class="empty-state"><p>No institutions selected yet</p></div></div>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:1rem;">
+              <button class="btn-outline" onclick="goToStep(1)" style="flex:1;">← Back</button>
+              <button class="btn-primary" onclick="goToStep(3)" style="flex:2;padding:12px;">Next: Documents →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3: DOCUMENTS -->
+    <div id="step-3" class="step-content" style="display:none;">
+      <div class="app-layout">
+        <div>
+          <div class="card">
+            <div class="section-title">Upload Your Documents</div>
+            <div class="section-sub">Upload once — these are submitted securely to all your selected institutions. Click any item to mark as uploaded.</div>
+            <div class="doc-upload-item uploaded" onclick="toggleDoc(this)">
+              <div class="doc-icon">📄</div>
+              <div class="doc-info"><div class="doc-name">South African ID / Smart Card</div><div class="doc-hint">Clear copy of both sides · PDF or JPG · max 5MB</div></div>
+              <div class="doc-status done">✓ Uploaded</div>
+            </div>
+            <div class="doc-upload-item uploaded" onclick="toggleDoc(this)">
+              <div class="doc-icon">📋</div>
+              <div class="doc-info"><div class="doc-name">Matric Certificate / Statement of Results</div><div class="doc-hint">Final results or provisional NSC statement · PDF · max 10MB</div></div>
+              <div class="doc-status done">✓ Uploaded</div>
+            </div>
+            <div class="doc-upload-item" onclick="toggleDoc(this)">
+              <div class="doc-icon">🏠</div>
+              <div class="doc-info"><div class="doc-name">Proof of Residence</div><div class="doc-hint">Not older than 3 months · utility bill or affidavit · PDF</div></div>
+              <div class="doc-status pending">Click to upload</div>
+            </div>
+            <div class="doc-upload-item" onclick="toggleDoc(this)">
+              <div class="doc-icon">📸</div>
+              <div class="doc-info"><div class="doc-name">Passport-size Photograph</div><div class="doc-hint">Recent, plain background · JPG or PNG · max 2MB</div></div>
+              <div class="doc-status pending">Click to upload</div>
+            </div>
+            <div class="doc-upload-item" onclick="toggleDoc(this)">
+              <div class="doc-icon">💰</div>
+              <div class="doc-info"><div class="doc-name">NSFAS Application / Proof of Income</div><div class="doc-hint">Required by financial aid institutions · parent payslip or NSFAS reference number</div></div>
+              <div class="doc-status pending">Click to upload</div>
+            </div>
+            <div style="margin-top:1rem;padding:0.75rem 1rem;background:var(--gold-light);border-radius:var(--radius-sm);border:1px solid rgba(192,126,16,0.2);font-size:13px;color:var(--gold-dark);">
+              ⚠ Some institutions may request additional documents after reviewing your application.
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="sidebar-sticky">
+            <div class="card" style="background:var(--navy);">
+              <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:white;margin-bottom:0.75rem;">Document status</div>
+              <div id="doc-sidebar" style="font-size:13px;line-height:2.2;">
+                <div style="color:rgba(255,255,255,0.9);">✓ <span style="color:rgba(255,255,255,0.55);">ID Document</span></div>
+                <div style="color:rgba(255,255,255,0.9);">✓ <span style="color:rgba(255,255,255,0.55);">Matric Certificate</span></div>
+                <div style="color:rgba(255,255,255,0.35);">○ <span>Proof of Residence</span></div>
+                <div style="color:rgba(255,255,255,0.35);">○ <span>Photograph</span></div>
+                <div style="color:rgba(255,255,255,0.35);">○ <span>NSFAS / Income Proof</span></div>
+              </div>
+              <div style="margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid rgba(255,255,255,0.1);font-size:11px;color:rgba(255,255,255,0.35);">2 of 5 uploaded</div>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:1rem;">
+              <button class="btn-outline" onclick="goToStep(2)" style="flex:1;">← Back</button>
+              <button class="btn-primary" onclick="goToStep(4)" style="flex:2;padding:12px;">Check Eligibility →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 4: ELIGIBILITY CHECK -->
+    <div id="step-4" class="step-content" style="display:none;">
+      <div class="app-layout">
+        <div>
+          <div class="card">
+            <div class="section-title">Eligibility Assessment</div>
+            <div class="section-sub">Based on your matric results and selected course, here's how you measure up at each institution — before you pay.</div>
+
+            <div class="eligibility-banner pass">
+              <div class="elig-icon">✅</div>
+              <div>
+                <div class="elig-title">You qualify at 4 of your 6 selected institutions</div>
+                <div class="elig-detail">Your APS of 28 meets entry requirements for BCom Accounting at 4 institutions. Two are above your current score.</div>
+              </div>
+            </div>
+
+            <table class="elig-table" style="margin-bottom:1.25rem;">
+              <thead>
+                <tr><th>Institution</th><th>Min. APS</th><th>Your APS</th><th>Key Subject Req.</th><th>Status</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><strong>UCT</strong> — BCom Accounting</td><td>36</td><td>28</td><td>Maths 70%+</td><td><span class="elig-badge elig-no">✗ Does not qualify</span></td></tr>
+                <tr><td><strong>Wits</strong> — BCom Accounting</td><td>32</td><td>28</td><td>Maths 60%+</td><td><span class="elig-badge elig-no">✗ Does not qualify</span></td></tr>
+                <tr><td><strong>UP</strong> — BCom Accounting</td><td>28</td><td>28</td><td>Maths 60%+</td><td><span class="elig-badge elig-cond">~ Borderline</span></td></tr>
+                <tr><td><strong>UJ</strong> — BCom Accounting</td><td>26</td><td>28</td><td>Maths 50%+</td><td><span class="elig-badge elig-yes">✓ Qualifies</span></td></tr>
+                <tr><td><strong>TUT</strong> — Diploma Accounting</td><td>22</td><td>28</td><td>Maths 40%+</td><td><span class="elig-badge elig-yes">✓ Qualifies</span></td></tr>
+                <tr><td><strong>UNISA</strong> — BCom Accounting</td><td>23</td><td>28</td><td>Maths 40%+</td><td><span class="elig-badge elig-yes">✓ Qualifies</span></td></tr>
+              </tbody>
+            </table>
+
+            <div class="eligibility-banner warn">
+              <div class="elig-icon">⚠️</div>
+              <div>
+                <div class="elig-title">UCT and Wits are above your current APS</div>
+                <div class="elig-detail">You can still include them, but you'll pay their application fees with a low chance of acceptance. Consider removing them to save R200.</div>
+              </div>
+            </div>
+
+            <div style="margin-top:1rem;display:flex;gap:10px;flex-wrap:wrap;">
+              <button class="btn-outline" onclick="alert('In the full app, this removes UCT and Wits and recalculates your total.')">Remove non-qualifying institutions</button>
+              <button class="btn-outline" onclick="alert('In the full app, this shows tips to improve your APS through supplementary exams.')">View improvement tips</button>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="sidebar-sticky">
+            <div class="checkout-card">
+              <div class="checkout-header"><h3>Eligibility Summary</h3></div>
+              <div class="checkout-body">
+                <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:13px;border-bottom:1px solid var(--border);">
+                  <span style="color:var(--text-muted);">Qualifying</span><span style="color:var(--teal);font-weight:600;">4 institutions</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:13px;border-bottom:1px solid var(--border);">
+                  <span style="color:var(--text-muted);">Borderline</span><span style="color:var(--gold-dark);font-weight:600;">1 institution</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:13px;">
+                  <span style="color:var(--text-muted);">Not qualifying</span><span style="color:var(--danger);font-weight:600;">2 institutions</span>
+                </div>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:1rem;">
+              <button class="btn-outline" onclick="goToStep(3)" style="flex:1;">← Back</button>
+              <button class="btn-primary" onclick="goToStep(5)" style="flex:2;padding:12px;">Review &amp; Pay →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 5: REVIEW & PAY -->
+    <div id="step-5" class="step-content" style="display:none;">
+      <div class="app-layout">
+        <div>
+          <div class="card">
+            <div class="section-title">Review Your Application</div>
+            <div class="section-sub">Confirm your details before submitting and paying.</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem;">
+              <div>
+                <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);font-weight:500;margin-bottom:4px;">Applicant</div>
+                <div style="font-size:15px;font-weight:500;">Thabo Nkosi</div>
+                <div style="font-size:13px;color:var(--text-muted);">thabo.nkosi@gmail.com</div>
+              </div>
+              <div>
+                <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);font-weight:500;margin-bottom:4px;">Course Selected</div>
+                <div style="font-size:15px;font-weight:500;">BCom Accounting</div>
+                <div style="font-size:13px;color:var(--text-muted);">Commerce &amp; Management</div>
+              </div>
+            </div>
+            <div style="border-top:1px solid var(--border);padding-top:1rem;">
+              <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);font-weight:500;margin-bottom:0.75rem;">Institutions &amp; Fees</div>
+              <table class="elig-table">
+                <thead><tr><th>Institution</th><th>Programme</th><th>Eligibility</th><th style="text-align:right;">Fee</th></tr></thead>
+                <tbody>
+                  <tr><td><strong>UP</strong></td><td>BCom Accounting</td><td><span class="elig-badge elig-cond">~ Borderline</span></td><td style="text-align:right;font-weight:500;">R300</td></tr>
+                  <tr><td><strong>UJ</strong></td><td>BCom Accounting</td><td><span class="elig-badge elig-yes">✓ Qualifies</span></td><td style="text-align:right;font-weight:500;">R200</td></tr>
+                  <tr><td><strong>TUT</strong></td><td>Diploma Accounting</td><td><span class="elig-badge elig-yes">✓ Qualifies</span></td><td style="text-align:right;font-weight:500;">R240</td></tr>
+                  <tr><td><strong>UNISA</strong></td><td>BCom Accounting</td><td><span class="elig-badge elig-yes">✓ Qualifies</span></td><td style="text-align:right;font-weight:500;color:var(--teal);">Free</td></tr>
+                </tbody>
+              </table>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-top:1rem;padding-top:0.75rem;border-top:2px solid var(--navy);font-family:'Syne',sans-serif;font-weight:700;font-size:20px;">
+                <span>Total Due</span><span>R740</span>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="section-title">Payment Method</div>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <label style="display:flex;align-items:center;gap:12px;padding:12px;border:1.5px solid var(--teal);border-radius:var(--radius-sm);cursor:pointer;background:var(--teal-light);text-transform:none;letter-spacing:0;font-weight:normal;">
+                <input type="radio" name="payment" checked style="width:auto;"> <span style="font-size:14px;font-weight:500;">Credit / Debit Card</span>
+              </label>
+              <label style="display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);cursor:pointer;text-transform:none;letter-spacing:0;font-weight:normal;">
+                <input type="radio" name="payment" style="width:auto;"> <span style="font-size:14px;">EFT / Bank Transfer</span>
+              </label>
+              <label style="display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);cursor:pointer;text-transform:none;letter-spacing:0;font-weight:normal;">
+                <input type="radio" name="payment" style="width:auto;"> <span style="font-size:14px;">SnapScan / Zapper</span>
+              </label>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="sidebar-sticky">
+            <div class="checkout-card">
+              <div class="checkout-header"><h3>Order Summary</h3></div>
+              <div class="checkout-body">
+                <div class="checkout-line"><div class="inst-label">UP — BCom Accounting</div><div class="fee-amount">R300</div></div>
+                <div class="checkout-line"><div class="inst-label">UJ — BCom Accounting</div><div class="fee-amount">R200</div></div>
+                <div class="checkout-line"><div class="inst-label">TUT — Diploma Accounting</div><div class="fee-amount">R240</div></div>
+                <div class="checkout-line"><div class="inst-label">UNISA — BCom Accounting</div><div class="fee-amount free">Free</div></div>
+                <div class="checkout-line"><div class="inst-label">ApplyOnce platform fee</div><div class="fee-amount free">Free</div></div>
+                <div class="checkout-total"><span>Total</span><span>R740</span></div>
+              </div>
+              <div class="checkout-footer">
+                <button class="btn-primary" onclick="alert('🎉 In the full app, this processes payment and submits to all institutions simultaneously.')">Pay R740 &amp; Submit →</button>
+                <div style="font-size:11px;color:var(--text-muted);text-align:center;margin-top:8px;">🔒 Secured by PayFast · 256-bit SSL</div>
+              </div>
+            </div>
+            <button class="btn-outline" onclick="goToStep(4)" style="width:100%;margin-top:10px;padding:11px;">← Back to Eligibility</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════ CAREER GUIDE ═══════════════ -->
+<div id="screen-career" class="screen">
+  <div class="main-content">
+    <div class="career-hero">
+      <h2>Career Guide</h2>
+      <p>Choose your 7 matric subjects, enter your marks, and discover what you qualify to study</p>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Your Matric Subjects &amp; Results</div>
+      <div class="section-sub">Select each subject from the dropdown and enter your percentage mark. Every student's combination is different — pick yours exactly. Life Orientation is included but excluded from your APS calculation.</div>
+
+      <div id="subjects-container"></div>
+
+      <div style="margin-top:0.5rem;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <button class="btn-primary" onclick="calculateAPS()" style="background:var(--navy);color:white;">Calculate APS &amp; Find Careers</button>
+        <button class="btn-outline" onclick="loadSample()">Load sample results</button>
+      </div>
+    </div>
+
+    <div id="aps-result" style="display:none;"></div>
+    <div id="career-results"></div>
+  </div>
+</div>
+
+<script>
+const ALL_SUBJECTS = [
+  'Afrikaans Home Language','Afrikaans First Additional Language','Afrikaans Second Additional Language',
+  'English Home Language','English First Additional Language','English Second Additional Language',
+  'IsiZulu Home Language','IsiZulu First Additional Language',
+  'IsiXhosa Home Language','IsiXhosa First Additional Language',
+  'Sepedi Home Language','Sepedi First Additional Language',
+  'Setswana Home Language','Setswana First Additional Language',
+  'Sesotho Home Language','Sesotho First Additional Language',
+  'Xitsonga Home Language','Siswati Home Language','Tshivenda Home Language','IsiNdebele Home Language',
+  'Mathematics','Mathematical Literacy','Technical Mathematics',
+  'Physical Sciences','Life Sciences','Agricultural Sciences','Marine Sciences',
+  'Accounting','Business Studies','Economics','Tourism',
+  'History','Geography','Religion Studies','Philosophy',
+  'Visual Arts','Music','Dramatic Arts','Dance Studies',
+  'Computer Applications Technology','Information Technology',
+  'Engineering Graphics & Design','Technical Sciences',
+  'Agricultural Management Practices','Agricultural Technology',
+  'Consumer Studies','Hospitality Studies',
+  'Civil Technology','Mechanical Technology','Electrical Technology',
+  'Life Orientation',
+].sort();
+
+const SAMPLE = [
+  {s:'English Home Language', m:72},
+  {s:'Mathematics', m:65},
+  {s:'Life Sciences', m:58},
+  {s:'Physical Sciences', m:54},
+  {s:'Accounting', m:68},
+  {s:'Business Studies', m:71},
+  {s:'Life Orientation', m:72},
+];
+
+const INSTITUTIONS = [
+  {id:'uct',name:'UCT',full:'University of Cape Town',type:'university',fee:100,fields:['health','law','engineering','commerce','humanities','ict']},
+  {id:'wits',name:'Wits',full:'University of the Witwatersrand',type:'university',fee:100,fields:['health','law','engineering','commerce','humanities','ict']},
+  {id:'up',name:'UP',full:'University of Pretoria',type:'university',fee:300,fields:['health','law','engineering','commerce','humanities','education','ict']},
+  {id:'stellenbosch',name:'Stellenbosch',full:'Stellenbosch University',type:'university',fee:100,fields:['health','law','engineering','commerce','humanities','education']},
+  {id:'ukzn',name:'UKZN',full:'Univ. of KwaZulu-Natal',type:'university',fee:200,fields:['health','law','engineering','commerce','humanities','education','ict']},
+  {id:'unisa',name:'UNISA',full:'Unisa (Distance Learning)',type:'distance',fee:0,fields:['law','commerce','humanities','education','ict']},
+  {id:'uj',name:'UJ',full:'University of Johannesburg',type:'university',fee:200,fields:['engineering','commerce','humanities','education','ict','health']},
+  {id:'nmu',name:'NMU',full:'Nelson Mandela University',type:'university',fee:200,fields:['health','law','engineering','commerce','humanities','education','ict']},
+  {id:'tut',name:'TUT',full:'Tshwane Univ. of Technology',type:'technology',fee:240,fields:['engineering','commerce','humanities','education','ict','health']},
+  {id:'dut',name:'DUT',full:'Durban Univ. of Technology',type:'technology',fee:200,fields:['engineering','commerce','ict','health']},
+  {id:'cut',name:'CUT',full:'Central Univ. of Technology',type:'technology',fee:100,fields:['engineering','commerce','ict','education']},
+  {id:'cput',name:'CPUT',full:'Cape Peninsula Univ. of Tech',type:'technology',fee:100,fields:['engineering','commerce','ict','health']},
+  {id:'ul',name:'UL',full:'University of Limpopo',type:'university',fee:200,fields:['health','law','commerce','humanities','education']},
+  {id:'ump',name:'UMP',full:'Univ. of Mpumalanga',type:'university',fee:0,fields:['health','education']},
+];
+
+const COURSES = {
+  health:['MBChB (Medicine)','BPharm (Pharmacy)','BSc Nursing','BSc Physiotherapy','BSc Dietetics','Radiography','BSc Occupational Therapy'],
+  engineering:['BEng Civil Engineering','BEng Electrical Engineering','BEng Mechanical Engineering','BSc Computer Engineering','BEng Industrial Engineering','Diploma Civil Engineering','Diploma Electrical Engineering'],
+  commerce:['BCom Accounting','BCom Finance','BCom Economics','BCom Marketing','BCom Human Resources','BCom Business Management','Diploma Business Administration'],
+  law:['LLB (Law)','BA Law','BCom Law'],
+  humanities:['BA Psychology','BA Sociology','BA Communications','BA Political Science','BA Philosophy','BSW Social Work','BA Media Studies'],
+  education:['BEd Foundation Phase','BEd Intermediate Phase','BEd Senior Phase','PGCE','BEd Technology'],
+  ict:['BSc Computer Science','BSc Information Technology','Diploma ICT','BSc Data Science','BSc Cybersecurity','Diploma Software Development'],
+};
+
+let selected = new Set();
+let currentFilter = 'all';
+
+// ── NAVIGATION
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-links button').forEach(b => b.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  const nb = document.getElementById('nav-' + name);
+  if (nb) nb.classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function goToStep(n) {
+  document.querySelectorAll('.step-content').forEach(s => s.style.display = 'none');
+  document.getElementById('step-' + n).style.display = 'block';
+  for (let i = 1; i <= 5; i++) {
+    const t = document.getElementById('tab-' + i);
+    if (!t) continue;
+    t.classList.remove('active','done');
+    if (i === n) t.classList.add('active');
+    else if (i < n) t.classList.add('done');
+  }
+  window.scrollTo(0, 0);
+}
+
+// ── INSTITUTIONS
+function renderInstitutions() {
+  const grid = document.getElementById('institutions-grid');
+  if (!grid) return;
+  const filtered = INSTITUTIONS.filter(i => currentFilter === 'all' ? true : currentFilter === 'free' ? i.fee === 0 : i.type === currentFilter);
+  grid.innerHTML = filtered.map(inst => `
+    <div class="institution-card ${selected.has(inst.id) ? 'selected' : ''}" onclick="toggleInst('${inst.id}')">
+      <div class="inst-check"></div>
+      <div class="inst-name">${inst.name}</div>
+      <div class="inst-type">${inst.full}</div>
+      <div class="inst-fee ${inst.fee === 0 ? 'free' : 'paid'}">${inst.fee === 0 ? '✓ No application fee' : 'R' + inst.fee + ' application fee'}</div>
+    </div>`).join('');
+}
+
+function toggleInst(id) {
+  if (selected.has(id)) selected.delete(id); else selected.add(id);
+  renderInstitutions();
+  updateSidebar2();
+  updateAvailability();
+}
+
+function filterInst(el, type) {
+  currentFilter = type;
+  document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  renderInstitutions();
+}
+
+function updateSidebar2() {
+  const body = document.getElementById('checkout-body-2');
+  if (!body) return;
+  if (selected.size === 0) { body.innerHTML = '<div class="empty-state"><p>No institutions selected yet</p></div>'; return; }
+  let html = '';
+  selected.forEach(id => {
+    const inst = INSTITUTIONS.find(i => i.id === id);
+    html += `<div class="checkout-line"><div class="inst-label">${inst.name}<br><span style="font-size:11px;color:var(--text-light);">${inst.full}</span></div><div class="fee-amount ${inst.fee === 0 ? 'free' : ''}">${inst.fee === 0 ? 'Free' : 'R' + inst.fee}</div></div>`;
+  });
+  body.innerHTML = html;
+}
+
+// ── COURSES
+function filterCourses() {
+  const field = document.getElementById('field-select').value;
+  const courses = COURSES[field] || [];
+  const base = '<option value="">— Select a course —</option>';
+  const opts = base + courses.map(c => `<option value="${c}">${c}</option>`).join('');
+  document.getElementById('course1-select').innerHTML = field ? opts : '<option>— Select field first —</option>';
+  document.getElementById('course2-select').innerHTML = field ? '<option value="">— Optional: alternate course —</option>' + courses.map(c => `<option value="${c}">${c}</option>`).join('') : '<option>— Optional —</option>';
+  document.getElementById('availability-info').style.display = 'none';
+}
+
+function updateAvailability() {
+  const field = document.getElementById('field-select')?.value;
+  if (!field || selected.size === 0) { document.getElementById('availability-info').style.display = 'none'; return; }
+  const matched = [...selected].map(id => INSTITUTIONS.find(i => i.id === id)).filter(i => i.fields.includes(field));
+  const notMatched = [...selected].map(id => INSTITUTIONS.find(i => i.id === id)).filter(i => !i.fields.includes(field));
+  document.getElementById('availability-tags').innerHTML =
+    matched.map(i => `<span class="availability-tag available">✓ ${i.name}</span>`).join('') +
+    notMatched.map(i => `<span class="availability-tag unavailable">✗ ${i.name}</span>`).join('');
+  document.getElementById('availability-info').style.display = 'block';
+}
+
+// ── DOCUMENTS
+function toggleDoc(el) {
+  if (!el.classList.contains('uploaded')) {
+    el.classList.add('uploaded');
+    el.querySelector('.doc-status').textContent = '✓ Uploaded';
+    el.querySelector('.doc-status').className = 'doc-status done';
+  }
+}
+
+// ── CAREER GUIDE: build subject rows
+function buildSubjectRows() {
+  const container = document.getElementById('subjects-container');
+  if (!container) return;
+  const opts = ALL_SUBJECTS.map(s => `<option value="${s}">${s}</option>`).join('');
+  let html = '';
+  for (let i = 0; i < 7; i++) {
+    html += `
+    <div class="subject-row">
+      <div class="subject-row-num">${i + 1}</div>
+      <select id="subj-${i}">
+        <option value="">— Select subject —</option>
+        ${opts}
+      </select>
+      <input type="number" id="mark-${i}" min="0" max="100" placeholder="%" style="text-align:center;">
+    </div>`;
+    if (i === 6) html += `<div class="lo-hint">Subject 7 is typically Life Orientation — it's required but not counted in your APS score.</div>`;
+  }
+  container.innerHTML = html;
+}
+
+function loadSample() {
+  SAMPLE.forEach((s, i) => {
+    const sEl = document.getElementById('subj-' + i);
+    const mEl = document.getElementById('mark-' + i);
+    if (sEl) sEl.value = s.s;
+    if (mEl) mEl.value = s.m;
+  });
+  calculateAPS();
+}
+
+function toPoints(pct) {
+  if (pct >= 80) return 7; if (pct >= 70) return 6; if (pct >= 60) return 5;
+  if (pct >= 50) return 4; if (pct >= 40) return 3; if (pct >= 30) return 2; return 1;
+}
+
+function calculateAPS() {
+  const entries = [];
+  for (let i = 0; i < 7; i++) {
+    const subj = document.getElementById('subj-' + i)?.value || '';
+    const mark = parseInt(document.getElementById('mark-' + i)?.value) || 0;
+    if (subj && mark > 0) entries.push({ subj, mark });
+  }
+  if (entries.length === 0) { alert('Please select at least one subject and enter a mark.'); return; }
+
+  const isLO = s => s.toLowerCase().includes('life orientation');
+  const apsEntries = entries.filter(e => !isLO(e.subj));
+  const loEntry = entries.find(e => isLO(e.subj));
+  const aps = apsEntries.reduce((sum, e) => sum + toPoints(e.mark), 0);
+
+  // Key subject marks for matching
+  const get = (...names) => { const e = apsEntries.find(e => names.some(n => e.subj.toLowerCase().includes(n.toLowerCase()))); return e ? e.mark : 0; };
+  const math = get('Mathematics','Technical Mathematics');
+  const mathLit = get('Mathematical Literacy');
+  const science = get('Physical Sciences');
+  const lifeSc = get('Life Sciences');
+  const english = get('English');
+  const accounting = get('Accounting');
+
+  // Breakdown table
+  let rows = apsEntries.map(e => `<tr><td>${e.subj}</td><td>${e.mark}%</td><td><span class="aps-pt-badge">${toPoints(e.mark)}</span></td></tr>`).join('');
+  if (loEntry) rows += `<tr><td>${loEntry.subj}</td><td>${loEntry.mark}%</td><td><span class="aps-pt-badge aps-pt-lo">—</span></td></tr>`;
+
+  document.getElementById('aps-result').style.display = 'block';
+  document.getElementById('aps-result').innerHTML = `
+    <div class="aps-display">
+      <div><div class="aps-score">${aps}</div><div class="aps-label">Your APS Score</div></div>
+      <div class="aps-divider"></div>
+      <div class="aps-desc"><strong>Based on ${apsEntries.length} subject${apsEntries.length !== 1 ? 's' : ''}.</strong>
+      Life Orientation is excluded from APS. Universities require between 18–42 APS depending on the programme.</div>
+    </div>
+    <div class="card" style="margin-bottom:1rem;">
+      <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);margin-bottom:0.75rem;">Subject breakdown</div>
+      <table class="subject-breakdown">
+        <thead><tr><th>Subject</th><th>Mark</th><th>APS Points</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+
+  renderCareers(getCareerMatches(aps, math, mathLit, science, lifeSc, english, accounting));
+}
+
+function getCareerMatches(aps, math, mathLit, science, lifeSc, english, accounting) {
+  const hasMath = math > 0;
+  const all = [
+    { title:'Doctor (MBChB)', icon:'🩺', color:'#E1F5EE', field:'Health Sciences', minAPS:36,
+      requires:'Pure Maths ≥70%, Physical Science ≥60%', salary:'R800k–R1.5m/yr', duration:'6 years',
+      unis:['UCT','Wits','UP','Stellenbosch','UKZN','UL'],
+      description:'Diagnose and treat illness, prescribe medication, and provide holistic patient care. Among the most demanding and rewarding careers in SA.',
+      qualifies: aps >= 36 && math >= 70 && science >= 60 },
+    { title:'Pharmacist (BPharm)', icon:'💊', color:'#E1F5EE', field:'Health Sciences', minAPS:30,
+      requires:'Maths ≥60%, Physical Science ≥50%', salary:'R400k–R700k/yr', duration:'4 years',
+      unis:['UWC','UKZN','UL','NMU','UJ'],
+      description:'Dispense medications, counsel patients on correct dosage and interactions, and ensure pharmaceutical safety.',
+      qualifies: aps >= 30 && math >= 60 && science >= 50 },
+    { title:'Registered Nurse (BSc Nursing)', icon:'🏥', color:'#E1F5EE', field:'Health Sciences', minAPS:22,
+      requires:'Maths or Maths Lit ≥40%, Life Sciences ≥50%', salary:'R200k–R450k/yr', duration:'4 years',
+      unis:['UCT','UKZN','UP','UJ','NMU','UL'],
+      description:'Provide frontline patient care, administer treatment, and support medical teams in hospitals and clinics.',
+      qualifies: aps >= 22 && (math >= 40 || mathLit >= 40) && lifeSc >= 50 },
+    { title:'Civil Engineer (BEng)', icon:'🏗️', color:'#FFF3DC', field:'Engineering', minAPS:30,
+      requires:'Pure Maths ≥70%, Physical Science ≥60%', salary:'R450k–R900k/yr', duration:'4 years',
+      unis:['UCT','Wits','UP','Stellenbosch','UKZN','UJ'],
+      description:'Design and oversee construction of roads, bridges, dams, and buildings that shape modern infrastructure.',
+      qualifies: aps >= 30 && math >= 70 && science >= 60 },
+    { title:'Electrical Engineer (BEng)', icon:'⚡', color:'#FFF3DC', field:'Engineering', minAPS:30,
+      requires:'Pure Maths ≥70%, Physical Science ≥60%', salary:'R500k–R950k/yr', duration:'4 years',
+      unis:['UCT','Wits','UP','Stellenbosch','UKZN','UJ','TUT'],
+      description:'Design electrical systems, power grids, electronics, and control systems across industry and infrastructure.',
+      qualifies: aps >= 30 && math >= 70 && science >= 60 },
+    { title:'Software Developer (BSc IT)', icon:'💻', color:'#EEF2FF', field:'Information Technology', minAPS:25,
+      requires:'Pure Maths ≥50%', salary:'R350k–R800k/yr', duration:'3–4 years',
+      unis:['UCT','Wits','UP','UJ','TUT','CPUT','UNISA'],
+      description:'Design and build software applications, websites, and digital systems for businesses and consumers.',
+      qualifies: aps >= 25 && math >= 50 },
+    { title:'Data Scientist (BSc)', icon:'🔬', color:'#EEF2FF', field:'Information Technology', minAPS:28,
+      requires:'Pure Maths ≥65%', salary:'R500k–R1m/yr', duration:'3–4 years + Honours',
+      unis:['UCT','Wits','UP','UJ','Stellenbosch'],
+      description:'Analyse large datasets using statistical models and algorithms to drive strategic business and scientific decisions.',
+      qualifies: aps >= 28 && math >= 65 },
+    { title:'Chartered Accountant (CA)', icon:'📊', color:'#FFF3DC', field:'Commerce', minAPS:28,
+      requires:'Pure Maths ≥60%', salary:'R500k–R1.2m/yr', duration:'4 years + articles',
+      unis:['UCT','Wits','UP','Stellenbosch','UKZN','UJ'],
+      description:'Manage financial records, ensure regulatory compliance, and advise on high-level strategic financial decisions.',
+      qualifies: aps >= 28 && math >= 60 },
+    { title:'BCom Business Management', icon:'📈', color:'#FFF3DC', field:'Commerce', minAPS:22,
+      requires:'Maths or Maths Lit ≥40%, English ≥50%', salary:'R250k–R600k/yr', duration:'3 years',
+      unis:['UP','UJ','TUT','CPUT','NMU','UNISA','DUT'],
+      description:'Study business operations, strategy, and management to lead organisations and build entrepreneurial ventures.',
+      qualifies: aps >= 22 && (math >= 40 || mathLit >= 40) && english >= 50 },
+    { title:'Attorney (LLB)', icon:'⚖️', color:'#F3F0FF', field:'Law', minAPS:28,
+      requires:'English ≥60%', salary:'R350k–R900k/yr', duration:'4 years + articles',
+      unis:['UCT','Wits','UP','Stellenbosch','UKZN','UL','UNISA'],
+      description:'Provide legal advice, draft contracts, and represent clients in courts and commercial transactions.',
+      qualifies: aps >= 28 && english >= 60 },
+    { title:'Teacher (BEd)', icon:'📚', color:'#E1F5EE', field:'Education', minAPS:22,
+      requires:'English ≥50%', salary:'R200k–R450k/yr', duration:'4 years',
+      unis:['UP','UKZN','UJ','NMU','UNISA','TUT','UL'],
+      description:'Educate and inspire learners at primary or secondary school level, shaping future generations.',
+      qualifies: aps >= 22 && english >= 50 },
+    { title:'Social Worker (BSW)', icon:'🤝', color:'#FFF0F5', field:'Humanities', minAPS:20,
+      requires:'English ≥50%', salary:'R150k–R350k/yr', duration:'4 years',
+      unis:['UCT','Wits','UKZN','UJ','NMU','UNISA'],
+      description:'Empower individuals, families, and communities through crises, connecting people to social services and support.',
+      qualifies: aps >= 20 && english >= 50 },
+    { title:'Psychologist (BA Psychology)', icon:'🧠', color:'#FFF0F5', field:'Humanities', minAPS:26,
+      requires:'English ≥60%', salary:'R300k–R700k/yr', duration:'4 years + Masters',
+      unis:['UCT','Wits','UP','Stellenbosch','UKZN','UJ','UNISA'],
+      description:'Study human behaviour and mental health. Full registration as a psychologist requires postgraduate study.',
+      qualifies: aps >= 26 && english >= 60 },
+  ];
+  return { qualified: all.filter(c => c.qualifies), almost: all.filter(c => !c.qualifies && aps >= c.minAPS - 6) };
+}
+
+function renderCareers({ qualified, almost }) {
+  const c = document.getElementById('career-results');
+  if (qualified.length === 0 && almost.length === 0) { c.innerHTML = '<div style="text-align:center;padding:3rem;color:var(--text-muted);">No career matches found based on the marks entered.</div>'; return; }
+  let html = '<div>';
+  if (qualified.length > 0) {
+    html += `<div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;margin-bottom:1rem;">You qualify for ${qualified.length} career path${qualified.length !== 1 ? 's' : ''}</div>`;
+    html += qualified.map(c => careerCard(c, 'match-strong', '✓ Qualifies')).join('');
+  }
+  if (almost.length > 0) {
+    html += `<div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin:1.5rem 0 1rem;color:var(--gold-dark);">Almost there — ${almost.length} career${almost.length !== 1 ? 's' : ''} within reach</div>`;
+    html += almost.map(c => careerCard(c, 'match-moderate', 'Close — improve marks')).join('');
+  }
+  c.innerHTML = html + '</div>';
+}
+
+function careerCard(c, badgeClass, badgeText) {
+  return `<div class="career-card">
+    <div class="career-card-header" onclick="toggleCard(this)">
+      <div class="career-icon" style="background:${c.color}">${c.icon}</div>
+      <div style="flex:1;">
+        <h3>${c.title}</h3>
+        <div class="meta">${c.field} · ${c.duration}</div>
+        <div style="margin-top:4px;"><span class="match-badge ${badgeClass}">${badgeText}</span></div>
+      </div>
+      <div class="avg-salary"><div class="amount">${c.salary.split('–')[0]}</div><span class="label">starting salary</span></div>
+    </div>
+    <div class="career-card-body">
+      <div class="career-body-grid">
+        <div><div class="career-detail-label">About this career</div><div class="career-detail-value">${c.description}</div></div>
+        <div><div class="career-detail-label">Minimum requirements</div><div class="career-detail-value" style="font-weight:500;color:var(--navy);">APS ${c.minAPS}+</div><div class="career-detail-value" style="margin-top:2px;">${c.requires}</div></div>
+        <div><div class="career-detail-label">Salary range</div><div class="career-detail-value" style="color:var(--teal);font-weight:500;">${c.salary}</div></div>
+        <div><div class="career-detail-label">Where to study</div><div style="margin-top:4px;">${c.unis.map(u => `<span class="uni-pill">${u}</span>`).join('')}</div></div>
+      </div>
+      <div style="margin-top:1rem;">
+        <button class="btn-primary" onclick="event.stopPropagation();applyForCareer('${c.field}')" style="background:var(--navy);color:white;font-size:13px;padding:9px 18px;">Apply for this field →</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function toggleCard(header) { header.nextElementSibling.classList.toggle('open'); }
+
+function applyForCareer(field) {
+  const map = {'Health Sciences':'health','Engineering':'engineering','Commerce':'commerce','Law':'law','Humanities':'humanities','Education':'education','Information Technology':'ict'};
+  showScreen('apply');
+  setTimeout(() => {
+    const sel = document.getElementById('field-select');
+    if (sel) { sel.value = map[field] || ''; filterCourses(); }
+  }, 150);
+}
+
+renderInstitutions();
+buildSubjectRows();
+
+function validateStep1() {
+  const requiredFields = [
+    'firstName',
+    'lastName',
+    'email',
+    'cell',
+    'idNumber'
+  ];
+
+  let valid = true;
+
+  requiredFields.forEach(id => {
+    const field = document.getElementById(id);
+    if (!field) return;
+
+    if (!field.value.trim()) {
+      field.classList.add('required-error');
+      valid = false;
+    } else {
+      field.classList.remove('required-error');
+    }
+  });
+
+  if (!valid) {
+    alert('Please complete all required personal details before continuing.');
+    return;
+  }
+
+  // ✅ Safe to proceed
+  goToStep(2);
+}
+
+
+document.querySelectorAll('#step-1 input').forEach(input => {
+  input.addEventListener('input', () => {
+    if (input.value.trim()) {
+      input.classList.remove('required-error');
+    }
+  });
+});
+
+
+</script>
+</body>
+</html>
