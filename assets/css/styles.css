@@ -975,3 +975,7 @@ input[type=radio], input[type=checkbox] { width: auto; box-shadow: none; }
 .prog-min { display: grid; justify-items: end; gap: 4px; font-size: 12.5px; font-weight: 600; white-space: nowrap; text-align: right; }
 .prog-line { margin: 8px 0 0; font-size: 13px; color: var(--muted); }
 .prog-line strong { color: var(--text); }
+.about p + p { margin-top: -4px; }
+.signature { font-size: 14px; border-left: 3px solid var(--gold); padding-left: 12px; }
+.about-facts .timeline-fact { border-left: 3px solid var(--gold); }
+.about-facts .timeline-fact strong { font: 800 1.2rem var(--display); color: var(--amber); letter-spacing: 0; text-transform: none; }

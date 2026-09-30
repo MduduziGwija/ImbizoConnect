@@ -10,6 +10,10 @@
 
 *Imbizo* is a gathering. ImbizoConnect gathers every public university's fees, closing dates and prospectuses in one place, then lets a student apply to several of them with a single profile.
 
+### How it started
+
+In 2015, two high school friends, **Mduduzi Gwija** and **Karabo Kennedy Mafaralala**, kept asking the same question: why does applying to university mean filling in the same forms again and again, paying a fee at every institution, and guessing whether your marks are good enough? That conversation became an idea, and the idea stayed. In 2026, Mduduzi Gwija conceptualised and built ImbizoConnect as a working platform, with thanks to Karabo for the conversations that started it.
+
 ## Highlights
 
 - **One profile, many applications.** Students enter their details, marks and documents once. Every institution they apply to receives the same profile.
