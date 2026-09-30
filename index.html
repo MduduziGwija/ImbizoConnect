@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en-ZA">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ImbizoConnect</title>
+<meta name="description" content="Compare application fees, closing dates and prospectuses for all 26 South African public universities, check your APS, and plan your 2027 applications in one place.">
+<meta name="theme-color" content="#0c3864">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='16' fill='%230c3864'/><g fill='%23f4a535'><circle cx='32' cy='12' r='5'/><circle cx='49.3' cy='22' r='5'/><circle cx='49.3' cy='42' r='5'/><circle cx='32' cy='52' r='5'/><circle cx='14.7' cy='42' r='5'/><circle cx='14.7' cy='22' r='5'/><circle cx='32' cy='32' r='7'/></g></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="logo" href="#/" aria-label="ImbizoConnect home">
+      <span data-logo-mark></span>
+      <span class="logo-word">Imbizo<span class="accent">Connect</span></span>
+    </a>
+    <button class="menu-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="primary-nav">
+      <span></span><span></span><span></span>
+    </button>
+    <nav id="primary-nav" class="primary-nav" aria-label="Main">
+      <a href="#/" data-route="home">Home</a>
+      <a href="#/universities" data-route="universities">Universities</a>
+      <a href="#/aps" data-route="aps">APS &amp; Careers</a>
+      <a href="#/funding" data-route="funding">Funding</a>
+      <span id="account-nav" class="account-nav"></span>
+      <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+        <svg class="i-sun" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="4.5" fill="currentColor"/><g stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></g></svg>
+        <svg class="i-moon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" fill="currentColor"/></svg>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<div class="notice-bar" role="note">
+  <strong>Concept platform.</strong> Applications made here are not sent to real institutions yet. Fees and dates for the <span data-intake></span> intake were checked on <span data-verified></span>. Always confirm with the university before you pay.
+</div>
+
+<main id="main" tabindex="-1">
+
+<!-- ═════════════ HOME ═════════════ -->
+<section class="screen" data-screen="home">
+  <div class="hero">
+    <div class="hero-inner">
+      <div class="hero-copy">
+        <span class="eyebrow"><span class="pulse" aria-hidden="true"></span><span id="hero-open-count">…</span></span>
+        <h1>Apply to university <em>without the guesswork.</em></h1>
+        <p class="lede">Create one profile, then apply to several of South Africa's 26 public universities at once. See every fee, closing date and prospectus, check your APS before you pay, and follow each offer in one place.</p>
+        <div class="hero-actions">
+          <a class="btn btn-gold btn-lg" id="hero-apply" href="#/signin?next=apply">Start applying</a>
+          <a class="btn btn-ghost-light btn-lg" href="#/universities">Compare universities</a>
+        </div>
+        <ul class="hero-points">
+          <li>✓ One profile for every application</li>
+          <li>✓ Real <span data-intake></span> fees, CAO charged once</li>
+          <li>✓ Track every offer</li>
+        </ul>
+      </div>
+      <div class="hero-visual" id="hero-visual">
+        <div class="map-wrap" id="hero-map"></div>
+        <div class="float-card fc-fee" data-depth="18"><span class="fc-label">Wits · BCom</span><strong>R100</strong><span class="fc-sub">application fee</span></div>
+        <div class="float-card fc-aps" data-depth="30"></div>
+        <div class="float-card fc-offer" data-depth="12" hidden></div>
+        <p class="map-hint">Tap a pin to see a university</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="pattern-band" aria-hidden="true"></div>
+  <div class="stats">
+    <div class="stat"><strong id="stat-unis">26</strong><span>public universities</span></div>
+    <div class="stat"><strong id="stat-free">–</strong><span>charge no application fee</span></div>
+    <div class="stat"><strong id="stat-range">–</strong><span>fee range for SA applicants</span></div>
+    <div class="stat"><strong id="stat-pdfs">–</strong><span>prospectus PDFs to download</span></div>
+  </div>
+
+  <div class="container">
+    <div class="closing">
+      <div class="section-head tight">
+        <h2>Closing soon</h2>
+        <a class="btn btn-text" href="#/universities?sort=closing">All closing dates →</a>
+      </div>
+      <ol class="deadline-list" id="deadline-list"></ol>
+    </div>
+
+    <div class="section-head">
+      <h2>How it works</h2>
+      <p>Four steps from "what can I study?" to an accepted offer.</p>
+    </div>
+    <div class="steps">
+      <article class="step spot"><span class="step-n">1</span><h3>Build your profile</h3><p>Enter your details, marks and documents once. We calculate your APS and check your SA ID number.</p></article>
+      <article class="step spot"><span class="step-n">2</span><h3>Shortlist and choose</h3><p>Filter by province, fee and closing date, download each prospectus, and pick two programmes per institution.</p></article>
+      <article class="step spot"><span class="step-n">3</span><h3>Check before you pay</h3><p>See where you meet the estimated cut-off, and drop long shots before you spend R100–R300 on each.</p></article>
+      <article class="step spot"><span class="step-n">4</span><h3>Submit and track</h3><p>Send every application at once, pay one total (one CAO fee for KZN), and accept your best offer here.</p></article>
+    </div>
+
+    <div class="split-cta">
+      <div>
+        <h2>Don't know what to study yet?</h2>
+        <p>Enter your seven subjects and we'll show the careers you already qualify for, and the ones a few more marks would unlock.</p>
+      </div>
+      <div class="cta-side">
+        <svg class="grad-art" viewBox="0 0 200 150" aria-hidden="true">
+          <ellipse cx="100" cy="138" rx="70" ry="8" class="ga-shadow"/>
+          <g class="ga-scroll"><rect x="42" y="92" width="116" height="26" rx="13" class="ga-paper"/><circle cx="55" cy="105" r="13" class="ga-paper-end"/><rect x="96" y="88" width="10" height="34" class="ga-ribbon"/></g>
+          <g class="ga-cap"><path d="M100 20 L170 46 L100 72 L30 46 Z" class="ga-board"/><path d="M62 58 v22 c0 10 76 10 76 0 v-22 L100 72z" class="ga-crown"/><path d="M160 50 v28" class="ga-tassel-cord"/><circle cx="160" cy="82" r="5" class="ga-tassel"/></g>
+          <g class="ga-stars"><path d="M28 18l3 7 7 3-7 3-3 7-3-7-7-3 7-3z"/><path d="M178 102l2 5 5 2-5 2-2 5-2-5-5-2 5-2z"/></g>
+        </svg>
+        <a class="btn btn-gold btn-lg" href="#/aps">Try the career guide →</a>
+      </div>
+    </div>
+
+    <div class="section-head">
+      <h2>Free to apply</h2>
+      <p>These universities charge SA applicants nothing to apply online for <span data-intake></span>.</p>
+    </div>
+    <div class="chip-cloud" id="free-list"></div>
+
+    <div class="about">
+      <div>
+        <span class="eyebrow dark">About the project</span>
+        <h2>Concept by Mduduzi Gwija</h2>
+        <p>ImbizoConnect is a concept project to make university applications simpler and cheaper for South African students. <em>Imbizo</em> is a gathering: every institution, fee and deadline in one place. I'm moving into tech and building practical systems that solve everyday problems.</p>
+        <div class="btn-row">
+          <a class="btn btn-primary" href="https://mduduzigwija.github.io/Mduduzi-Gwija-Profile-Site-1/" target="_blank" rel="noopener">View my portfolio →</a>
+          <button class="btn btn-outline" id="copy-email" data-email="mduduzigwija@gmail.com">mduduzigwija@gmail.com <span class="copy-ico" aria-hidden="true">⧉</span></button>
+        </div>
+      </div>
+      <ul class="about-facts">
+        <li><strong>Sources</strong><span>University websites and published <span data-intake></span> prospectuses</span></li>
+        <li><strong>Last checked</strong><span data-verified></span></li>
+        <li><strong>Your data</strong><span>Stays in your browser. Nothing is uploaded.</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════════ UNIVERSITIES ═════════════ -->
+<section class="screen" data-screen="universities" hidden>
+  <div class="page-hero">
+    <div class="container">
+      <h1>Universities, fees &amp; prospectuses</h1>
+      <p>All 26 public universities for the <span data-intake></span> intake. Add a university to your application, or download its prospectus.</p>
+    </div>
+  </div>
+  <div class="container">
+    <div class="toolbar" role="search">
+      <label class="search">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="m20 20-4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <input type="search" id="uni-search" placeholder="Search by name, city or abbreviation" aria-label="Search universities">
+      </label>
+      <select id="uni-province" aria-label="Province"><option value="">All provinces</option></select>
+      <select id="uni-field" aria-label="Field of study"><option value="">All fields</option></select>
+      <select id="uni-sort" aria-label="Sort">
+        <option value="name">Sort: A–Z</option>
+        <option value="fee">Sort: fee (low → high)</option>
+        <option value="closing">Sort: closing date</option>
+      </select>
+    </div>
+    <div class="pills" role="group" aria-label="Filter">
+      <button class="pill active" data-filter="all">All</button>
+      <button class="pill" data-filter="open">Open now</button>
+      <button class="pill" data-filter="free">No fee</button>
+      <button class="pill" data-filter="traditional">Traditional</button>
+      <button class="pill" data-filter="comprehensive">Comprehensive</button>
+      <button class="pill" data-filter="technology">Universities of Technology</button>
+      <button class="pill" data-filter="cao">CAO (KZN)</button>
+    </div>
+    <div class="result-row">
+      <p class="result-meta" id="uni-meta" aria-live="polite"></p>
+      <div class="seg" role="group" aria-label="View">
+        <button class="seg-btn active" data-view="grid" aria-pressed="true">Grid</button>
+        <button class="seg-btn" data-view="map" aria-pressed="false">Map</button>
+      </div>
+    </div>
+    <div class="uni-grid" id="uni-grid"></div>
+    <div class="uni-map" id="uni-map" hidden>
+      <div class="map-wrap light" id="list-map"></div>
+      <aside class="map-legend">
+        <h3>How to read the map</h3>
+        <ul>
+          <li><span class="lg open"></span>Open for applications</li>
+          <li><span class="lg soon"></span>Closing within two weeks</li>
+          <li><span class="lg closed"></span>Closed for 2027</li>
+          <li><span class="lg dim"></span>Hidden by your filters</li>
+        </ul>
+        <p class="hint">Pins in Gauteng, Cape Town and Durban are spread out so you can tap each one. The thin line points to the real campus.</p>
+      </aside>
+    </div>
+
+    <details class="table-wrap">
+      <summary>View as a fee &amp; deadline table</summary>
+      <div class="table-scroll">
+        <table class="data-table" id="fee-table">
+          <thead><tr><th>University</th><th>Province</th><th>Fee (SA)</th><th>Closes</th><th>Status</th><th>Prospectus</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </details>
+  </div>
+</section>
+
+<!-- ═════════════ APS & CAREERS ═════════════ -->
+<section class="screen" data-screen="aps" hidden>
+  <div class="page-hero">
+    <div class="container">
+      <h1>APS calculator &amp; career guide</h1>
+      <p>Enter your seven subjects. Use Grade 11 finals or Grade 12 June marks. That's what universities use for provisional offers.</p>
+    </div>
+  </div>
+  <div class="container">
+    <div class="aps-layout">
+      <div class="card">
+        <div class="card-head">
+          <h2>Your subjects</h2>
+          <button class="btn btn-text" id="load-sample">Load sample marks</button>
+        </div>
+        <form id="subjects-form" novalidate>
+          <div id="subjects"></div>
+          <p class="hint">Life Orientation is required, but most universities leave it out of your APS.</p>
+          <p class="hint" id="aps-save-note"></p>
+          <div class="btn-row">
+            <button type="submit" class="btn btn-primary">Calculate APS</button>
+            <button type="button" class="btn btn-outline" id="clear-subjects">Clear</button>
+          </div>
+        </form>
+      </div>
+      <aside class="aps-side">
+        <div class="aps-score-card" id="aps-card">
+          <span class="label">Your APS</span>
+          <strong id="aps-value">–</strong>
+          <span class="sub" id="aps-sub">out of 42 (six subjects × 7)</span>
+          <div class="meter"><span id="aps-meter"></span></div>
+          <div class="pass-type" id="pass-type"></div>
+        </div>
+        <div class="card compact">
+          <h3>APS points scale</h3>
+          <table class="scale">
+            <tr><td>80–100%</td><td>7</td></tr><tr><td>70–79%</td><td>6</td></tr><tr><td>60–69%</td><td>5</td></tr>
+            <tr><td>50–59%</td><td>4</td></tr><tr><td>40–49%</td><td>3</td></tr><tr><td>30–39%</td><td>2</td></tr><tr><td>0–29%</td><td>1</td></tr>
+          </table>
+          <p class="hint">UCT, Wits, SU and a few others use their own scoring. Each university card says which method it uses.</p>
+        </div>
+      </aside>
+    </div>
+    <div id="career-results"></div>
+  </div>
+</section>
+
+<!-- ═════════════ FUNDING ═════════════ -->
+<section class="screen" data-screen="funding" hidden>
+  <div class="page-hero">
+    <div class="container">
+      <h1>Paying for your studies</h1>
+      <p>An application fee is the smallest cost. Here's how most students fund tuition, residence and books.</p>
+    </div>
+  </div>
+  <div class="container">
+    <div class="fund-grid">
+      <article class="card fund">
+        <span class="fund-tag">Government</span>
+        <h3>NSFAS bursary</h3>
+        <p>Covers tuition, residence, meals, books and transport at public universities and TVET colleges for SA citizens whose combined household income is <strong>R350 000 a year or less</strong> (R600 000 for students with disabilities).</p>
+        <ul class="ticks"><li>Apply separately from your university application</li><li>Applications for <span data-intake></span> open in the last quarter of the year</li><li>You'll need your ID, your parents' IDs and proof of income</li></ul>
+        <a class="btn btn-outline" href="https://www.nsfas.org.za/" target="_blank" rel="noopener">nsfas.org.za ↗</a>
+      </article>
+      <article class="card fund">
+        <span class="fund-tag">Teaching</span>
+        <h3>Funza Lushaka</h3>
+        <p>Full bursary for BEd students training to teach priority subjects such as Maths, Science, Technology and African languages. In return, you teach at a public school for one year for every year funded.</p>
+        <a class="btn btn-outline" href="https://www.funzalushaka.doe.gov.za/" target="_blank" rel="noopener">funzalushaka.doe.gov.za ↗</a>
+      </article>
+      <article class="card fund">
+        <span class="fund-tag">Missing middle</span>
+        <h3>ISFAP &amp; university aid</h3>
+        <p>If your household earns too much for NSFAS but can't afford fees, look at ISFAP, university merit awards and financial aid offices. Most universities also discount or waive the application fee on request if you can show financial need.</p>
+        <a class="btn btn-outline" href="https://www.isfap.co.za/" target="_blank" rel="noopener">isfap.co.za ↗</a>
+      </article>
+      <article class="card fund">
+        <span class="fund-tag">Private</span>
+        <h3>Company bursaries</h3>
+        <p>Banks, mining houses, SOEs and engineering firms fund scarce-skills degrees, and many offer a job afterwards. Most close between March and September of your matric year, so start early.</p>
+        <a class="btn btn-outline" href="#/aps">Find your field first →</a>
+      </article>
+    </div>
+
+    <div class="section-head"><h2>Frequently asked questions</h2></div>
+    <div class="faq">
+      <details><summary>Can I apply before I get my final matric results?</summary><p>Yes. That's how it normally works. Universities make provisional offers based on your Grade 11 final results and confirm them against your Grade 12 NSC results in January.</p></details>
+      <details><summary>What is the CAO?</summary><p>The Central Applications Office handles undergraduate applications for UKZN, DUT, MUT and UNIZULU. One fee (R250 for SA applicants) covers up to six programme choices across all four, so ImbizoConnect only charges it once in your total.</p></details>
+      <details><summary>Is the application fee refundable?</summary><p>Almost never. That's why ImbizoConnect shows your eligibility before you pay. If you're far below a programme's cut-off, you can save the fee.</p></details>
+      <details><summary>Why is my APS different on a university's website?</summary><p>Several universities use their own method. Wits gives up to 8 points per subject, UCT uses a Faculty Points Score, SU uses an average percentage, and some count Life Orientation. We use the standard 7-point scale as a common baseline and flag the differences on each university card.</p></details>
+      <details><summary>What's a Bachelor's, Diploma or Higher Certificate pass?</summary><p><strong>Bachelor's pass</strong>: 40% in Home Language, 50% in four other designated subjects and 30% in the rest. <strong>Diploma pass</strong>: 40% in Home Language, 40% in four other subjects and 30% in the rest. <strong>Higher Certificate pass</strong>: 40% in Home Language, 40% in two others and 30% in three more. You need a Bachelor's pass for degree study.</p></details>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════════ PORTAL (signed-in pages, drawn by assets/js/pages/*.js) ═════════════ -->
+<section class="screen" data-screen="portal" hidden>
+  <div class="container portal" id="portal"></div>
+</section>
+
+</main>
+
+<!-- University detail drawer -->
+<div class="drawer" id="drawer" hidden>
+  <div class="drawer-backdrop" data-close></div>
+  <div class="drawer-panel" role="dialog" aria-modal="true" aria-labelledby="drawer-title">
+    <button class="drawer-close" data-close aria-label="Close">×</button>
+    <div id="drawer-content"></div>
+  </div>
+</div>
+
+<div id="toasts" aria-live="polite"></div>
+<div class="map-tip" id="map-tip" hidden></div>
+
+<div class="pattern-band" aria-hidden="true"></div>
+<footer class="footer">
+  <div class="container footer-inner">
+    <div>
+      <a class="logo" href="#/"><span data-logo-mark></span><span class="logo-word">Imbizo<span class="accent">Connect</span></span></a>
+      <p>A concept by Mduduzi Gwija. Not affiliated with any university, the CAO or NSFAS. Prospectuses belong to their institutions and are linked or mirrored unchanged for convenience.</p>
+      <p class="copyright">© 2026 Mduduzi Gwija. All rights reserved.</p>
+    </div>
+    <div class="footer-links">
+      <a href="#/universities">Universities</a>
+      <a href="#/aps">APS calculator</a>
+      <a href="#/funding">Funding &amp; FAQ</a>
+      <a href="https://github.com/MduduziGwija/ImbizoConnect" target="_blank" rel="noopener">Source on GitHub</a>
+    </div>
+  </div>
+</footer>
+
+<script src="prospectuses/manifest.js"></script>
+<script type="module" src="assets/js/app.js"></script>
+</body>
+</html>

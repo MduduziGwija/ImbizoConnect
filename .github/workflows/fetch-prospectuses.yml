@@ -1,0 +1,39 @@
+name: Mirror prospectuses
+
+# Downloads the official prospectus PDFs listed in assets/js/data.js into
+# /prospectuses so the site can offer them as attachments.
+# Run it from the Actions tab (Run workflow) after changing data.js.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 4 1 * *' # monthly, to pick up revised editions
+
+permissions:
+  contents: write
+
+concurrency:
+  group: prospectuses-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node tools/fetch-prospectuses.mjs
+      - name: Commit updated prospectuses
+        run: |
+          # Commit as the person who triggered the run, so the history only
+          # shows the repository owner.
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
+          git add prospectuses
+          if git diff --cached --quiet; then
+            echo "No changes."
+          else
+            git commit -m "Mirror official university prospectuses"
+            git push
+          fi

@@ -1,0 +1,71 @@
+# Tests the app, then publishes it to GitHub Pages whenever main changes.
+# One-time setup: repository Settings -> Pages -> Source: "GitHub Actions".
+name: Test and deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      PGHOST: localhost
+      PGUSER: postgres
+      PGPASSWORD: postgres
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Rules tests
+        run: npm test
+      - name: Database permission and workflow tests
+        run: bash tests/db/run.sh
+
+  deploy:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Collect the site files
+        run: mkdir _site && cp -r index.html assets vendor prospectuses _site/
+      # Public demo at /demo/: same app with made-up students and officers, data kept in the
+      # visitor's browser, not connected to the real database.
+      - name: Add the public demo
+        run: |
+          mkdir _site/demo && cp -r index.html assets vendor prospectuses _site/demo/
+          sed -i -E "s#SUPABASE_URL: '[^']*'#SUPABASE_URL: ''#; s#SUPABASE_ANON_KEY: '[^']*'#SUPABASE_ANON_KEY: ''#" _site/demo/assets/js/config.js
+          grep -q "SUPABASE_URL: ''" _site/demo/assets/js/config.js
+      # Browsers keep files for a while, so each deploy stamps every file reference with the
+      # commit id. Phones then fetch the new version straight away instead of mixing old and new.
+      - name: Stamp file references with this version
+        run: |
+          bash tools/stamp-version.sh _site "${GITHUB_SHA::8}"
+          bash tools/stamp-version.sh _site/demo "${GITHUB_SHA::8}"
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4
