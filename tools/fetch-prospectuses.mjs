@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// © 2026 Mduduzi Gwija. All rights reserved. Proprietary: see LICENSE.
 /* Downloads every official prospectus PDF listed in assets/js/data.js into
  * /prospectuses and regenerates prospectuses/manifest.js so the site serves
  * the local copy as an attachment.
@@ -18,7 +19,7 @@ const MAX_BYTES = 40 * 1024 * 1024; // keep the repo light; bigger files stay as
 
 const src = await readFile(join(root, 'assets/js/data.js'), 'utf8');
 const ctx = {};
-vm.runInNewContext(src + '\nthis.INSTITUTIONS = INSTITUTIONS;', ctx);
+vm.runInNewContext(src.replace(/^export /gm, '') + '\nthis.INSTITUTIONS = INSTITUTIONS;', ctx);
 
 await mkdir(outDir, { recursive: true });
 let previous = {};

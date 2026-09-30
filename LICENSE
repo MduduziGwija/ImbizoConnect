@@ -1,0 +1,40 @@
+PROPRIETARY SOFTWARE LICENCE
+
+Copyright (c) 2026 Mduduzi Gwija. All rights reserved.
+
+This software, including its source code, database scripts, illustrations, designs,
+text and all related files (together, "the Software"), is the property of Mduduzi
+Gwija and is protected by copyright law, including the Copyright Act 98 of 1978 of
+the Republic of South Africa, and by international copyright treaties.
+
+1. No licence is granted. Unless you have a separate written agreement signed by
+   Mduduzi Gwija, you may not copy, reproduce, modify, adapt, translate, merge,
+   publish, distribute, sub-license, sell, rent, lend, host for others, or create
+   derivative works from the Software, in whole or in part.
+
+2. Viewing is not permission. The fact that the Software, or any part of it, can be
+   seen or accessed (for example in a public repository or through a web browser)
+   does not grant any right to use it beyond what is stated here.
+
+3. Permitted use. People who have been given access to a hosted copy of the
+   application by Mduduzi Gwija may use that hosted application for its intended
+   purpose, for as long as that access is granted. This does not include a right to
+   obtain, copy or reuse the Software itself.
+
+4. Third-party components. vendor/supabase.min.js is the supabase-js library,
+   supplied under its own MIT licence, which applies to that file only.
+
+5. Institution material and your data. University prospectuses in prospectuses/ are
+   the property of the institutions that published them and are mirrored unchanged
+   for convenience. Applications, marks and documents entered into the application
+   remain the property of the person who entered them.
+
+6. No warranty. The Software is provided "as is", without warranty of any kind.
+   Application fees, closing dates and eligibility estimates are provided for
+   guidance only and must be confirmed with each institution.
+
+7. Enforcement. Any use of the Software in breach of this licence is an infringement
+   of copyright. Mduduzi Gwija reserves all rights and remedies available under law.
+
+For permission to use, license or buy the Software, contact Mduduzi Gwija
+(GitHub: https://github.com/MduduziGwija).

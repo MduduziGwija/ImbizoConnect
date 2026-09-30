@@ -29,7 +29,7 @@
       <a href="#/universities" data-route="universities">Universities</a>
       <a href="#/aps" data-route="aps">APS &amp; Careers</a>
       <a href="#/funding" data-route="funding">Funding</a>
-      <a href="#/apply" data-route="apply" class="nav-cta">My application <span class="cart-count" id="cart-count" hidden>0</span></a>
+      <span id="account-nav" class="account-nav"></span>
       <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">
         <svg class="i-sun" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="4.5" fill="currentColor"/><g stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></g></svg>
         <svg class="i-moon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" fill="currentColor"/></svg>
@@ -39,7 +39,7 @@
 </header>
 
 <div class="notice-bar" role="note">
-  <strong>Concept platform.</strong> ImbizoConnect doesn't submit applications or take payments yet. Fees and dates for the <span data-intake></span> intake were checked on <span data-verified></span>. Always confirm with the university before you pay.
+  <strong>Concept platform.</strong> Applications made here are not sent to real institutions yet. Fees and dates for the <span data-intake></span> intake were checked on <span data-verified></span>. Always confirm with the university before you pay.
 </div>
 
 <main id="main" tabindex="-1">
@@ -51,15 +51,15 @@
       <div class="hero-copy">
         <span class="eyebrow"><span class="pulse" aria-hidden="true"></span><span id="hero-open-count">…</span></span>
         <h1>Apply to university <em>without the guesswork.</em></h1>
-        <p class="lede">See the fee, closing date and prospectus for all 26 public universities, check your APS against real entry requirements, and plan every application in one place.</p>
+        <p class="lede">Create one profile, then apply to several of South Africa's 26 public universities at once. See every fee, closing date and prospectus, check your APS before you pay, and follow each offer in one place.</p>
         <div class="hero-actions">
-          <a class="btn btn-gold btn-lg" href="#/universities">Compare universities</a>
-          <a class="btn btn-ghost-light btn-lg" href="#/aps">Calculate my APS</a>
+          <a class="btn btn-gold btn-lg" id="hero-apply" href="#/signin?next=apply">Start applying</a>
+          <a class="btn btn-ghost-light btn-lg" href="#/universities">Compare universities</a>
         </div>
         <ul class="hero-points">
-          <li>✓ Real <span data-intake></span> application fees</li>
-          <li>✓ Official prospectus downloads</li>
-          <li>✓ CAO fee handled once</li>
+          <li>✓ One profile for every application</li>
+          <li>✓ Real <span data-intake></span> fees, CAO charged once</li>
+          <li>✓ Track every offer</li>
         </ul>
       </div>
       <div class="hero-visual" id="hero-visual">
@@ -91,13 +91,13 @@
 
     <div class="section-head">
       <h2>How it works</h2>
-      <p>Four steps from "what can I study?" to a submitted plan.</p>
+      <p>Four steps from "what can I study?" to an accepted offer.</p>
     </div>
     <div class="steps">
-      <article class="step spot"><span class="step-n">1</span><h3>Know your APS</h3><p>Enter your Grade 11 or June Grade 12 marks. We calculate your APS and match you to courses and careers.</p></article>
-      <article class="step spot"><span class="step-n">2</span><h3>Shortlist universities</h3><p>Filter by province, fee and closing date. Download each prospectus to check exact requirements.</p></article>
+      <article class="step spot"><span class="step-n">1</span><h3>Build your profile</h3><p>Enter your details, marks and documents once. We calculate your APS and check your SA ID number.</p></article>
+      <article class="step spot"><span class="step-n">2</span><h3>Shortlist and choose</h3><p>Filter by province, fee and closing date, download each prospectus, and pick two programmes per institution.</p></article>
       <article class="step spot"><span class="step-n">3</span><h3>Check before you pay</h3><p>See where you meet the estimated cut-off, and drop long shots before you spend R100–R300 on each.</p></article>
-      <article class="step spot"><span class="step-n">4</span><h3>One fee summary</h3><p>Your total is worked out for you, with free universities at R0 and all four KZN universities under one CAO fee.</p></article>
+      <article class="step spot"><span class="step-n">4</span><h3>Submit and track</h3><p>Send every application at once, pay one total (one CAO fee for KZN), and accept your best offer here.</p></article>
     </div>
 
     <div class="split-cta">
@@ -142,7 +142,7 @@
 </section>
 
 <!-- ═════════════ UNIVERSITIES ═════════════ -->
-<section class="screen" data-screen="universities">
+<section class="screen" data-screen="universities" hidden>
   <div class="page-hero">
     <div class="container">
       <h1>Universities, fees &amp; prospectuses</h1>
@@ -207,7 +207,7 @@
 </section>
 
 <!-- ═════════════ APS & CAREERS ═════════════ -->
-<section class="screen" data-screen="aps">
+<section class="screen" data-screen="aps" hidden>
   <div class="page-hero">
     <div class="container">
       <h1>APS calculator &amp; career guide</h1>
@@ -224,6 +224,7 @@
         <form id="subjects-form" novalidate>
           <div id="subjects"></div>
           <p class="hint">Life Orientation is required, but most universities leave it out of your APS.</p>
+          <p class="hint" id="aps-save-note"></p>
           <div class="btn-row">
             <button type="submit" class="btn btn-primary">Calculate APS</button>
             <button type="button" class="btn btn-outline" id="clear-subjects">Clear</button>
@@ -253,7 +254,7 @@
 </section>
 
 <!-- ═════════════ FUNDING ═════════════ -->
-<section class="screen" data-screen="funding">
+<section class="screen" data-screen="funding" hidden>
   <div class="page-hero">
     <div class="container">
       <h1>Paying for your studies</h1>
@@ -300,118 +301,9 @@
   </div>
 </section>
 
-<!-- ═════════════ APPLY ═════════════ -->
-<section class="screen" data-screen="apply">
-  <div class="page-hero">
-    <div class="container">
-      <h1>My application</h1>
-      <p>Fill in your details once. Your progress saves on this device automatically.</p>
-    </div>
-  </div>
-  <div class="container">
-    <ol class="stepper" id="stepper">
-      <li data-step="1"><button><span>1</span>Details</button></li>
-      <li data-step="2"><button><span>2</span>Choices</button></li>
-      <li data-step="3"><button><span>3</span>Documents</button></li>
-      <li data-step="4"><button><span>4</span>Eligibility</button></li>
-      <li data-step="5"><button><span>5</span>Review</button></li>
-    </ol>
-
-    <div class="apply-layout">
-      <div class="apply-main">
-
-        <!-- STEP 1 -->
-        <div class="step-panel" data-panel="1">
-          <form class="card" id="details-form" novalidate>
-            <h2>Personal details</h2>
-            <p class="muted">Used on each university's application form.</p>
-            <div class="grid-2">
-              <label class="field"><span>First name(s)</span><input name="firstName" autocomplete="given-name" required></label>
-              <label class="field"><span>Surname</span><input name="lastName" autocomplete="family-name" required></label>
-              <label class="field"><span>Email</span><input name="email" type="email" autocomplete="email" required></label>
-              <label class="field"><span>Cellphone</span><input name="cell" type="tel" inputmode="tel" autocomplete="tel" placeholder="e.g. 082 123 4567" required></label>
-              <label class="field"><span>SA ID number</span><input name="idNumber" inputmode="numeric" maxlength="13" required><small class="field-hint" id="id-hint">13 digits. We check the date of birth and check digit.</small></label>
-              <label class="field"><span>Province</span>
-                <select name="province" required><option value="">Select…</option><option>Eastern Cape</option><option>Free State</option><option>Gauteng</option><option>KwaZulu-Natal</option><option>Limpopo</option><option>Mpumalanga</option><option>North West</option><option>Northern Cape</option><option>Western Cape</option></select>
-              </label>
-            </div>
-            <h2 class="mt">School</h2>
-            <div class="grid-2">
-              <label class="field"><span>High school</span><input name="school" autocomplete="organization"></label>
-              <label class="field"><span>Status</span>
-                <select name="status"><option value="gr12">In Grade 12 (2026)</option><option value="matric">Completed matric</option><option value="upgrade">Upgrading marks</option></select>
-              </label>
-            </div>
-            <label class="check"><input type="checkbox" name="nsfas"> I'm applying (or will apply) for NSFAS funding</label>
-            <div class="btn-row between">
-              <button type="button" class="btn btn-text" id="demo-fill">Fill with demo details</button>
-              <button type="submit" class="btn btn-primary">Continue to choices →</button>
-            </div>
-          </form>
-        </div>
-
-        <!-- STEP 2 -->
-        <div class="step-panel" data-panel="2" hidden>
-          <div class="card">
-            <h2>What do you want to study?</h2>
-            <p class="muted">Choose a first choice and a backup. We'll check them at every university you add.</p>
-            <div class="grid-2">
-              <label class="field"><span>1st choice</span><select id="course1"></select></label>
-              <label class="field"><span>2nd choice (backup)</span><select id="course2"></select></label>
-            </div>
-          </div>
-          <div class="card">
-            <div class="card-head">
-              <h2>Universities</h2>
-              <a class="btn btn-text" href="#/universities">Browse all →</a>
-            </div>
-            <p class="muted">Universities that offer your first-choice field are listed first. Closed ones are greyed out.</p>
-            <div class="pick-list" id="pick-list"></div>
-          </div>
-        </div>
-
-        <!-- STEP 3 -->
-        <div class="step-panel" data-panel="3" hidden>
-          <div class="card">
-            <h2>Supporting documents</h2>
-            <p class="muted">Get these ready once and reuse them for every application. In this concept, files stay in your browser and nothing is uploaded.</p>
-            <div id="doc-list" class="doc-list"></div>
-            <div class="callout warn">Certified copies must usually be less than three months old. Police stations certify documents for free.</div>
-          </div>
-        </div>
-
-        <!-- STEP 4 -->
-        <div class="step-panel" data-panel="4" hidden>
-          <div class="card">
-            <h2>Eligibility check</h2>
-            <p class="muted" id="elig-intro"></p>
-            <div id="elig-body"></div>
-          </div>
-        </div>
-
-        <!-- STEP 5 -->
-        <div class="step-panel" data-panel="5" hidden>
-          <div class="card" id="review-card"></div>
-        </div>
-      </div>
-
-      <aside class="apply-side">
-        <div class="summary-card">
-          <div class="summary-head">
-            <h3>Fee summary</h3>
-            <span class="muted" id="sum-count">0 selected</span>
-          </div>
-          <div class="summary-body" id="summary-body"></div>
-          <div class="summary-total"><span>Total application fees</span><strong id="sum-total">R0</strong></div>
-          <p class="summary-note" id="sum-note"></p>
-          <div class="btn-row stack">
-            <button class="btn btn-primary" id="next-btn">Continue →</button>
-            <button class="btn btn-outline" id="back-btn">← Back</button>
-          </div>
-        </div>
-      </aside>
-    </div>
-  </div>
+<!-- ═════════════ PORTAL (signed-in pages, drawn by assets/js/pages/*.js) ═════════════ -->
+<section class="screen" data-screen="portal" hidden>
+  <div class="container portal" id="portal"></div>
 </section>
 
 </main>
@@ -425,9 +317,8 @@
   </div>
 </div>
 
-<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div id="toasts" aria-live="polite"></div>
 <div class="map-tip" id="map-tip" hidden></div>
-<canvas class="confetti" id="confetti" aria-hidden="true"></canvas>
 
 <div class="pattern-band" aria-hidden="true"></div>
 <footer class="footer">
@@ -435,6 +326,7 @@
     <div>
       <a class="logo" href="#/"><span data-logo-mark></span><span class="logo-word">Imbizo<span class="accent">Connect</span></span></a>
       <p>A concept by Mduduzi Gwija. Not affiliated with any university, the CAO or NSFAS. Prospectuses belong to their institutions and are linked or mirrored unchanged for convenience.</p>
+      <p class="copyright">© 2026 Mduduzi Gwija. All rights reserved.</p>
     </div>
     <div class="footer-links">
       <a href="#/universities">Universities</a>
@@ -445,9 +337,7 @@
   </div>
 </footer>
 
-<script src="assets/js/data.js"></script>
-<script src="assets/js/art.js"></script>
 <script src="prospectuses/manifest.js"></script>
-<script src="assets/js/app.js"></script>
+<script type="module" src="assets/js/app.js"></script>
 </body>
 </html>

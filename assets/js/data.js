@@ -1,3 +1,4 @@
+// © 2026 Mduduzi Gwija. All rights reserved. Proprietary: see LICENSE. Unauthorised copying or use is prohibited.
 /* ImbizoConnect — reference data for the 2027 intake.
  *
  * Fees and closing dates were checked against university sites and public
@@ -7,12 +8,12 @@
  * website; files in /prospectuses are mirrored copies of those PDFs.
  */
 
-const DATA_VERIFIED = '30 September 2026';
-const INTAKE_YEAR = 2027;
+export const DATA_VERIFIED = '30 September 2026';
+export const INTAKE_YEAR = 2027;
 
 /* Central Applications Office (KwaZulu-Natal). One fee covers up to six
  * programme choices across UKZN, DUT, MUT and UNIZULU. */
-const CAO = {
+export const CAO = {
   name: 'Central Applications Office (CAO)',
   fee: 250,
   feeIntl: 300,
@@ -23,7 +24,7 @@ const CAO = {
   note: 'One R250 fee covers up to six choices across UKZN, DUT, MUT and UNIZULU. Late applications after 1 November cost R470.',
 };
 
-const FIELDS = {
+export const FIELDS = {
   health:      { label: 'Health Sciences',              icon: '🩺' },
   engineering: { label: 'Engineering & Built Env.',     icon: '🏗️' },
   science:     { label: 'Natural & Agricultural Sci.',  icon: '🔬' },
@@ -34,7 +35,7 @@ const FIELDS = {
   ict:         { label: 'Computing & ICT',              icon: '💻' },
 };
 
-const TYPES = {
+export const TYPES = {
   traditional:   'Traditional university',
   comprehensive: 'Comprehensive university',
   technology:    'University of Technology',
@@ -43,7 +44,7 @@ const TYPES = {
 
 /* fee: SA applicant fee in rand (0 = free). selectivity: added to a course's
  * baseline APS to estimate that institution's cut-off. */
-const INSTITUTIONS = [
+export const INSTITUTIONS = [
   { id:'uct', short:'UCT', name:'University of Cape Town', city:'Cape Town', province:'Western Cape', type:'traditional',
     fee:100, feeIntl:300, closes:'2026-07-31', earlyNote:'All undergraduate programmes closed 31 July 2026.',
     selectivity:6, apsNote:'UCT ranks applicants on a Faculty Points Score (FPS) out of 600, plus the NBT for most faculties.',
@@ -231,7 +232,7 @@ const INSTITUTIONS = [
  * traditional university. Institution selectivity shifts it up or down.
  * req keys are minimum percentages: math (Pure/Technical Maths), mathOrLit,
  * sci (Physical Sciences), life (Life Sciences), eng (English). */
-const COURSES = [
+export const COURSES = [
   { id:'mbchb',   field:'health', name:'MBChB (Medicine)',            years:6, aps:36, req:{ math:60, sci:60, eng:60 } },
   { id:'bpharm',  field:'health', name:'BPharm (Pharmacy)',           years:4, aps:32, req:{ math:60, sci:60 } },
   { id:'nursing', field:'health', name:'Bachelor of Nursing',         years:4, aps:26, req:{ mathOrLit:50, life:50, eng:50 } },
@@ -276,7 +277,7 @@ const COURSES = [
   { id:'is',      field:'ict', name:'BCom Information Systems', years:3, aps:28, req:{ math:50 } },
 ];
 
-const SUBJECTS = [
+export const SUBJECTS = [
   'Afrikaans Home Language','Afrikaans First Additional Language',
   'English Home Language','English First Additional Language',
   'IsiZulu Home Language','IsiZulu First Additional Language',
@@ -298,7 +299,7 @@ const SUBJECTS = [
   'Life Orientation',
 ].sort();
 
-const SAMPLE_RESULTS = [
+export const SAMPLE_RESULTS = [
   { s:'English Home Language', m:72 },
   { s:'IsiZulu First Additional Language', m:78 },
   { s:'Mathematics', m:65 },
@@ -310,7 +311,7 @@ const SAMPLE_RESULTS = [
 
 /* Career guide. Salaries are indicative ranges for early-to-mid career in
  * South Africa; they vary widely by employer and region. */
-const CAREERS = [
+export const CAREERS = [
   { title:'Medical Doctor', course:'mbchb', icon:'🩺', salary:'R850k – R1.6m', note:'Two years of internship and one year of community service after the degree.' ,
     description:'Diagnose and treat illness, perform procedures and lead patient care in hospitals and clinics.' },
   { title:'Pharmacist', course:'bpharm', icon:'💊', salary:'R450k – R750k', note:'Includes a one-year internship and community service.',
@@ -343,13 +344,14 @@ const CAREERS = [
     description:'Assess and treat mental health, or apply psychology in organisations and schools.' },
 ];
 
-const DOCUMENTS = [
+export const DOCUMENTS = [
   { id:'id',    icon:'🪪', name:'Certified copy of SA ID or smart card', hint:'Both sides · PDF or JPG · max 5 MB', required:true },
   { id:'gr11',  icon:'📋', name:'Grade 11 final results', hint:'Used for conditional offers while you finish Grade 12 · PDF', required:true },
   { id:'gr12',  icon:'🎓', name:'Grade 12 June / trial results', hint:'Upload as soon as they are available · PDF', required:false },
   { id:'res',   icon:'🏠', name:'Proof of residence', hint:'Not older than 3 months · utility bill or affidavit · PDF', required:false },
   { id:'photo', icon:'📸', name:'Passport-size photograph', hint:'Recent, plain background · JPG or PNG · max 2 MB', required:false },
   { id:'guard', icon:'👪', name:'Parent / guardian ID', hint:'Needed for NSFAS and some residence applications', required:false },
+  { id:'income', icon:'💰', name:'Proof of household income', hint:'Payslips, SASSA letter or affidavit · for NSFAS and fee waivers', required:false },
 ];
 
 /* Brand palettes used for each university's artwork.
@@ -357,7 +359,7 @@ const DOCUMENTS = [
  * windows on hover, s = sun / secondary accent. Based on each university's
  * published colours; entries marked `approx` could not be confirmed from an
  * official source and use the dominant colours of the crest. */
-const BRAND = {
+export const BRAND = {
   uct:     { c:'#003B71', w:'#7FC8F8', s:'#7FC8F8' },             // dark blue, light blue
   wits:    { c:'#003E7E', w:'#E3B45A', s:'#E3B45A' },             // blue, gold
   up:      { c:'#005BAA', w:'#D6A844', s:'#D2232A' },             // blue, gold, red

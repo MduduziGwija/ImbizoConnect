@@ -1,0 +1,10 @@
+// © 2026 Mduduzi Gwija. All rights reserved. Proprietary: see LICENSE. Unauthorised copying or use is prohibited.
+// Connect the app to your Supabase project (see README, "Going live").
+// Both values are in Supabase: the Connect button, or Project Settings -> API Keys.
+// Use the publishable (or legacy anon) key, never the secret / service_role key.
+// This key is meant to be public: the database rules in supabase/schema.sql protect the data.
+// Leave both empty to run the built-in demo (data stays in your browser only).
+export const CONFIG = {
+  SUPABASE_URL: '',
+  SUPABASE_ANON_KEY: '',
+};

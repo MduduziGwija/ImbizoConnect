@@ -1,8 +1,7 @@
+// © 2026 Mduduzi Gwija. All rights reserved. Proprietary: see LICENSE. Unauthorised copying or use is prohibited.
 /* ImbizoConnect — generated artwork: logo mark, field icons, campus
  * skylines, the university map and the Ndebele-inspired pattern band.
  * Everything is SVG built in code so the site ships without image files. */
-(() => {
-'use strict';
 
 /* Logo mark: an imbizo, people gathered in a circle around one point. */
 function logoMark(size = 30) {
@@ -129,5 +128,4 @@ function ndebeleTile() {
   return `url("data:image/svg+xml,${encodeURIComponent(svg.replace(/\s+/g, ' '))}")`;
 }
 
-window.ART = { logoMark, icon, skyline, map, ndebeleTile, MAP_W, MAP_H };
-})();
+export const ART = { logoMark, icon, skyline, map, ndebeleTile, MAP_W, MAP_H };

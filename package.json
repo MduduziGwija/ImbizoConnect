@@ -1,0 +1,14 @@
+{
+  "name": "imbizoconnect",
+  "private": true,
+  "type": "module",
+  "description": "ImbizoConnect: apply to many South African universities at once. Static front end (GitHub Pages) + Supabase.",
+  "author": "Mduduzi Gwija",
+  "license": "SEE LICENSE IN LICENSE",
+  "scripts": {
+    "start": "npx --yes http-server -c-1 -p 8080 .",
+    "test": "node --test tests/*.test.js",
+    "test:db": "bash tests/db/run.sh",
+    "prospectuses": "node tools/fetch-prospectuses.mjs"
+  }
+}
