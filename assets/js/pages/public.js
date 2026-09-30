@@ -2,11 +2,13 @@
 // Public pages (no sign-in needed): home, universities with map and details drawer, the APS
 // calculator and career guide. Their markup lives in index.html; this module fills it in.
 import { INSTITUTIONS, COURSES, CAO, FIELDS, TYPES, SUBJECTS, SAMPLE_RESULTS, CAREERS, INTAKE_YEAR } from '../data.js';
+import { PROGRAMMES, programmesOf, sourceOf } from '../programmes.js';
 import { ART } from '../art.js';
 import {
-  byId, courseById, MONTHS, closingStatus, isOpen, daysUntil, fmtDate, rand, analyse, points, isLO, checkReqs, eligibility,
-  marksProblems,
+  byId, MONTHS, closingStatus, isOpen, daysUntil, fmtDate, rand, analyse, points, isLO, checkReqs, eligibility,
+  marksProblems, minLabel,
 } from '../logic.js';
+const kindById = Object.fromEntries(COURSES.map((c) => [c.id, c]));
 import { $, $$, esc, toast, store, brandOf, brandVars, monogram, fmtSize, copyText } from '../ui.js';
 
 const FIELD_COLOURS = { health: '#1d9e75', engineering: '#c07e10', science: '#0d7490', commerce: '#0c3864', law: '#7c3aed', humanities: '#be4a6a', education: '#4d7c0f', ict: '#1a4f86' };
@@ -91,14 +93,9 @@ export function home() {
 
 /* Hero cards show the visitor's own result, and only after they confirmed their marks. */
 function bestMatch(a) {
-  const courses = [...COURSES].sort((x, y) => y.aps - x.aps);
-  for (const course of courses) {
-    const hits = INSTITUTIONS.filter((i) => isOpen(i) || cycleOver())
-      .map((i) => ({ i, e: eligibility(course, i, a) })).filter((r) => r.e.key === 'yes')
-      .sort((x, y) => y.e.cutoff - x.e.cutoff);
-    if (hits.length) return { course, inst: hits[0].i };
-  }
-  return null;
+  const hits = PROGRAMMES.filter((p) => p.qual === 'degree' && (isOpen(byId[p.institution_id]) || cycleOver()) && eligibility(p, null, a).key === 'yes')
+    .sort((x, y) => y.aps - x.aps);
+  return hits.length ? { course: hits[0], inst: byId[hits[0].institution_id] } : null;
 }
 function renderHeroCards() {
   const apsCard = $('.fc-aps'), offer = $('.fc-offer');
@@ -177,7 +174,7 @@ export function universities(ctx, q) {
 function filteredUnis() {
   const q = uniFilter.q.trim().toLowerCase();
   const list = INSTITUTIONS.filter((i) => {
-    if (q && !`${i.name} ${i.short} ${i.city} ${i.province}`.toLowerCase().includes(q)) return false;
+    if (q && !`${i.name} ${i.short} ${i.city} ${i.province}`.toLowerCase().includes(q) && !programmesOf(i.id).some((p) => p.name.toLowerCase().includes(q))) return false;
     if (uniFilter.province && i.province !== uniFilter.province) return false;
     if (uniFilter.field && !i.fields.includes(uniFilter.field)) return false;
     switch (uniFilter.pill) {
@@ -223,6 +220,16 @@ function shortlistButton(i, size = 'btn-sm') {
   return `<button class="btn ${size} ${on ? 'btn-added' : 'btn-primary'}" data-cart="${i.id}" ${closed && !on ? 'disabled title="Applications have closed"' : ''}>${on ? '✓ Shortlisted' : closed ? 'Closed' : '+ Shortlist'}</button>`;
 }
 
+/** When searching for a programme, show which of this institution's programmes matched. */
+function progHit(i) {
+  const q = uniFilter.q.trim().toLowerCase();
+  if (!q || `${i.name} ${i.short} ${i.city} ${i.province}`.toLowerCase().includes(q)) {
+    return `<button class="prog-count" data-open="${i.id}" data-tab="programmes">${programmesOf(i.id).length} programmes →</button>`;
+  }
+  const hits = programmesOf(i.id).filter((p) => p.name.toLowerCase().includes(q));
+  return `<button class="prog-count hit" data-open="${i.id}" data-tab="programmes">${esc(hits[0].name)}${hits.length > 1 ? ` +${hits.length - 1} more` : ''} →</button>`;
+}
+
 function renderUniversities() {
   const list = filteredUnis();
   $('#uni-meta').textContent = `${list.length} of ${INSTITUTIONS.length} universities` + (C.shortlist.size ? ` · ${C.shortlist.size} on your shortlist` : '');
@@ -247,6 +254,7 @@ function renderUniversities() {
         <div class="fact"><small>Application fee</small><strong>${feeHTML(i)}</strong></div>
         <div class="fact"><small>Closes</small><strong>${fmtDate(i.closes)}</strong></div>
       </div>
+      ${progHit(i)}
       <div class="uni-actions">
         ${prospectusButton(i)}
         ${websiteButton(i)}
@@ -274,12 +282,12 @@ function renderUniversities() {
   }).join('');
 }
 
-export function openDrawer(id) {
+export function openDrawer(id, tab = '') {
   const i = byId[id]; if (!i) return;
   const st = closingStatus(i); const p = prospectus(i);
   const { marks, confirmed } = currentMarks();
   const a = analyse(marks);
-  const planned = courseById[store.get('planned', '')];
+  const planned = programmesOf(i.id).find((p) => p.kind === store.get('planned', ''));
   const elig = confirmed && a.count >= 4 && planned ? eligibility(planned, i, a) : null;
 
   const attach = ['local', 'pdf'].includes(p.kind)
@@ -308,8 +316,8 @@ export function openDrawer(id) {
       ${elig ? `<div class="callout ${elig.key === 'yes' ? 'good' : elig.key === 'maybe' ? 'warn' : 'bad'}"><strong>${esc(planned.name)}:</strong> ${esc(elig.label)}${elig.cutoff ? ` (your APS ${a.aps}, estimated cut-off ${elig.cutoff}${elig.diploma ? ', diploma route' : ''})` : ''}</div>` : ''}
       <h3>Prospectus</h3>
       ${attach}
-      <h3>Faculties</h3>
-      <div class="field-tags">${i.fields.map((f) => `<span>${ART.icon(f, 16)} ${esc(FIELDS[f].label)}</span>`).join('')}</div>
+      <h3 id="drawer-programmes">Programmes <span class="count-pill">${programmesOf(i.id).length}</span></h3>
+      ${programmeList(i, confirmed && a.count >= 4 ? a : null)}
       <h3>Links</h3>
       <ul class="link-list">
         <li><a href="${esc(i.web)}" target="_blank" rel="noopener"><span>Official website</span><b>${esc(new URL(i.web).hostname)} ↗</b></a></li>
@@ -320,7 +328,30 @@ export function openDrawer(id) {
   const drawer = $('#drawer');
   drawer.dataset.id = id;
   if (drawer.hidden) { drawer.hidden = false; document.body.style.overflow = 'hidden'; $('.drawer-close').focus(); }
+  $('#prog-q').addEventListener('input', (e) => {
+    const q = e.target.value.trim().toLowerCase();
+    $$('.prog-list li', drawer).forEach((li) => { li.hidden = q && !li.dataset.name.includes(q); });
+    $$('.prog-group', drawer).forEach((g) => { g.hidden = !$$('li', g).some((li) => !li.hidden); });
+  });
+  if (tab === 'programmes') $('#drawer-programmes').scrollIntoView({ block: 'start' });
 }
+/** Every programme the institution offers, grouped by faculty, searchable. */
+function programmeList(i, a) {
+  const progs = programmesOf(i.id);
+  const QUAL = { degree: 'Degree', diploma: 'Diploma', hc: 'Higher Certificate' };
+  const LBL = { eng: 'English', math: 'Maths', mathOrLit: 'Maths/Maths Lit', sci: 'Physical Sci', life: 'Life Sci', acc: 'Accounting' };
+  const groups = Object.entries(FIELDS).filter(([k]) => progs.some((p) => p.field === k));
+  return `<label class="search small"><input type="search" id="prog-q" placeholder="Search ${progs.length} programmes" aria-label="Search programmes"></label>
+    <div class="prog-groups">${groups.map(([k, f]) => `<details class="prog-group" open><summary>${ART.icon(k, 16)} ${esc(f.label)} <span class="muted">${progs.filter((p) => p.field === k).length}</span></summary>
+      <ul class="prog-list">${progs.filter((p) => p.field === k).map((p) => {
+        const e = a ? eligibility(p, i, a) : null;
+        return `<li data-name="${esc(p.name.toLowerCase())}"><div><strong>${esc(p.name)}</strong>
+          <small>${QUAL[p.qual]} · ${p.years} yr${p.years === 1 ? '' : 's'} · ${Object.entries(p.req).map(([r, v]) => `${LBL[r]} ${v}%`).join(' · ')}${p.note ? ` · ${esc(p.note)}` : ''}</small></div>
+          <span class="prog-min">${esc(minLabel(p))}${e ? `<span class="badge ${{ yes: 'open', maybe: 'soon', no: 'closed' }[e.key]}">${esc(e.label)}</span>` : ''}</span></li>`;
+      }).join('')}</ul></details>`).join('')}</div>
+    <p class="hint">${sourceOf(i.id) === 'prospectus' ? `From the ${esc(i.short)} 2027 prospectus.` : `Compiled from ${esc(i.short)}'s website and published 2027 guides. Check the prospectus for exact requirements.`}${a ? ' Eligibility uses your confirmed marks.' : ''}</p>`;
+}
+
 export function closeDrawer(silent = false) {
   const drawer = $('#drawer'); if (drawer.hidden) return;
   drawer.hidden = true; drawer.dataset.id = ''; document.body.style.overflow = '';
@@ -392,10 +423,11 @@ function showAPS(marks, confirmed) {
 
 function renderCareers(a) {
   const rows = CAREERS.map((c) => {
-    const course = courseById[c.course];
+    const course = kindById[c.course];
     const reqs = checkReqs(course, a.subj);
-    const offering = INSTITUTIONS.filter((i) => i.fields.includes(course.field) && i.type !== 'technology');
-    const within = offering.filter((i) => eligibility(course, i, a).key === 'yes');
+    const progs = PROGRAMMES.filter((p) => p.kind === c.course);
+    const offering = [...new Set(progs.map((p) => p.institution_id))];
+    const within = [...new Set(progs.filter((p) => eligibility(p, null, a).key === 'yes').map((p) => p.institution_id))];
     const subjectsOk = reqs.every((r) => r.ok);
     const tier = a.aps >= course.aps && subjectsOk ? 'yes' : (a.aps >= course.aps - 5 && reqs.every((r) => r.have >= r.min - 10)) ? 'close' : 'no';
     return { c, course, reqs, offering, within, tier };
@@ -416,7 +448,7 @@ function renderCareers(a) {
       <p class="small">${esc(r.c.note)}</p>
       <div class="career-foot">
         <div><span class="uni-count">Earning</span><br><strong>${esc(r.c.salary)}</strong> <span class="uni-count">/yr</span></div>
-        <div class="right"><span class="uni-count">${r.within.length} of ${r.offering.length} universities in reach</span><br>
+        <div class="right"><span class="uni-count">${r.within.length} of ${r.offering.length} institutions in reach</span><br>
         <button class="btn btn-text" data-plan="${r.course.id}">Apply for this →</button></div>
       </div>
     </article>`;
@@ -450,7 +482,7 @@ export function init(ctx, shellFns) {
     const t = e.target.closest('[data-cart],[data-open],[data-close],[data-plan]');
     if (!t) return;
     if (t.dataset.cart) toggleShortlist(t.dataset.cart);
-    else if (t.dataset.open) openDrawer(t.dataset.open);
+    else if (t.dataset.open) openDrawer(t.dataset.open, t.dataset.tab || (uniFilter.q ? 'programmes' : ''));
     else if ('close' in t.dataset) closeDrawer();
     else if (t.dataset.plan) {
       store.set('planned', t.dataset.plan);

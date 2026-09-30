@@ -5,6 +5,7 @@ import assert from 'node:assert/strict';
 import {
   points, analyse, passType, marksProblems, eligibility, validSAID, makeSAID, feeBreakdown, closingStatus,
   daysUntil, profileChecklist, basketProblems, actionError, OFFICER_ACTIONS, STUDENT_ACTIONS, makeRef, byId, courseById,
+  PROGRAMMES, programmesOf,
 } from '../assets/js/logic.js';
 import { INSTITUTIONS, COURSES, CAO, SAMPLE_RESULTS, BRAND } from '../assets/js/data.js';
 
@@ -41,15 +42,27 @@ test('marks need seven unique subjects including LO and a Home Language', () => 
   assert.ok(marksProblems(both).some((p) => /only one of Mathematics/.test(p)));
 });
 
-test('eligibility uses course APS plus institution selectivity and subject minimums', () => {
-  const a = analyse(sample);
-  const acc = courseById.acc;
-  assert.equal(eligibility(acc, byId.nmu, a).key, 'yes');      // cut-off 32
-  assert.equal(eligibility(acc, byId.uj, a).key, 'maybe');     // cut-off 33
-  assert.equal(eligibility(acc, byId.uct, a).key, 'no');       // cut-off 38
-  assert.equal(eligibility(courseById.llb, byId.mut, a).key, 'na');           // MUT has no law faculty
+test('eligibility uses each programme\'s own minimum and subject requirements', () => {
+  const a = analyse(sample); // APS 32, Maths 65, English 72
+  assert.equal(eligibility(courseById['uj-bacc-ca'], byId.uj, a).key, 'maybe');        // needs APS 33
+  assert.equal(eligibility(courseById['uj-bcom-acc'], byId.uj, a).key, 'yes');          // APS 28, Maths 50
+  assert.equal(eligibility(courseById['up-bcom-acc'], byId.up, a).key, 'maybe');        // APS 34 and Maths 70%: close
+  assert.equal(eligibility(courseById['uct-mbchb'], byId.uct, a).key, 'no');
+  assert.equal(eligibility(courseById['wits-bcom-acc'], byId.uj, a).key, 'na');         // wrong institution
   const noMaths = analyse(sample.map((e) => (e.s === 'Mathematics' ? { s: 'Mathematical Literacy', m: 90 } : e)));
-  assert.equal(eligibility(acc, byId.tut, noMaths).key, 'no');
+  assert.equal(eligibility(courseById['tut-dip-acc'], byId.tut, noMaths).key, 'yes');   // Maths Lit accepted
+  assert.equal(eligibility(courseById['tut-bengtech-civil'], byId.tut, noMaths).key, 'no');
+});
+
+test('programme catalogues are institution-specific', () => {
+  const offers = (inst, kind) => PROGRAMMES.some((p) => p.institution_id === inst && p.kind === kind);
+  assert.ok(offers('up', 'vet') && !PROGRAMMES.some((p) => p.kind === 'vet' && p.institution_id !== 'up'), 'only UP trains vets');
+  assert.ok(!offers('up', 'bpharm'), 'UP has no pharmacy');
+  assert.ok(!offers('uct', 'bedfp') && !offers('uct', 'bedsp'), 'UCT has no undergraduate BEd');
+  assert.ok(offers('ru', 'bpharm') && offers('uwc', 'bpharm'));
+  assert.ok(PROGRAMMES.filter((p) => p.institution_id === 'vut').every((p) => p.qual !== 'degree' || /BEngTech/.test(p.name)), 'VUT offers diplomas and BEngTech');
+  for (const i of INSTITUTIONS) assert.ok(programmesOf(i.id).length >= 10, `${i.short} needs a programme list`);
+  assert.equal(new Set(PROGRAMMES.map((p) => p.id)).size, PROGRAMMES.length, 'programme ids are unique');
 });
 
 test('SA ID numbers: date of birth and Luhn check digit', () => {
@@ -95,14 +108,14 @@ test('profile checklist', () => {
 
 test('basket rules: dates, duplicates, offered programmes and CAO choice limit', () => {
   const opts = { profile: readyProfile, docs: readyDocs, on: '2026-09-30' };
-  assert.deepEqual(basketProblems([{ institution_id: 'wits', choice1: 'acc', choice2: 'mgmt' }], opts), []);
-  assert.ok(basketProblems([{ institution_id: 'up', choice1: 'acc' }], opts).some((p) => /closed/.test(p)));
-  assert.deepEqual(basketProblems([{ institution_id: 'up', choice1: 'acc' }], { ...opts, enforceDates: false }), []);
-  assert.ok(basketProblems([{ institution_id: 'mut', choice1: 'llb' }], opts).some((p) => /doesn't offer/.test(p)));
-  assert.ok(basketProblems([{ institution_id: 'wits', choice1: 'acc' }], { ...opts, existing: [{ institution_id: 'wits', status: 'submitted' }] }).some((p) => /already/.test(p)));
-  const cao = ['ukzn', 'dut', 'mut', 'unizulu'].map((id) => ({ institution_id: id, choice1: 'it', choice2: 'is' }));
+  assert.deepEqual(basketProblems([{ institution_id: 'wits', choice1: 'wits-bcom-acc', choice2: 'wits-bcom' }], opts), []);
+  assert.ok(basketProblems([{ institution_id: 'up', choice1: 'up-bcom-acc' }], opts).some((p) => /closed/.test(p)));
+  assert.deepEqual(basketProblems([{ institution_id: 'up', choice1: 'up-bcom-acc' }], { ...opts, enforceDates: false }), []);
+  assert.ok(basketProblems([{ institution_id: 'mut', choice1: 'wits-llb' }], opts).some((p) => /doesn't offer/.test(p)));
+  assert.ok(basketProblems([{ institution_id: 'wits', choice1: 'wits-bcom-acc' }], { ...opts, existing: [{ institution_id: 'wits', status: 'submitted' }] }).some((p) => /already/.test(p)));
+  const cao = ['ukzn', 'dut', 'mut', 'unizulu'].map((id) => ({ institution_id: id, choice1: programmesOf(id)[0].id, choice2: programmesOf(id)[1].id }));
   assert.ok(basketProblems(cao, opts).some((p) => /CAO allows 6/.test(p)));
-  assert.ok(basketProblems([{ institution_id: 'wits', choice1: 'acc' }], { ...opts, docs: [] }).some((p) => /Complete your profile/.test(p)));
+  assert.ok(basketProblems([{ institution_id: 'wits', choice1: 'wits-bcom-acc' }], { ...opts, docs: [] }).some((p) => /Complete your profile/.test(p)));
 });
 
 test('workflow actions', () => {

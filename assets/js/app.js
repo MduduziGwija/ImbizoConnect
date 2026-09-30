@@ -228,7 +228,7 @@ async function boot() {
   if (api.kind === 'demo') {
     const bar = document.createElement('div');
     bar.className = 'demo-banner';
-    bar.innerHTML = `<span><strong>Demo.</strong> Made-up students and admissions officers. Everything stays in this browser.</span>
+    bar.innerHTML = `<span><strong>Demo.</strong> Made-up students and admissions officers. Everything stays in this browser.${window.SITE_ANALYTICS ? ' Visits are counted anonymously (no cookies).' : ''}</span>
       <button type="button" data-act="switch">Switch user</button><button type="button" data-act="reset-demo">Reset demo</button>`;
     document.body.append(bar);
     document.body.classList.add('has-demo-banner');

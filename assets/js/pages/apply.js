@@ -1,27 +1,32 @@
 // © 2026 Mduduzi Gwija. All rights reserved. Proprietary: see LICENSE. Unauthorised copying or use is prohibited.
 // New application: choose several institutions and programmes, check eligibility, then submit
 // them all at once with a single fee total (the CAO fee is charged once for KZN).
-import { INSTITUTIONS, COURSES, FIELDS, TYPES, CAO } from '../data.js';
+import { INSTITUTIONS, FIELDS, TYPES, CAO } from '../data.js';
 import {
   byId, courseById, closingStatus, isOpen, fmtDate, rand, analyse, eligibility, feeBreakdown, basketProblems,
-  profileChecklist, MAX_INSTITUTIONS,
+  profileChecklist, MAX_INSTITUTIONS, programmesOf, minLabel,
 } from '../logic.js';
+import { sourceOf } from '../programmes.js';
 import { $, esc, toast, busy, store, monogram, brandVars, confetti } from '../ui.js';
 import { refresh, renderAccount } from '../app.js';
 
-let C, items, step, main;
+let C, items, step, main, plannedKind = '';
 const draftKey = () => `draft:${C.me.id}`;
 const saveDraft = () => store.set(draftKey(), { items, step });
 
 function taken() { return new Set(C.apps.filter((a) => a.status !== 'withdrawn').map((a) => a.institution_id)); }
 const canPick = (i) => isOpen(i) || !C.api.enforceDates;
 
+const QUAL = { degree: '', diploma: ' · Diploma', hc: ' · Higher Certificate' };
 function courseOptions(inst, selected, allowNone) {
-  return (allowNone ? '<option value="">No second choice</option>' : '<option value="">Choose a programme…</option>')
-    + Object.entries(FIELDS).filter(([k]) => inst.fields.includes(k)).map(([k, f]) =>
-      `<optgroup label="${esc(f.label)}">${COURSES.filter((c) => c.field === k).map((c) =>
-        `<option value="${c.id}" ${c.id === selected ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}</optgroup>`).join('');
+  const progs = programmesOf(inst.id);
+  return (allowNone ? '<option value="">No second choice</option>' : `<option value="">Choose one of ${progs.length} programmes…</option>`)
+    + Object.entries(FIELDS).filter(([k]) => progs.some((p) => p.field === k)).map(([k, f]) =>
+      `<optgroup label="${esc(f.label)}">${progs.filter((p) => p.field === k).map((p) =>
+        `<option value="${p.id}" ${p.id === selected ? 'selected' : ''}>${esc(p.name)} (${esc(minLabel(p))})</option>`).join('')}</optgroup>`).join('');
 }
+/** The programme of a given kind at an institution, if it offers one. */
+const ofKind = (instId, kind) => (kind ? programmesOf(instId).find((p) => p.kind === kind) : null);
 
 export async function render(el, ctx, query) {
   C = ctx; main = el;
@@ -32,8 +37,9 @@ export async function render(el, ctx, query) {
   // Bring in the shortlist and a programme chosen in the career guide.
   for (const id of ctx.shortlist) if (!already.has(id) && !items.some((it) => it.institution_id === id)) items.push({ institution_id: id, choice1: '', choice2: '' });
   const planned = query.get('course') || store.get('planned', '');
-  if (courseById[planned]) {
-    for (const it of items) if (!it.choice1 && byId[it.institution_id].fields.includes(courseById[planned].field)) it.choice1 = planned;
+  if (planned) {
+    for (const it of items) if (!it.choice1) it.choice1 = ofKind(it.institution_id, planned)?.id || '';
+    plannedKind = planned;
     store.set('planned', '');
   }
   saveDraft();
@@ -73,41 +79,55 @@ function goStep(n) {
 function stepChoices() {
   const already = taken();
   const chosen = new Set(items.map((i) => i.institution_id));
-  const firstField = courseById[items.find((i) => i.choice1)?.choice1]?.field;
+  const kind = courseById[items.find((i) => i.choice1)?.choice1]?.kind || plannedKind;
   $('#step-body').innerHTML = `
     <div class="card">
       <div class="card-head"><h2>Your choices <span class="count-pill">${items.length}/${MAX_INSTITUTIONS - already.size}</span></h2>
-        ${items.length > 1 && items[0].choice1 ? `<button class="btn btn-text" data-act="same">Use ${esc(courseById[items[0].choice1].name)} everywhere it's offered</button>` : ''}</div>
+        ${items.length > 1 && courseById[items[0].choice1]?.kind ? `<button class="btn btn-text" data-act="same">Choose the same kind of programme everywhere</button>` : ''}</div>
       ${items.length ? '' : '<p class="empty">No institutions yet. Add some from the list below or from <a href="#/universities">Universities</a>.</p>'}
       <div class="choice-list">${items.map((it, n) => {
         const i = byId[it.institution_id]; const st = closingStatus(i);
         return `<div class="choice" style="${brandVars(i)}">
           <div class="choice-top">${monogram(i)}
-            <div class="grow"><strong>${esc(i.name)}</strong><span class="muted small">${esc(i.city)} · ${i.cao ? `CAO · R${CAO.fee} once` : rand(i.fee)} · <span class="badge ${st.key}">${esc(st.label)}</span></span></div>
+            <div class="grow"><strong>${esc(i.name)}</strong><span class="muted small">${esc(i.city)} · ${i.cao ? `CAO · R${CAO.fee} once` : rand(i.fee)} · ${programmesOf(i.id).length} programmes · <span class="badge ${st.key}">${esc(st.label)}</span></span></div>
             <button class="icon-btn" data-remove="${n}" aria-label="Remove ${esc(i.short)}" title="Remove">✕</button></div>
           <div class="grid-2">
             <label class="field"><span>1st choice</span><select id="c1-${i.id}" data-c1="${n}">${courseOptions(i, it.choice1)}</select></label>
             <label class="field"><span>2nd choice (optional)</span><select id="c2-${i.id}" data-c2="${n}">${courseOptions(i, it.choice2, true)}</select></label>
           </div>
+          ${progLine(it.choice1)}${sourceOf(i.id) === 'compiled' ? '<p class="hint">Programme list compiled from the institution\'s website. Check the prospectus for exact requirements.</p>' : ''}
         </div>`;
       }).join('')}</div>
     </div>
     <div class="card">
       <div class="card-head"><h2>Add institutions</h2>
-        <label class="search small"><input type="search" id="add-q" placeholder="Search" aria-label="Search institutions"></label></div>
-      <div class="pick-list" id="add-list">${addList(chosen, already, firstField, '')}</div>
+        <label class="search small"><input type="search" id="add-q" placeholder="Search institution or programme, e.g. Pharmacy" aria-label="Search institutions or programmes"></label></div>
+      <div class="pick-list" id="add-list">${addList(chosen, already, kind, '')}</div>
     </div>
     <div class="btn-row end"><button class="btn btn-primary" data-step="2">Check eligibility →</button></div>`;
 }
 
-function addList(chosen, already, field, q) {
-  const list = INSTITUTIONS.filter((i) => !chosen.has(i.id) && `${i.name} ${i.short} ${i.city}`.toLowerCase().includes(q.toLowerCase()))
+/** One-line summary of a chosen programme: minimum, subjects, duration. */
+function progLine(id) {
+  const p = courseById[id];
+  if (!p) return '';
+  const reqs = Object.entries(p.req).map(([k, v]) => `${{ eng: 'English', math: 'Maths', mathOrLit: 'Maths/Maths Lit', sci: 'Physical Sci', life: 'Life Sci', acc: 'Accounting' }[k]} ${v}%`).join(' · ');
+  return `<p class="prog-line"><strong>${esc(minLabel(p))}</strong>${reqs ? ` · ${esc(reqs)}` : ''} · ${p.years} year${p.years === 1 ? '' : 's'}${p.note ? ` · ${esc(p.note)}` : ''}</p>`;
+}
+
+function addList(chosen, already, kind, q) {
+  const needle = q.toLowerCase();
+  const matches = (i) => !needle || `${i.name} ${i.short} ${i.city}`.toLowerCase().includes(needle) || programmesOf(i.id).some((p) => p.name.toLowerCase().includes(needle));
+  const list = INSTITUTIONS.filter((i) => !chosen.has(i.id) && matches(i))
     .sort((a, b) => (+!!already.has(a.id) - +!!already.has(b.id)) || (+!canPick(a) - +!canPick(b))
-      || (field ? +!b.fields.includes(field) - +!a.fields.includes(field) : 0) || a.name.localeCompare(b.name));
+      || (kind ? +!ofKind(a.id, kind) - +!ofKind(b.id, kind) : 0) || a.name.localeCompare(b.name));
   return list.map((i) => {
     const st = closingStatus(i); const done = already.has(i.id); const blocked = done || !canPick(i);
+    const hit = needle && programmesOf(i.id).filter((p) => p.name.toLowerCase().includes(needle));
+    const k = kind && ofKind(i.id, kind);
+    const hint = hit && hit.length ? ` · offers ${esc(hit[0].name)}${hit.length > 1 ? ` +${hit.length - 1}` : ''}` : kind ? (k ? ` · offers ${esc(k.name)}` : ' · doesn\'t offer this programme') : '';
     return `<button class="pick ${blocked ? 'disabled' : ''}" data-add="${i.id}" ${blocked ? 'disabled' : ''} style="${brandVars(i)}">
-      ${monogram(i, 'sm')}<span class="pick-name">${esc(i.name)}<small>${esc(i.city)} · ${esc(TYPES[i.type])}${field && !i.fields.includes(field) ? ' · doesn\'t offer your field' : ''}</small></span>
+      ${monogram(i, 'sm')}<span class="pick-name">${esc(i.name)}<small>${esc(i.city)} · ${esc(TYPES[i.type])}${hint}</small></span>
       <span class="pick-right"><strong>${done ? 'Applied' : i.cao ? 'R' + CAO.fee + ' CAO' : rand(i.fee)}</strong><span class="badges"><span class="badge ${st.key}">${esc(st.label)}</span></span></span></button>`;
   }).join('') || '<p class="muted">No matches.</p>';
 }
@@ -133,7 +153,7 @@ function stepEligibility() {
   const badge = (e) => `<span class="badge ${{ yes: 'open', maybe: 'soon', no: 'closed', na: 'closed' }[e.key]}">${esc(e.label)}</span>`;
   $('#step-body').innerHTML = `<div class="card">
     <h2>Eligibility check</h2>
-    <p class="muted">Your APS is <strong>${a.aps}</strong>. Cut-offs are estimates from each institution's typical requirements. Check the prospectus for exact figures.</p>
+    <p class="muted">Your APS is <strong>${a.aps}</strong>. Each programme's minimum comes from the institution's own requirements. Where it scores applicants its own way, we compare against a standard-APS equivalent. Meeting the minimum doesn't guarantee a place.</p>
     <div class="banner ${n('yes') ? 'good' : 'warn'}"><span class="ico">${n('yes') ? '✅' : '⚠️'}</span><div>
       <strong>Likely eligible at ${n('yes')} of ${rows.length}${n('maybe') ? ` · borderline at ${n('maybe')}` : ''}</strong>
       <p>${unlikely.length ? `${unlikely.length} look out of reach. Removing them saves ${rand(saved)}.` : 'None of your choices look out of reach.'}</p></div></div>
@@ -141,8 +161,8 @@ function stepEligibility() {
       <thead><tr><th>Institution</th><th>1st choice</th><th>2nd choice</th></tr></thead>
       <tbody>${rows.map((r) => `<tr>
         <td><strong>${esc(r.i.short)}</strong><small>${esc(r.i.city)}</small></td>
-        <td>${esc(courseById[r.it.choice1].name)}<small>Cut-off ≈ APS ${r.e1.cutoff ?? '—'}</small>${badge(r.e1)}${r.e1.reqs.filter((q) => !q.ok).map((q) => `<small class="bad">${esc(q.label)} ${q.have}% (needs ${q.min}%)</small>`).join('')}</td>
-        <td>${r.e2 ? `${esc(courseById[r.it.choice2].name)}<small>Cut-off ≈ APS ${r.e2.cutoff ?? '—'}</small>${badge(r.e2)}` : '<span class="muted">—</span>'}</td>
+        <td>${esc(courseById[r.it.choice1].name)}<small>Minimum: ${esc(minLabel(courseById[r.it.choice1]))}${courseById[r.it.choice1].min ? ` (≈ APS ${r.e1.cutoff})` : ''}</small>${badge(r.e1)}${r.e1.reqs.filter((q) => !q.ok).map((q) => `<small class="bad">${esc(q.label)} ${q.have}% (needs ${q.min}%)</small>`).join('')}</td>
+        <td>${r.e2 ? `${esc(courseById[r.it.choice2].name)}<small>Minimum: ${esc(minLabel(courseById[r.it.choice2]))}</small>${badge(r.e2)}` : '<span class="muted">—</span>'}</td>
       </tr>`).join('')}</tbody></table></div>
     ${unlikely.length ? `<div class="btn-row"><button class="btn btn-outline" data-act="drop">Remove ${unlikely.length} unlikely choice${unlikely.length === 1 ? '' : 's'}</button></div>` : ''}
   </div>
@@ -224,8 +244,8 @@ function onClick(e) {
   else if (t.dataset.add) {
     if (items.length + taken().size >= MAX_INSTITUTIONS) { toast(`You can apply to at most ${MAX_INSTITUTIONS} institutions per intake.`, 'bad'); return; }
     const i = byId[t.dataset.add];
-    const prev = items.find((x) => x.choice1)?.choice1;
-    items.push({ institution_id: i.id, choice1: prev && i.fields.includes(courseById[prev].field) ? prev : '', choice2: '' });
+    const kind = courseById[items.find((x) => x.choice1)?.choice1]?.kind || plannedKind;
+    items.push({ institution_id: i.id, choice1: ofKind(i.id, kind)?.id || '', choice2: '' });
     C.shortlist.add(i.id); C.saveLocal(); renderAccount();
     saveDraft(); draw();
   } else if (t.dataset.remove) {
@@ -234,9 +254,14 @@ function onClick(e) {
     saveDraft(); draw();
   } else if (t.dataset.act === 'same') {
     const c = courseById[items[0].choice1];
-    let n = 0;
-    for (const it of items) if (byId[it.institution_id].fields.includes(c.field) && it.choice1 !== c.id) { it.choice1 = c.id; if (it.choice2 === c.id) it.choice2 = ''; n++; }
-    saveDraft(); draw(); toast(n ? `Set ${c.name} at ${n} more institution${n === 1 ? '' : 's'}.` : 'Already set everywhere it is offered.');
+    let n = 0, missing = 0;
+    for (const it of items.slice(1)) {
+      const match = ofKind(it.institution_id, c.kind);
+      if (!match) { missing++; continue; }
+      if (it.choice1 !== match.id) { it.choice1 = match.id; if (it.choice2 === match.id) it.choice2 = ''; n++; }
+    }
+    saveDraft(); draw();
+    toast(`${n ? `Updated ${n} institution${n === 1 ? '' : 's'}.` : 'Nothing to change.'}${missing ? ` ${missing} don't offer a matching programme.` : ''}`);
   } else if (t.dataset.act === 'drop') {
     const drop = new Set(($('#step-body').dataset.drop || '').split(',').filter(Boolean));
     items = items.filter((it) => !drop.has(it.institution_id));
@@ -246,12 +271,12 @@ function onClick(e) {
 }
 function onChange(e) {
   const t = e.target;
-  if (t.dataset.c1 !== undefined) { items[+t.dataset.c1].choice1 = t.value; if (items[+t.dataset.c1].choice2 === t.value) items[+t.dataset.c1].choice2 = ''; saveDraft(); drawSummary(); }
+  if (t.dataset.c1 !== undefined) { items[+t.dataset.c1].choice1 = t.value; if (items[+t.dataset.c1].choice2 === t.value) items[+t.dataset.c1].choice2 = ''; saveDraft(); draw(); }
   if (t.dataset.c2 !== undefined) { items[+t.dataset.c2].choice2 = t.value === items[+t.dataset.c2].choice1 ? '' : t.value; if (t.value && !items[+t.dataset.c2].choice2) toast('Pick a different programme for your second choice.', 'bad'); saveDraft(); }
 }
 function onInput(e) {
   if (e.target.id !== 'add-q') return;
-  const firstField = courseById[items.find((i) => i.choice1)?.choice1]?.field;
-  $('#add-list').innerHTML = addList(new Set(items.map((i) => i.institution_id)), taken(), firstField, e.target.value);
+  const kind = courseById[items.find((i) => i.choice1)?.choice1]?.kind || plannedKind;
+  $('#add-list').innerHTML = addList(new Set(items.map((i) => i.institution_id)), taken(), kind, e.target.value);
 }
 
