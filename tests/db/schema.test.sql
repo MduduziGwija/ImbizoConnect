@@ -40,41 +40,44 @@ select expect_error($$ select set_role('00000000-0000-0000-0000-000000000002', '
 select test_login('00000000-0000-0000-0000-000000000001');
 select expect_error($$ update profiles set role = 'admin' where id = auth.uid() $$, 'Only an admin');
 select expect_error($$ update profiles set id_number = '0803150142081' where id = auth.uid() $$, 'not valid');
-select expect_error($$ select submit_applications('[{"institution_id":"wits","choice1":"acc"}]') $$, 'personal and school details');
+select expect_error($$ select submit_applications('[{"institution_id":"wits","choice1":"wits-bcom-acc"}]') $$, 'personal and school details');
 
 -- Complete the profile, confirm marks and upload the two required documents.
 update profiles set first_names = 'Thandiwe', surname = 'Mokoena', id_number = '0803150142088', phone = '0725550142',
   province = 'Gauteng', address = '12 Vilakazi St', school = 'Morris Isaacson', guardian_name = 'Palesa Mokoena'
   where id = auth.uid();
 select expect((select full_name from profiles where id = auth.uid()) = 'Thandiwe Mokoena', 'full name kept in sync');
-select expect_error($$ select submit_applications('[{"institution_id":"wits","choice1":"acc"}]') $$, 'Confirm your marks');
+select expect_error($$ select submit_applications('[{"institution_id":"wits","choice1":"wits-bcom-acc"}]') $$, 'Confirm your marks');
 update profiles set marks = '[{"s":"Mathematics","m":65}]', marks_confirmed_at = now() where id = auth.uid();
-select expect_error($$ select submit_applications('[{"institution_id":"wits","choice1":"acc"}]') $$, 'Upload your ID');
+select expect_error($$ select submit_applications('[{"institution_id":"wits","choice1":"wits-bcom-acc"}]') $$, 'Upload your ID');
 insert into documents (owner_id, kind, name, path) values
   (auth.uid(), 'id', 'id.pdf', auth.uid() || '/id-id.pdf'), (auth.uid(), 'gr11', 'gr11.pdf', auth.uid() || '/gr11-gr11.pdf');
 select expect_error($$ insert into documents (owner_id, kind, name, path) values ('00000000-0000-0000-0000-000000000002', 'photo', 'x', '00000000-0000-0000-0000-000000000002/x') $$, 'row-level security');
 
+-- A programme from another institution is refused.
+select expect_error($$ select submit_applications('[{"institution_id":"uj","choice1":"wits-bcom-acc"}]') $$, 'does not offer');
+
 -- Closing dates are enforced; the demo copy switches this off.
 update settings set enforce_dates = true;
-select expect_error($$ select submit_applications('[{"institution_id":"up","choice1":"acc"}]') $$, 'closed');
-select expect_error($$ select submit_applications('[{"institution_id":"mut","choice1":"llb"}]') $$, 'does not offer');
+select expect_error($$ select submit_applications('[{"institution_id":"up","choice1":"up-bcom-acc"}]') $$, 'closed');
+select expect_error($$ select submit_applications('[{"institution_id":"mut","choice1":"wits-llb"}]') $$, 'does not offer');
 reset role;
 update settings set enforce_dates = false;
 set role authenticated;
 
 -- Apply to Wits, UJ (free) and two CAO institutions in one go.
 select count(*) from submit_applications('[
-  {"institution_id":"wits","choice1":"acc","choice2":"mgmt"},
-  {"institution_id":"uj","choice1":"acc"},
-  {"institution_id":"ukzn","choice1":"acc","choice2":"is"},
-  {"institution_id":"dut","choice1":"is"}]');
+  {"institution_id":"wits","choice1":"wits-bcom-acc","choice2":"wits-bcom"},
+  {"institution_id":"uj","choice1":"uj-bacc-ca"},
+  {"institution_id":"ukzn","choice1":"ukzn-bcom-acc","choice2":"ukzn-bcom-is"},
+  {"institution_id":"dut","choice1":"dut-dip-ict-bus"}]');
 select expect((select count(*) from applications where student_id = auth.uid()) = 4, 'four applications created');
 select expect((select sum(fee) from applications where student_id = auth.uid() and institution_id in ('ukzn','dut')) = 250, 'CAO fee charged once');
 select expect((select status from applications where institution_id = 'uj' and student_id = auth.uid()) = 'submitted', 'free application goes straight in');
 select expect((select status from applications where institution_id = 'wits' and student_id = auth.uid()) = 'awaiting_payment', 'paid application waits for payment');
 select expect((select count(distinct ref) from applications) = 4, 'unique references');
-select expect_error($$ select submit_applications('[{"institution_id":"wits","choice1":"cs"}]') $$, 'already applied');
-select expect_error($$ select submit_applications('[{"institution_id":"mut","choice1":"it","choice2":"is"},{"institution_id":"unizulu","choice1":"is","choice2":"it"}]') $$, 'CAO allows');
+select expect_error($$ select submit_applications('[{"institution_id":"wits","choice1":"wits-bsc-cs"}]') $$, 'already applied');
+select expect_error($$ select submit_applications('[{"institution_id":"mut","choice1":"mut-dip-ict","choice2":"mut-dip-acc"},{"institution_id":"unizulu","choice1":"unizulu-bsc-cs","choice2":"unizulu-bcom-acc"}]') $$, 'CAO allows');
 
 -- Unpaid applications are hidden from the institution.
 select test_login('00000000-0000-0000-0000-0000000000b1');
@@ -89,7 +92,7 @@ select student_action((select id from applications where institution_id = 'dut')
 select expect((select count(*) from applications where cao_group is not null and status = 'submitted') = 2, 'CAO group paid together');
 
 -- A later CAO choice shares the paid CAO fee.
-select count(*) from submit_applications('[{"institution_id":"unizulu","choice1":"llb"}]');
+select count(*) from submit_applications('[{"institution_id":"unizulu","choice1":"unizulu-llb"}]');
 select expect((select fee = 0 and status = 'submitted' and payment_ref = 'CAO-448812' from applications where institution_id = 'unizulu'), 'later CAO choice is already paid');
 
 -- Wits officer: sees only Wits, can read the applicant and their documents, and moves the application on.
@@ -101,9 +104,9 @@ select expect_error($$ select officer_action((select id from applications where 
 select expect_error($$ select officer_action((select id from applications), 'accept') $$, 'Unknown action');
 select expect_error($$ select officer_action((select id from applications), 'decline') $$, 'note');
 select officer_action((select id from applications), 'review');
-select officer_action((select id from applications), 'offer', 'Welcome to Wits', 'mgmt');
-select expect((select offer_choice from applications) = 'mgmt', 'offer for the second choice');
-select expect_error($$ select officer_action((select id from applications), 'offer', '', 'cs') $$, 'not available');
+select officer_action((select id from applications), 'offer', 'Welcome to Wits', 'wits-bcom');
+select expect((select offer_choice from applications) = 'wits-bcom', 'offer for the second choice');
+select expect_error($$ select officer_action((select id from applications), 'offer', '', 'wits-bsc-cs') $$, 'not available');
 select expect_error($$ update applications set status = 'accepted' $$, 'permission denied');
 
 -- The UKZN officer cannot see Wits applications, but does see the paid CAO application.

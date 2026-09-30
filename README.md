@@ -14,6 +14,7 @@
 
 - **One profile, many applications.** Students enter their details, marks and documents once. Every institution they apply to receives the same profile.
 - **Real 2027 data for all 26 public universities.** Application fees, closing dates with live countdowns, faculties, how each one scores applicants, and links to official prospectuses. Five prospectus PDFs are stored in the repository. Where sources disagree on a fee, the site says so.
+- **Each institution's real programmes.** 756 undergraduate programmes across the 26 institutions, each with the institution's own name, minimum (APS, or the institution's own score such as Wits APS, UCT FPS, the Mandela Applicant Score or UWC points) and subject requirements. Institutions offer different things: only UP trains vets, UP has no pharmacy school, UCT has no undergraduate BEd, and universities of technology mostly offer diplomas and BEngTech degrees. UP, SU, Rhodes, UL and WSU come from their 2027 prospectuses; the others were compiled from institution websites and 2027 guides, and the site says which.
 - **Checks before you pay.** The APS calculator (standard 7-point scale, Life Orientation excluded) works out the NSC pass type, then estimates eligibility for each programme at each institution. Estimates appear only after the student confirms their own marks, and long shots can be dropped with one click to save their fees.
 - **The CAO handled properly.** UKZN, DUT, MUT and UNIZULU share one R250 CAO fee and a limit of six programme choices. The fee is charged once, and paying it pays every CAO application.
 - **An admissions portal for institutions.** Admissions officers see only their own institution's applications, and only once the fee is paid. They open the applicant's marks, documents and history, then request documents, make a provisional offer, waitlist or decline, and export the list to CSV.
@@ -72,6 +73,8 @@ Pick a person on the sign-in screen:
 5. **Publish the website**: repository **Settings → Pages → Source: GitHub Actions**, then merge to `main`. The included workflow tests and publishes the site, with the demo at `/demo/`. *Free GitHub accounts can only use Pages on **public** repositories.*
 6. **Sign up first**: the first account created becomes **admin**. Everyone else who signs up is a student. The admin makes admissions staff officers for their institution under **Admin**.
 
+*Existing databases* created before programmes were institution-specific: run [`supabase/updates/001-programmes.sql`](supabase/updates/001-programmes.sql) once, then `supabase/schema.sql` again.
+
 Each new intake: update `closes` (and `fee` if it changed) for each institution in `assets/js/data.js` and in the `institutions` table.
 
 ## Cost
@@ -89,8 +92,9 @@ Each new intake: update `closes` (and `fee` if it changed) for each institution 
 3. **Eligibility is an estimate.** It uses the standard APS and a typical cut-off per programme, adjusted for how selective each institution is. Wits, UCT, SU, NMU and others score applicants their own way, and each university card says so. Students should always check the prospectus.
 4. **Fees and dates change every year.** They were checked in September 2026 against university websites and published guides. Entries marked *Confirm fee* had conflicting sources.
 5. **POPIA (personal information).** ID numbers, marks and documents are personal information. Access is restricted in the database itself: officers see only applicants to their own institution, and only after the fee is paid. Students give consent when they sign up and again when they submit. Choose Supabase's Cape Town region to keep data in South Africa.
-6. **Free Supabase projects pause after 7 days without activity.** Daily use keeps it awake. A paused project is restored with one click, with no data lost.
-7. **Large prospectuses stay as links.** The mirror skips files over 40 MB (the UFS prospectus is 56 MB) and links to the official PDF instead.
+6. **Visit counting.** The published site counts visits anonymously with [Umami](https://umami.is) (no cookies, no personal data), added at deploy time from `tools/analytics.html`. Local copies aren't counted.
+7. **Free Supabase projects pause after 7 days without activity.** Daily use keeps it awake. A paused project is restored with one click, with no data lost.
+8. **Large prospectuses stay as links.** The mirror skips files over 40 MB (the UFS prospectus is 56 MB) and links to the official PDF instead.
 
 ## Project layout
 
@@ -98,7 +102,8 @@ Each new intake: update `closes` (and `fee` if it changed) for each institution 
 index.html                     the page (public sections + portal container)
 assets/css/styles.css          styles (light and dark)
 assets/js/config.js            your Supabase URL and publishable key
-assets/js/data.js              institutions, fees, dates, brand colours, courses, careers
+assets/js/data.js              institutions, fees, dates, brand colours, programme types, careers
+assets/js/programmes.js        every institution's own programmes and minimums
 assets/js/logic.js             rules: APS, pass types, SA ID, eligibility, CAO fees, workflow
 assets/js/art.js               logo mark, icons, campus skylines, map, pattern
 assets/js/ui.js                toasts, dialogs and other helpers

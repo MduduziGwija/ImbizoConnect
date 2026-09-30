@@ -7,7 +7,7 @@ import {
 } from '../logic.js';
 import { SAMPLE_RESULTS, DOCUMENTS, CAO } from '../data.js';
 
-const KEY = 'imbizo-demo-v1';
+const KEY = 'imbizo-demo-v2'; // v2: choices are institution-specific programme ids
 const uid = () => (crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2));
 const clone = (x) => JSON.parse(JSON.stringify(x));
 const daysAgo = (n, h = 10) => { const d = new Date(); d.setDate(d.getDate() - n); d.setHours(h, 15, 0, 0); return d.toISOString(); };
@@ -145,33 +145,33 @@ function seed() {
   };
   const paid = (days, ref) => ['submitted', days, null, 'pay', `Paid online · ${ref}`, { paid_at: daysAgo(days), payment_ref: ref }];
 
-  A('s-thandiwe', 'wits', 'acc', 'mgmt', [['awaiting_payment', 18, null, 'submit'], paid(18, 'PF-83412'), ['under_review', 9, 'o-wits', 'review']]);
-  A('s-thandiwe', 'uj', 'acc', 'econ', [['submitted', 18, null, 'submit'], ['under_review', 12, 'o-uj', 'review'],
-    ['offer', 3, 'o-uj', 'offer', 'Congratulations! Provisional offer for BCom Accounting (CA stream), subject to your final NSC results.', { offer_choice: 'acc', decision_note: 'Provisional offer, subject to final NSC results.' }]]);
+  A('s-thandiwe', 'wits', 'wits-bcom-acc', 'wits-bcom', [['awaiting_payment', 18, null, 'submit'], paid(18, 'PF-83412'), ['under_review', 9, 'o-wits', 'review']]);
+  A('s-thandiwe', 'uj', 'uj-bacc-ca', 'uj-bcom-acc', [['submitted', 18, null, 'submit'], ['under_review', 12, 'o-uj', 'review'],
+    ['offer', 3, 'o-uj', 'offer', 'Congratulations! Provisional offer for the Bachelor of Accounting (CA stream), subject to your final NSC results.', { offer_choice: 'uj-bacc-ca', decision_note: 'Provisional offer, subject to final NSC results.' }]]);
   const g = uid();
-  const u1 = A('s-thandiwe', 'ukzn', 'acc', 'is', [['awaiting_payment', 2, null, 'submit']], g);
+  const u1 = A('s-thandiwe', 'ukzn', 'ukzn-bcom-acc', 'ukzn-bcom-is', [['awaiting_payment', 2, null, 'submit']], g);
   u1.fee = 250;
-  A('s-thandiwe', 'dut', 'is', null, [['awaiting_payment', 2, null, 'submit']], g);
+  A('s-thandiwe', 'dut', 'dut-dip-ict-bus', null, [['awaiting_payment', 2, null, 'submit']], g);
 
-  A('s-aisha', 'uct', 'mbchb', 'physio', [['awaiting_payment', 80, null, 'submit'], paid(80, 'PF-55120'), ['under_review', 60, null, 'review'],
+  A('s-aisha', 'uct', 'uct-mbchb', 'uct-bsc-physio', [['awaiting_payment', 80, null, 'submit'], paid(80, 'PF-55120'), ['under_review', 60, null, 'review'],
     ['declined', 40, null, 'decline', 'The MBChB programme was oversubscribed this year. Your application was strong but not ranked high enough for a place.', { decision_note: 'Not ranked high enough in MBChB selection.' }]]);
-  A('s-aisha', 'su', 'bsc', 'physio', [['awaiting_payment', 79, null, 'submit'], paid(79, 'PF-55188'), ['under_review', 55, null, 'review'],
-    ['offer', 35, null, 'offer', 'Welcome to Stellenbosch! Offer for BSc Biological Sciences.', { offer_choice: 'bsc' }], ['accepted', 33, null, 'accept']]);
-  A('s-aisha', 'uwc', 'physio', null, [['submitted', 78, null, 'submit'], ['offer', 30, null, 'offer', 'Offer for BSc Physiotherapy.', { offer_choice: 'physio' }], ['offer_declined', 29, null, 'decline_offer', 'Accepted a place elsewhere.']]);
+  A('s-aisha', 'su', 'su-bsc-hls', 'su-bphysio', [['awaiting_payment', 79, null, 'submit'], paid(79, 'PF-55188'), ['under_review', 55, null, 'review'],
+    ['offer', 35, null, 'offer', 'Welcome to Stellenbosch! Offer for BSc Human Life Sciences.', { offer_choice: 'su-bsc-hls' }], ['accepted', 33, null, 'accept']]);
+  A('s-aisha', 'uwc', 'uwc-bphysio', null, [['submitted', 78, null, 'submit'], ['offer', 30, null, 'offer', 'Offer for BSc Physiotherapy.', { offer_choice: 'uwc-bphysio' }], ['offer_declined', 29, null, 'decline_offer', 'Accepted a place elsewhere.']]);
 
-  A('s-kabelo', 'wits', 'civil', 'elec', [['awaiting_payment', 14, null, 'submit'], paid(14, 'PF-60311')]);
-  A('s-lerato', 'wits', 'cs', 'ds', [['awaiting_payment', 16, null, 'submit'], paid(16, 'PF-60102'), ['under_review', 10, 'o-wits', 'review'],
-    ['offer', 5, 'o-wits', 'offer', 'Provisional offer for BSc Computer Science.', { offer_choice: 'cs' }]]);
-  A('s-ruan', 'wits', 'econ', null, [['awaiting_payment', 11, null, 'submit'], paid(11, 'PF-60877'), ['docs_requested', 6, 'o-wits', 'request_docs', 'Please upload your Grade 12 June results so we can complete the assessment.']]);
-  A('s-ayanda', 'wits', 'nursing', null, [['awaiting_payment', 8, null, 'submit'], paid(7, 'PF-61240')]);
-  A('s-lerato', 'uj', 'cs', null, [['submitted', 15, null, 'submit']]);
-  A('s-kabelo', 'uj', 'civil', null, [['submitted', 13, null, 'submit'], ['under_review', 4, 'o-uj', 'review']]);
-  A('s-ayanda', 'uj', 'nursing', 'mgmt', [['submitted', 8, null, 'submit']]);
+  A('s-kabelo', 'wits', 'wits-bsc-eng-civil', 'wits-bsc-eng-elec', [['awaiting_payment', 14, null, 'submit'], paid(14, 'PF-60311')]);
+  A('s-lerato', 'wits', 'wits-bsc-cs', 'wits-bsc-actuarial', [['awaiting_payment', 16, null, 'submit'], paid(16, 'PF-60102'), ['under_review', 10, 'o-wits', 'review'],
+    ['offer', 5, 'o-wits', 'offer', 'Provisional offer for BSc (Computer Science).', { offer_choice: 'wits-bsc-cs' }]]);
+  A('s-ruan', 'wits', 'wits-bcom', null, [['awaiting_payment', 11, null, 'submit'], paid(11, 'PF-60877'), ['docs_requested', 6, 'o-wits', 'request_docs', 'Please upload your Grade 12 June results so we can complete the assessment.']]);
+  A('s-ayanda', 'wits', 'wits-bnurs', null, [['awaiting_payment', 8, null, 'submit'], paid(7, 'PF-61240')]);
+  A('s-lerato', 'uj', 'uj-bsc-cs', null, [['submitted', 15, null, 'submit']]);
+  A('s-kabelo', 'uj', 'uj-beng-civil', null, [['submitted', 13, null, 'submit'], ['under_review', 4, 'o-uj', 'review']]);
+  A('s-ayanda', 'uj', 'uj-bnurs', 'uj-bcom-bm', [['submitted', 8, null, 'submit']]);
   const g2 = uid();
-  const n1 = A('s-nomvula', 'ukzn', 'llb', 'psych', [['awaiting_payment', 12, null, 'submit'], paid(12, 'CAO-448812')], g2);
+  const n1 = A('s-nomvula', 'ukzn', 'ukzn-llb', 'ukzn-ba', [['awaiting_payment', 12, null, 'submit'], paid(12, 'CAO-448812')], g2);
   n1.fee = 250;
-  A('s-nomvula', 'unizulu', 'llb', null, [['awaiting_payment', 12, null, 'submit'], paid(12, 'CAO-448812')], g2);
-  A('s-ruan', 'ukzn', 'agri', null, [['awaiting_payment', 9, null, 'submit'], paid(9, 'CAO-449901'), ['under_review', 3, 'o-ukzn', 'review']]).fee = 250;
+  A('s-nomvula', 'unizulu', 'unizulu-llb', null, [['awaiting_payment', 12, null, 'submit'], paid(12, 'CAO-448812')], g2);
+  A('s-ruan', 'ukzn', 'ukzn-bsc-agric', null, [['awaiting_payment', 9, null, 'submit'], paid(9, 'CAO-449901'), ['under_review', 3, 'o-ukzn', 'review']]).fee = 250;
   state.events.sort((a, b) => a.at.localeCompare(b.at));
   return state;
 }

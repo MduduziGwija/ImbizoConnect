@@ -2,10 +2,15 @@
 // Application rules shared by the pages, both backends and the tests: APS, NSC pass
 // types, SA ID numbers, eligibility estimates, fees (with the CAO charged once),
 // the application workflow and profile completeness. No DOM access in this file.
-import { INSTITUTIONS, COURSES, CAO, DOCUMENTS, INTAKE_YEAR } from './data.js';
+import { INSTITUTIONS, CAO, DOCUMENTS, INTAKE_YEAR } from './data.js';
+import { PROGRAMMES, progById, programmesOf } from './programmes.js';
 
 export const byId = Object.fromEntries(INSTITUTIONS.map((i) => [i.id, i]));
-export const courseById = Object.fromEntries(COURSES.map((c) => [c.id, c]));
+// Each institution's faculties follow from the programmes it actually offers.
+for (const inst of INSTITUTIONS) inst.fields = [...new Set(programmesOf(inst.id).map((p) => p.field))];
+/** Programmes by id. Application choices store programme ids. */
+export const courseById = progById;
+export { PROGRAMMES, progById, programmesOf };
 export const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 /** Most institutions a student can apply to in one intake. */
@@ -86,6 +91,7 @@ export function analyse(marks = []) {
     sci: find(/^(Physical Sciences|Technical Sciences)$/),
     life: find(/^Life Sciences$/),
     eng: find(/^English/),
+    acc: find(/^Accounting$/),
   };
   subj.mathOrLit = Math.max(subj.math, subj.lit);
   return { aps, subj, count: scored.length, pass: passType(valid) };
@@ -121,16 +127,23 @@ export function marksProblems(marks) {
   return problems;
 }
 
-export const REQ_LABEL = { math: 'Maths', mathOrLit: 'Maths / Maths Lit', sci: 'Physical Sci', life: 'Life Sci', eng: 'English' };
+export const REQ_LABEL = { math: 'Maths', mathOrLit: 'Maths / Maths Lit', sci: 'Physical Sci', life: 'Life Sci', eng: 'English', acc: 'Accounting' };
 export function checkReqs(course, subj) {
   return Object.entries(course.req).map(([k, min]) => ({ key: k, label: REQ_LABEL[k], min, have: subj[k] || 0, ok: (subj[k] || 0) >= min }));
 }
 
-/** Estimated eligibility for `course` at `inst` from an analyse() result. */
+/** Minimum shown to students: the institution's own measure where it has one. */
+export const minLabel = (prog) => prog.min || `APS ${prog.aps}`;
+
+/**
+ * Estimated eligibility for a programme from an analyse() result. The cut-off is the
+ * programme's own minimum (converted to the standard APS scale where the institution uses
+ * its own scoring). `inst` is optional and only used to check the programme belongs to it.
+ */
 export function eligibility(course, inst, a) {
-  if (!course || !inst) return null;
-  if (!inst.fields.includes(course.field)) return { key: 'na', label: 'Not offered', cutoff: null, reqs: [] };
-  const cutoff = Math.max(18, course.aps + inst.selectivity);
+  if (!course) return null;
+  if (inst && course.institution_id && course.institution_id !== inst.id) return { key: 'na', label: 'Not offered', cutoff: null, reqs: [] };
+  const cutoff = course.aps;
   const reqs = checkReqs(course, a.subj);
   const subjectsOk = reqs.every((r) => r.ok);
   const nearSubjects = reqs.every((r) => r.have >= r.min - 5);
@@ -139,7 +152,7 @@ export function eligibility(course, inst, a) {
   else if (a.aps >= cutoff - 2 && nearSubjects) key = 'maybe';
   else key = 'no';
   const label = { yes: 'Likely eligible', maybe: 'Borderline', no: 'Unlikely' }[key];
-  return { key, label, cutoff, reqs, diploma: inst.type === 'technology' };
+  return { key, label, cutoff, reqs, diploma: course.qual !== 'degree' };
 }
 
 // ───────────────────────── SA ID numbers
@@ -258,9 +271,9 @@ export function basketProblems(items, { profile = {}, docs = [], existing = [], 
     if (enforceDates && !isOpen(inst, on)) problems.push(`${inst.short} closed on ${fmtDate(inst.closes)}.`);
     const c1 = courseById[it.choice1];
     if (!c1) problems.push(`Choose a first-choice programme for ${inst.short}.`);
-    else if (!inst.fields.includes(c1.field)) problems.push(`${inst.short} doesn't offer ${c1.name}.`);
+    else if (c1.institution_id !== inst.id) problems.push(`${inst.short} doesn't offer ${c1.name}.`);
     const c2 = it.choice2 ? courseById[it.choice2] : null;
-    if (it.choice2 && (!c2 || !inst.fields.includes(c2.field))) problems.push(`${inst.short} doesn't offer your second choice.`);
+    if (it.choice2 && (!c2 || c2.institution_id !== inst.id)) problems.push(`${inst.short} doesn't offer your second choice.`);
     if (c2 && c2 === c1) problems.push(`Your two choices at ${inst.short} are the same.`);
     if (inst.cao) caoChoices += c2 ? 2 : 1;
   }
