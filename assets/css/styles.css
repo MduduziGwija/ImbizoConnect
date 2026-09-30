@@ -624,3 +624,23 @@ input.invalid { border-color: var(--red); box-shadow: 0 0 0 4px var(--red-soft);
 .closing .deadline-list li { flex-wrap: nowrap; }
 .closing .dl-main { min-width: 0; }
 .uni-map .map-wrap.light { max-width: 760px; width: 100%; justify-self: center; }
+
+/* Brand palettes: each card uses its university's own colours */
+.uni-cover { background: linear-gradient(180deg, color-mix(in srgb, var(--c) 16%, var(--surface)), color-mix(in srgb, var(--c) 6%, var(--surface))); }
+.sky-hills { fill: color-mix(in srgb, var(--c) 22%, var(--surface)); }
+.sky-blocks { fill: var(--c); }
+.sky-windows { fill: color-mix(in srgb, var(--c) 55%, #ffffff); opacity: .55; transition: fill .4s, opacity .4s; }
+.uni-card:hover .sky-windows, .drawer-hero:hover .sky-windows { fill: var(--w); opacity: 1; filter: drop-shadow(0 0 2px var(--w)); }
+.uni-cover .sun { background: var(--s); box-shadow: 0 0 0 6px color-mix(in srgb, var(--s) 25%, transparent); }
+.uni-card:hover .sun { box-shadow: 0 0 0 10px color-mix(in srgb, var(--s) 30%, transparent), 0 0 28px var(--s); }
+.uni-card.in-cart { border-color: var(--c); box-shadow: 0 0 0 1px var(--c) inset; }
+.uni-card:hover { border-color: color-mix(in srgb, var(--c) 55%, transparent); }
+.drawer-hero { position: relative; overflow: hidden; background: var(--c); }
+.drawer-hero > * { position: relative; }
+.drawer-hero .skyline { position: absolute; left: 0; right: 0; bottom: 0; height: 70%; top: auto; opacity: .35; }
+.drawer-hero .sky-blocks, .drawer-hero .sky-hills { fill: rgba(0,0,0,.35); }
+.drawer-hero .sky-windows { fill: var(--w); opacity: .5; }
+.fc-link { font-size: 13px; font-weight: 600; color: var(--navy-3); text-decoration: none; margin-top: 4px; pointer-events: auto; }
+.fc-link:hover { text-decoration: underline; }
+.fc-bar i { transition: width .6s cubic-bezier(.2,.8,.2,1); }
+.aps-score-card.is-sample strong { color: rgba(255,255,255,.55); }

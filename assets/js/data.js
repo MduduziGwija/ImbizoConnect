@@ -351,3 +351,37 @@ const DOCUMENTS = [
   { id:'photo', icon:'📸', name:'Passport-size photograph', hint:'Recent, plain background · JPG or PNG · max 2 MB', required:false },
   { id:'guard', icon:'👪', name:'Parent / guardian ID', hint:'Needed for NSFAS and some residence applications', required:false },
 ];
+
+/* Brand palettes used for each university's artwork.
+ * c = main brand colour (buildings, monogram), w = accent that lights the
+ * windows on hover, s = sun / secondary accent. Based on each university's
+ * published colours; entries marked `approx` could not be confirmed from an
+ * official source and use the dominant colours of the crest. */
+const BRAND = {
+  uct:     { c:'#003B71', w:'#7FC8F8', s:'#7FC8F8' },             // dark blue, light blue
+  wits:    { c:'#003E7E', w:'#E3B45A', s:'#E3B45A' },             // blue, gold
+  up:      { c:'#005BAA', w:'#D6A844', s:'#D2232A' },             // blue, gold, red
+  su:      { c:'#61223B', w:'#C5A45A', s:'#C5A45A' },             // maroon, gold
+  uj:      { c:'#E8611A', w:'#FFD200', s:'#FFD200' },             // orange, yellow
+  ukzn:    { c:'#1E1E1E', w:'#E0303F', s:'#E0303F' },             // black, red
+  nwu:     { c:'#512C85', w:'#36C0C9', s:'#9AA4AE' },             // purple, turquoise, grey
+  ufs:     { c:'#0F204B', w:'#F2A900', s:'#C8102E', approx:true }, // navy, gold, red
+  ru:      { c:'#5B2A86', w:'#FFFFFF', s:'#C9B8E0' },             // purple, white
+  nmu:     { c:'#002B5C', w:'#FFC72C', s:'#FFC72C' },             // blue, yellow
+  uwc:     { c:'#1D3C8F', w:'#F5B21B', s:'#F5B21B' },             // blue, gold (crest)
+  ufh:     { c:'#0D3B8C', w:'#FFD100', s:'#FFD100' },             // blue, yellow
+  wsu:     { c:'#161616', w:'#FFFFFF', s:'#D9D9D9' },             // black, white
+  ul:      { c:'#004B8D', w:'#8DC63F', s:'#F2B632', approx:true }, // blue, green, gold
+  univen:  { c:'#00613A', w:'#F7B500', s:'#F7B500', approx:true }, // green, gold
+  ump:     { c:'#00467F', w:'#F7941D', s:'#6DB33F', approx:true }, // blue, orange, green
+  spu:     { c:'#C8202F', w:'#F7941D', s:'#F7941D' },             // red, orange
+  smu:     { c:'#00529B', w:'#F7941D', s:'#F7941D' },             // blue, orange
+  unisa:   { c:'#7A1F3D', w:'#FFFFFF', s:'#1B2A4A' },             // maroon, white, navy
+  unizulu: { c:'#003A80', w:'#E0B84C', s:'#E0B84C' },             // blue, gold
+  tut:     { c:'#003A80', w:'#F2B632', s:'#D2232A' },             // blue, gold, red
+  cput:    { c:'#004B93', w:'#6CC4EE', s:'#A7DDF6' },             // three blues
+  cut:     { c:'#004C97', w:'#FFD100', s:'#D2232A' },             // blue, yellow, red
+  vut:     { c:'#0F52BA', w:'#F0E130', s:'#D4AF37' },             // sapphire, dandelion, gold
+  dut:     { c:'#5B2C83', w:'#89CFF0', s:'#3FA34D' },             // purple, baby blue, green
+  mut:     { c:'#800020', w:'#E0B84C', s:'#E0B84C' },             // maroon, gold
+};

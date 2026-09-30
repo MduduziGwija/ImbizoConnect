@@ -40,6 +40,8 @@ function status(inst) {
 }
 const cycleOver = () => INSTITUTIONS.every(i => daysUntil(i.closes) < 0);
 
+const brandOf = i => BRAND[i.id] || { c: monoColour(i.id), w: '#f4a535', s: '#f4a535' };
+function brandVars(i) { const b = brandOf(i); return `--c:${b.c};--w:${b.w};--s:${b.s}`; }
 function monoColour(id) {
   let h = 0; for (const ch of id) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
   return MONO_COLOURS[h % MONO_COLOURS.length];
@@ -68,6 +70,7 @@ const state = {
   c2: store.get('c2', ''),
   docs: store.get('docs', {}),
   marks: store.get('marks', []),
+  confirmed: store.get('confirmed', false),  // true once the student presses "Calculate APS" on their own marks
   step: 1,
   ref: store.get('ref', null),
 };
@@ -77,6 +80,7 @@ function save() {
   store.set('c1', state.c1); store.set('c2', state.c2);
   store.set('docs', state.docs); store.set('marks', state.marks);
   store.set('ref', state.ref);
+  store.set('confirmed', state.confirmed);
 }
 
 // ─────────────────────────── fees (CAO charged once)
@@ -223,9 +227,37 @@ function renderHome() {
   $('#stat-range').textContent = `R0 – R${Math.max(...paid)}`;
   $('#stat-pdfs').textContent = INSTITUTIONS.filter(i => prospectus(i).kind !== 'page').length;
   $('#free-list').innerHTML = free.map(i => `<a href="#/universities?open=${i.id}"><b>R0</b> ${esc(i.name)}</a>`).join('');
+  renderHeroCards();
   if (!$('#hero-map').children.length) mountMap($('#hero-map'), () => true);
   else paintMap($('#hero-map'), () => true);
   countUp();
+}
+
+/* Hero cards show the student's own result, and only after they have
+ * confirmed their marks. Until then the APS card invites them to start. */
+function bestMatch(a) {
+  const c1 = courseById[state.c1];
+  const courses = c1 ? [c1, ...COURSES.filter(c => c !== c1)] : [...COURSES].sort((x, y) => y.aps - x.aps);
+  for (const course of courses) {
+    const hits = INSTITUTIONS.filter(i => daysUntil(i.closes) >= 0 || cycleOver())
+      .map(i => ({ i, e: eligibility(course, i, a) })).filter(r => r.e.key === 'yes')
+      .sort((x, y) => y.e.cutoff - x.e.cutoff);
+    if (hits.length) return { course, inst: hits[0].i };
+  }
+  return null;
+}
+function renderHeroCards() {
+  const aps = $('.fc-aps'), offer = $('.fc-offer');
+  const a = analyse();
+  if (!state.confirmed || a.count < 4) {
+    aps.innerHTML = `<span class="fc-label">Your APS</span><strong>?<small>/42</small></strong><a class="fc-link" href="#/aps">Enter your marks →</a>`;
+    offer.hidden = true;
+    return;
+  }
+  aps.innerHTML = `<span class="fc-label">Your APS</span><strong>${a.aps}<small>/42</small></strong><span class="fc-bar"><i style="width:${Math.round(a.aps / 42 * 100)}%"></i></span>`;
+  const m = bestMatch(a);
+  offer.hidden = !m;
+  if (m) offer.innerHTML = `<span class="fc-tick">✓</span><div><strong>Likely eligible</strong><span class="fc-sub">${esc(m.inst.short)} · ${esc(m.course.name)}</span></div>`;
 }
 
 // ─────────────────────────── map
@@ -329,11 +361,11 @@ function renderUniversities() {
   $('#uni-grid').innerHTML = list.length ? list.map(i => {
     const st = status(i); const inCart = state.cart.has(i.id);
     const closed = st.key === 'closed' && !cycleOver();
-    return `<article class="uni-card spot ${inCart ? 'in-cart' : ''}" style="--c:${monoColour(i.id)}">
+    return `<article class="uni-card spot ${inCart ? 'in-cart' : ''}" style="${brandVars(i)}">
       <div class="uni-cover"><span class="sun"></span>${ART.skyline(i.id, i.type)}</div>
       <div class="uni-inner">
       <div class="uni-top">
-        <div class="uni-mono" style="background:${monoColour(i.id)}${i.short.length > 4 ? ';font-size:10px' : ''}">${esc(i.short.slice(0, 7))}</div>
+        <div class="uni-mono" style="background:${brandOf(i).c}${i.short.length > 4 ? ';font-size:10px' : ''}">${esc(i.short.slice(0, 7))}</div>
         <div class="uni-title">
           <h3><button data-open="${i.id}">${esc(i.name)}</button></h3>
           <span>${esc(i.city)} · ${esc(TYPES[i.type])}</span>
@@ -380,16 +412,16 @@ function openDrawer(id) {
   const closed = st.key === 'closed' && !cycleOver();
   const a = analyse();
   const c1 = courseById[state.c1];
-  const elig = a.count >= 4 && c1 ? eligibility(c1, i, a) : null;
+  const elig = state.confirmed && a.count >= 4 && c1 ? eligibility(c1, i, a) : null;
 
   const attach = p.kind === 'page'
     ? `<div class="doc-attach"><div class="pdf">WEB</div><div class="meta"><strong>${esc(i.short)} ${p.year || INTAKE_YEAR} prospectus</strong><span>Published on the university website</span></div><a class="btn btn-outline btn-sm" href="${esc(p.href)}" target="_blank" rel="noopener">Open ↗</a></div>`
     : `<div class="doc-attach"><div class="pdf">PDF</div><div class="meta"><strong>${esc(i.short)} ${p.year || INTAKE_YEAR} undergraduate prospectus</strong><span>${p.kind === 'local' ? `Attached · ${fmtSize(p.size)}` : 'Official PDF from ' + esc(new URL(p.href).hostname)}</span></div><a class="btn btn-primary btn-sm" href="${esc(p.href)}" ${p.kind === 'local' ? 'download' : 'target="_blank" rel="noopener"'}>Download</a></div>`;
 
   $('#drawer-content').innerHTML = `
-    <div class="drawer-hero">
+    <div class="drawer-hero" style="${brandVars(i)}">${ART.skyline(i.id, i.type)}
       <div class="uni-top">
-        <div class="uni-mono" style="background:${monoColour(i.id)};box-shadow:0 0 0 2px rgba(255,255,255,.2)${i.short.length > 4 ? ';font-size:10px' : ''}">${esc(i.short.slice(0, 7))}</div>
+        <div class="uni-mono" style="background:${brandOf(i).c};box-shadow:0 0 0 2px rgba(255,255,255,.2)${i.short.length > 4 ? ';font-size:10px' : ''}">${esc(i.short.slice(0, 7))}</div>
         <div><h2 id="drawer-title" style="margin:0">${esc(i.name)}</h2><p>${esc(i.city)}, ${esc(i.province)} · ${esc(TYPES[i.type])}</p></div>
       </div>
     </div>
@@ -475,6 +507,8 @@ function showAPS() {
   $('#aps-sub').textContent = `from ${a.count} subject${a.count === 1 ? '' : 's'} · max 42`;
   $('#aps-meter').style.width = Math.min(100, a.aps / 42 * 100) + '%';
   $('#pass-type').textContent = a.pass ? a.pass.label : 'Add all seven subjects to see your NSC pass type.';
+  $('#aps-card').classList.toggle('is-sample', !state.confirmed);
+  $('#aps-sub').textContent = state.confirmed ? `from ${a.count} subject${a.count === 1 ? '' : 's'} · max 42` : 'Sample marks. Enter yours and press Calculate APS.';
   renderCareers(a);
 }
 
@@ -649,9 +683,9 @@ function renderEligibility() {
   const body = $('#elig-body');
   if (!c1) { $('#elig-intro').textContent = ''; body.innerHTML = `<div class="callout warn">Choose a first-choice programme in step 2 first.</div>`; return; }
   if (!unis.length) { $('#elig-intro').textContent = ''; body.innerHTML = `<div class="callout warn">Add at least one university in step 2.</div>`; return; }
-  if (a.count < 4) {
-    $('#elig-intro').textContent = 'We need your marks to estimate eligibility.';
-    body.innerHTML = `<div class="callout info">Enter your subjects in the APS calculator. They'll carry over here automatically.</div><div class="btn-row"><a class="btn btn-primary" href="#/aps">Open the APS calculator →</a></div>`;
+  if (!state.confirmed || a.count < 4) {
+    $('#elig-intro').textContent = 'We need your own marks before we can estimate eligibility.';
+    body.innerHTML = `<div class="callout info">Enter your subjects and marks in the APS calculator, then press <strong>Calculate APS</strong> to confirm them. They'll carry over here automatically. Sample marks aren't used.</div><div class="btn-row"><a class="btn btn-primary" href="#/aps">Open the APS calculator →</a></div>`;
     return;
   }
   $('#elig-intro').textContent = `Your APS is ${a.aps}. Cut-offs are estimates from each university's typical requirements, so check the prospectus for the exact figure.`;
@@ -857,11 +891,11 @@ function bind() {
     if (!marks.some(m => m.s && Number.isFinite(m.m))) { toast('Add at least one subject and mark.'); return; }
     const names = marks.filter(m => m.s).map(m => m.s);
     if (new Set(names).size !== names.length) { toast('Each subject can only be used once.'); return; }
-    state.marks = marks; save(); showAPS();
+    state.marks = marks; state.confirmed = true; save(); showAPS(); toast('Marks confirmed. Eligibility checks now use your APS.');
     $('#career-results').scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
-  $('#load-sample').addEventListener('click', () => { fillSubjects(SAMPLE_RESULTS); state.marks = readSubjects(); save(); showAPS(); });
-  $('#clear-subjects').addEventListener('click', () => { state.marks = []; save(); fillSubjects([]); resetAPSCard(); });
+  $('#load-sample').addEventListener('click', () => { fillSubjects(SAMPLE_RESULTS); state.marks = readSubjects(); state.confirmed = false; save(); showAPS(); });
+  $('#clear-subjects').addEventListener('click', () => { state.marks = []; state.confirmed = false; save(); fillSubjects([]); resetAPSCard(); });
 
   // apply
   $$('#stepper button').forEach(b => b.addEventListener('click', () => {
