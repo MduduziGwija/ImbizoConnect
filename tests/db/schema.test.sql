@@ -58,6 +58,11 @@ select expect_error($$ insert into documents (owner_id, kind, name, path) values
 select expect_error($$ select submit_applications('[{"institution_id":"uj","choice1":"wits-bcom-acc"}]') $$, 'does not offer');
 
 -- Closing dates are enforced; the demo copy switches this off.
+-- Pin one closed and one open institution so the test does not depend on today's date.
+reset role;
+update institutions set closes = current_date - 1 where id = 'up';
+update institutions set closes = current_date + 30 where id = 'mut';
+set role authenticated;
 update settings set enforce_dates = true;
 select expect_error($$ select submit_applications('[{"institution_id":"up","choice1":"up-bcom-acc"}]') $$, 'closed');
 select expect_error($$ select submit_applications('[{"institution_id":"mut","choice1":"wits-llb"}]') $$, 'does not offer');
