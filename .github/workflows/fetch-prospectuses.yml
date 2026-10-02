@@ -10,6 +10,7 @@ on:
 
 permissions:
   contents: write
+  actions: write # to start the Pages deploy after new PDFs are committed
 
 concurrency:
   group: prospectuses-${{ github.ref }}
@@ -36,4 +37,9 @@ jobs:
           else
             git commit -m "Mirror official university prospectuses"
             git push
+            # Pushes made with the workflow token don't trigger other workflows,
+            # so start the test-and-deploy run explicitly to publish the new PDFs.
+            gh workflow run pages.yml --ref "${{ github.ref_name }}"
           fi
+        env:
+          GH_TOKEN: ${{ github.token }}
