@@ -116,16 +116,51 @@ function map(institutions) {
 /* Ndebele-inspired tile: bold outlines around stepped colour blocks. */
 function ndebeleTile() {
   const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='96' height='24' viewBox='0 0 96 24'>
-    <rect width='96' height='24' fill='#fdfaf4'/>
-    <g stroke='#0b1f3a' stroke-width='2.4' stroke-linejoin='miter'>
-      <path d='M0 12L12 0L24 12L12 24Z' fill='#f4a535'/>
-      <path d='M24 0h24v24H24z' fill='#fdfaf4'/><path d='M30 6h12v12H30z' fill='#1d9e75'/>
-      <path d='M48 12L60 0L72 12L60 24Z' fill='#0c3864'/>
-      <path d='M72 0h24v24H72z' fill='#e24b4a'/><path d='M78 6h12v12H78z' fill='#fdfaf4'/>
+    <rect width='96' height='24' fill='#f7f6f2'/>
+    <g stroke='#0b1628' stroke-width='2.4' stroke-linejoin='miter'>
+      <path d='M0 12L12 0L24 12L12 24Z' fill='#d4a24c'/>
+      <path d='M24 0h24v24H24z' fill='#f7f6f2'/><path d='M30 6h12v12H30z' fill='#1a7f5a'/>
+      <path d='M48 12L60 0L72 12L60 24Z' fill='#10294a'/>
+      <path d='M72 0h24v24H72z' fill='#c0362c'/><path d='M78 6h12v12H78z' fill='#f7f6f2'/>
     </g>
-    <g fill='#0b1f3a'><rect x='10' y='10' width='4' height='4'/><rect x='58' y='10' width='4' height='4' fill='#fdfaf4'/></g>
+    <g fill='#0b1628'><rect x='10' y='10' width='4' height='4'/><rect x='58' y='10' width='4' height='4' fill='#f7f6f2'/></g>
   </svg>`;
   return `url("data:image/svg+xml,${encodeURIComponent(svg.replace(/\s+/g, ' '))}")`;
 }
 
-export const ART = { logoMark, icon, skyline, map, ndebeleTile, MAP_W, MAP_H };
+// ─────────────────────────── interface icons
+// One consistent line-icon set (24px grid, 1.75 stroke, round joins) for the interface,
+// in place of emoji, which render differently on every phone.
+const UI = {
+  bell: '<path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>',
+  'bell-check': '<path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/><path d="m9.5 10.5 2 2 3.5-3.5"/>',
+  check: '<path d="M20 6 9 17l-5-5"/>',
+  'arrow-right': '<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>',
+  external: '<path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>',
+  download: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/>',
+  search: '<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>',
+  'id-card': '<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M6 16c.6-1.4 1.7-2 3-2s2.4.6 3 2"/><path d="M15 10h3M15 13h3"/>',
+  clipboard: '<rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 12h6M9 16h4"/>',
+  graduation: '<path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/><path d="M22 10v6"/>',
+  home: '<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1Z"/>',
+  camera: '<path d="M14.5 4h-5L7.5 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3.5Z"/><circle cx="12" cy="13" r="3.5"/>',
+  users: '<circle cx="9" cy="8" r="4"/><path d="M2 21v-1a6 6 0 0 1 12 0v1"/><path d="M16 4.1a4 4 0 0 1 0 7.8"/><path d="M22 21v-1a6 6 0 0 0-4-5.7"/>',
+  wallet: '<path d="M19 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-3"/><path d="M3 7h16a2 2 0 0 1 2 2v3h-5a2 2 0 0 0 0 4h5"/>',
+  mail: '<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/>',
+  chat: '<path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>',
+  lock: '<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+  info: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>',
+  copy: '<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/>',
+  calendar: '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+  x: '<path d="M18 6 6 18M6 6l12 12"/>',
+  star: '<path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9Z"/>',
+  alert: '<path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/>',
+  'check-circle': '<circle cx="12" cy="12" r="10"/><path d="m8 12 3 3 5-6"/>',
+  shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><path d="m9 12 2 2 4-4"/>',
+};
+/** An interface icon by name (see UI above), drawn in the current text colour. */
+export function ui(name, size = 18) {
+  return `<svg class="ui-ico" viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${UI[name] || UI.info}</svg>`;
+}
+
+export const ART = { logoMark, icon, ui, skyline, map, ndebeleTile, MAP_W, MAP_H };

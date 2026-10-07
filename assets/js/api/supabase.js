@@ -86,4 +86,9 @@ export const supabaseApi = {
   async officerAction(appId, action, note = '', extra = {}) {
     ok(await sb.rpc('officer_action', { p_app: appId, p_action: action, p_note: note || '', p_offer_choice: extra.offer_choice || null }));
   },
+
+  async addAlert({ institution_ids, email, whatsapp }) {
+    ok(await sb.from('open_alerts').insert({ institution_ids, email: email || null, whatsapp: whatsapp || null }));
+  },
+  async alerts() { return ok(await sb.from('open_alerts').select('*').order('created_at', { ascending: false })); },
 };

@@ -2,6 +2,8 @@
 
 **Apply to several South African universities at once: one profile, one fee total, every offer in one place.**
 
+> **ImbizoConnect is a concept and nothing more.** It is an independent portfolio project. It is not affiliated with, endorsed by or acting for any university, the CAO, NSFAS or any government department, and it does not send applications to any institution. Apply and confirm fees and dates on each institution's official website.
+
 **[▶ Try the live demo](https://mduduzigwija.github.io/ImbizoConnect/demo/)** (made-up students and admissions officers, runs in your browser, nothing is shared)
 
 > © 2026 Mduduzi Gwija. All rights reserved. This is proprietary software: it may not be copied, used, modified or distributed without written permission. See [LICENSE](LICENSE).
@@ -19,11 +21,13 @@ In 2015, two high school friends, **Mduduzi Gwija** and **Karabo Kennedy Mafaral
 - **One profile, many applications.** Students enter their details, marks and documents once. Every institution they apply to receives the same profile.
 - **Real 2027 data for all 26 public universities.** Application fees, closing dates with live countdowns, faculties, how each one scores applicants, and links to official prospectuses. Five prospectus PDFs are stored in the repository. Where sources disagree on a fee, the site says so.
 - **Each institution's real programmes.** 756 undergraduate programmes across the 26 institutions, each with the institution's own name, minimum (APS, or the institution's own score such as Wits APS, UCT FPS, the Mandela Applicant Score or UWC points) and subject requirements. Institutions offer different things: only UP trains vets, UP has no pharmacy school, UCT has no undergraduate BEd, and universities of technology mostly offer diplomas and BEngTech degrees. UP, SU, Rhodes, UL and WSU come from their 2027 prospectuses; the others were compiled from institution websites and 2027 guides, and the site says which.
+- **Real faculties.** Every programme sits under its institution's own faculty, college or school, taken from the 2027 prospectuses (UP, SU, Rhodes, UL, WSU) and each university's official faculty pages. At UWC, for example, the BAdmin is in Economic and Management Sciences.
+- **Alerts when applications open.** Closed institutions say so plainly, and anyone can leave an email address or WhatsApp number to hear when each one opens for the next intake. Admins see the requests; sending them is left to a real deployment.
 - **Checks before you pay.** The APS calculator (standard 7-point scale, Life Orientation excluded) works out the NSC pass type, then estimates eligibility for each programme at each institution. Estimates appear only after the student confirms their own marks, and long shots can be dropped with one click to save their fees.
 - **The CAO handled properly.** UKZN, DUT, MUT and UNIZULU share one R250 CAO fee and a limit of six programme choices. The fee is charged once, and paying it pays every CAO application.
 - **An admissions portal for institutions.** Admissions officers see only their own institution's applications, and only once the fee is paid. They open the applicant's marks, documents and history, then request documents, make a provisional offer, waitlist or decline, and export the list to CSV.
 - **Permissions enforced by the database.** Row-level security and workflow functions in `supabase/schema.sql` decide who sees what and which status changes are allowed, not the web page. They are covered by tests on a real PostgreSQL database.
-- **Designed for the subject.** Each university's campus skyline in its own brand colours, which light up on hover, an interactive map, Ndebele-inspired pattern bands, light and dark mode, and a layout that works on a phone.
+- **Designed for the subject.** An editorial type system (Newsreader with Public Sans), an institutional navy and ochre palette, a custom SVG icon set (no emoji), each university's campus skyline in its own brand colours, an interactive map, Ndebele-inspired pattern bands, light and dark mode, and a layout that works on a phone.
 
 | Student dashboard | Choosing and checking |
 | --- | --- |
@@ -91,7 +95,7 @@ Each new intake: update `closes` (and `fee` if it changed) for each institution 
 
 ## Things to know (challenges)
 
-1. **It's a concept: universities don't receive these applications yet.** Each institution has its own admissions system. Going live for real means either staff working in the admissions portal, or connecting to each institution's system, which needs an agreement with each university and the CAO.
+1. **It's a concept, not affiliated with any institution.** Universities don't receive these applications. Each institution has its own admissions system; a real service would need an agreement with each university and the CAO, either for staff to work in the admissions portal or to connect to their systems.
 2. **Payments are recorded, not processed.** The demo simulates a card payment. The live version asks the student for their payment reference, because a real payment gateway (PayFast, Peach Payments or Ozow) needs a merchant account and a way to pass each fee on to the right institution.
 3. **Eligibility is an estimate.** It uses the standard APS and a typical cut-off per programme, adjusted for how selective each institution is. Wits, UCT, SU, NMU and others score applicants their own way, and each university card says so. Students should always check the prospectus.
 4. **Fees and dates change every year.** They were checked in September 2026 against university websites and published guides. Entries marked *Confirm fee* had conflicting sources.

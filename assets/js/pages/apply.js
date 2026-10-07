@@ -1,14 +1,15 @@
 // © 2026 Mduduzi Gwija. All rights reserved. Proprietary: see LICENSE. Unauthorised copying or use is prohibited.
 // New application: choose several institutions and programmes, check eligibility, then submit
 // them all at once with a single fee total (the CAO fee is charged once for KZN).
-import { INSTITUTIONS, FIELDS, TYPES, CAO } from '../data.js';
+import { INSTITUTIONS, TYPES, CAO } from '../data.js';
 import {
   byId, courseById, closingStatus, isOpen, fmtDate, rand, analyse, eligibility, feeBreakdown, basketProblems,
   profileChecklist, MAX_INSTITUTIONS, programmesOf, minLabel,
 } from '../logic.js';
-import { sourceOf } from '../programmes.js';
+import { sourceOf, facultiesOf, facultyTitle } from '../programmes.js';
 import { $, esc, toast, busy, store, monogram, brandVars, confetti } from '../ui.js';
 import { refresh, renderAccount } from '../app.js';
+import { ART } from '../art.js';
 
 let C, items, step, main, plannedKind = '';
 const draftKey = () => `draft:${C.me.id}`;
@@ -21,8 +22,8 @@ const QUAL = { degree: '', diploma: ' · Diploma', hc: ' · Higher Certificate' 
 function courseOptions(inst, selected, allowNone) {
   const progs = programmesOf(inst.id);
   return (allowNone ? '<option value="">No second choice</option>' : `<option value="">Choose one of ${progs.length} programmes…</option>`)
-    + Object.entries(FIELDS).filter(([k]) => progs.some((p) => p.field === k)).map(([k, f]) =>
-      `<optgroup label="${esc(f.label)}">${progs.filter((p) => p.field === k).map((p) =>
+    + facultiesOf(inst.id).map((f) =>
+      `<optgroup label="${esc(f.title)}">${f.programmes.map((p) =>
         `<option value="${p.id}" ${p.id === selected ? 'selected' : ''}>${esc(p.name)} (${esc(minLabel(p))})</option>`).join('')}</optgroup>`).join('');
 }
 /** The programme of a given kind at an institution, if it offers one. */
@@ -52,7 +53,7 @@ function draw() {
     <div class="portal-head"><div><h1>New application</h1>
       <p>Choose where you want to study and what. We send one application to each institution and give you one fee total.</p></div></div>
     ${check.ready ? '' : `<div class="callout warn gate"><strong>Finish your profile before you submit.</strong>
-      <ul>${check.items.filter((i) => !i.done).map((i) => `<li><a href="#/${i.route}">${esc(i.label)} →</a></li>`).join('')}</ul>
+      <ul>${check.items.filter((i) => !i.done).map((i) => `<li><a href="#/${i.route}">${esc(i.label)} <span class="i i-arrow" aria-hidden="true"></span></a></li>`).join('')}</ul>
       You can still choose institutions now. Your choices are saved.</div>`}
     ${C.api.enforceDates ? '' : '<div class="callout info">Demo: closing dates are shown but not enforced, so you can try every institution.</div>'}
     <ol class="stepper three">
@@ -90,7 +91,7 @@ function stepChoices() {
         return `<div class="choice" style="${brandVars(i)}">
           <div class="choice-top">${monogram(i)}
             <div class="grow"><strong>${esc(i.name)}</strong><span class="muted small">${esc(i.city)} · ${i.cao ? `CAO · R${CAO.fee} once` : rand(i.fee)} · ${programmesOf(i.id).length} programmes · <span class="badge ${st.key}">${esc(st.label)}</span></span></div>
-            <button class="icon-btn" data-remove="${n}" aria-label="Remove ${esc(i.short)}" title="Remove">✕</button></div>
+            <button class="icon-btn" data-remove="${n}" aria-label="Remove ${esc(i.short)}" title="Remove">${ART.ui('x', 16)}</button></div>
           <div class="grid-2">
             <label class="field"><span>1st choice</span><select id="c1-${i.id}" data-c1="${n}">${courseOptions(i, it.choice1)}</select></label>
             <label class="field"><span>2nd choice (optional)</span><select id="c2-${i.id}" data-c2="${n}">${courseOptions(i, it.choice2, true)}</select></label>
@@ -104,7 +105,7 @@ function stepChoices() {
         <label class="search small"><input type="search" id="add-q" placeholder="Search institution or programme, e.g. Pharmacy" aria-label="Search institutions or programmes"></label></div>
       <div class="pick-list" id="add-list">${addList(chosen, already, kind, '')}</div>
     </div>
-    <div class="btn-row end"><button class="btn btn-primary" data-step="2">Check eligibility →</button></div>`;
+    <div class="btn-row end"><button class="btn btn-primary" data-step="2">Check eligibility <span class="i i-arrow" aria-hidden="true"></span></button></div>`;
 }
 
 /** One-line summary of a chosen programme: minimum, subjects, duration. */
@@ -112,7 +113,7 @@ function progLine(id) {
   const p = courseById[id];
   if (!p) return '';
   const reqs = Object.entries(p.req).map(([k, v]) => `${{ eng: 'English', math: 'Maths', mathOrLit: 'Maths/Maths Lit', sci: 'Physical Sci', life: 'Life Sci', acc: 'Accounting' }[k]} ${v}%`).join(' · ');
-  return `<p class="prog-line"><strong>${esc(minLabel(p))}</strong>${reqs ? ` · ${esc(reqs)}` : ''} · ${p.years} year${p.years === 1 ? '' : 's'}${p.note ? ` · ${esc(p.note)}` : ''}</p>`;
+  return `<p class="prog-line"><span class="prog-fac">${esc(facultyTitle(p.faculty))}</span><strong>${esc(minLabel(p))}</strong>${reqs ? ` · ${esc(reqs)}` : ''} · ${p.years} year${p.years === 1 ? '' : 's'}${p.note ? ` · ${esc(p.note)}` : ''}</p>`;
 }
 
 function addList(chosen, already, kind, q) {
@@ -138,7 +139,7 @@ function stepEligibility() {
   if (!C.me.marks_confirmed_at || a.count < 4) {
     $('#step-body').innerHTML = `<div class="card"><h2>Eligibility check</h2>
       <div class="callout info">Confirm your marks in your profile first. The estimate uses only your own confirmed marks.</div>
-      <div class="btn-row"><a class="btn btn-primary" href="#/profile?tab=marks">Enter my marks →</a><button class="btn btn-outline" data-step="1">← Back</button></div></div>`;
+      <div class="btn-row"><a class="btn btn-primary" href="#/profile?tab=marks">Enter my marks <span class="i i-arrow" aria-hidden="true"></span></a><button class="btn btn-outline" data-step="1"><span class="i i-back" aria-hidden="true"></span> Back</button></div></div>`;
     return;
   }
   const rows = items.map((it) => {
@@ -154,7 +155,7 @@ function stepEligibility() {
   $('#step-body').innerHTML = `<div class="card">
     <h2>Eligibility check</h2>
     <p class="muted">Your APS is <strong>${a.aps}</strong>. Each programme's minimum comes from the institution's own requirements. Where it scores applicants its own way, we compare against a standard-APS equivalent. Meeting the minimum doesn't guarantee a place.</p>
-    <div class="banner ${n('yes') ? 'good' : 'warn'}"><span class="ico">${n('yes') ? '✅' : '⚠️'}</span><div>
+    <div class="banner ${n('yes') ? 'good' : 'warn'}"><span class="ico">${ART.ui(n('yes') ? 'check-circle' : 'alert', 24)}</span><div>
       <strong>Likely eligible at ${n('yes')} of ${rows.length}${n('maybe') ? ` · borderline at ${n('maybe')}` : ''}</strong>
       <p>${unlikely.length ? `${unlikely.length} look out of reach. Removing them saves ${rand(saved)}.` : 'None of your choices look out of reach.'}</p></div></div>
     <div class="table-scroll"><table class="elig-table">
@@ -166,7 +167,7 @@ function stepEligibility() {
       </tr>`).join('')}</tbody></table></div>
     ${unlikely.length ? `<div class="btn-row"><button class="btn btn-outline" data-act="drop">Remove ${unlikely.length} unlikely choice${unlikely.length === 1 ? '' : 's'}</button></div>` : ''}
   </div>
-  <div class="btn-row between"><button class="btn btn-outline" data-step="1">← Back</button><button class="btn btn-primary" data-step="3">Review &amp; submit →</button></div>`;
+  <div class="btn-row between"><button class="btn btn-outline" data-step="1"><span class="i i-back" aria-hidden="true"></span> Back</button><button class="btn btn-primary" data-step="3">Review &amp; submit <span class="i i-arrow" aria-hidden="true"></span></button></div>`;
   $('#step-body').dataset.drop = unlikely.map((r) => r.i.id).join(',');
 }
 
@@ -196,7 +197,8 @@ function stepReview() {
       <label class="check"><input type="checkbox" id="d2" required> I agree that ImbizoConnect sends my profile, marks and documents to the institutions listed above (POPIA).</label>
       <label class="check"><input type="checkbox" id="d3" required> I understand application fees are not refundable.</label>
     </fieldset>
-    <div class="btn-row between"><button class="btn btn-outline" data-step="2">← Back</button>
+    <div class="callout info">ImbizoConnect is a concept and is not affiliated with any institution. Submitting here shows how the process would work; it does not apply to a real university. Apply on each institution's official website.</div>
+    <div class="btn-row between"><button class="btn btn-outline" data-step="2"><span class="i i-back" aria-hidden="true"></span> Back</button>
       <button class="btn btn-gold btn-lg" data-act="submit" ${problems.length ? 'disabled' : ''}>Submit ${items.length} application${items.length === 1 ? '' : 's'}</button></div>
   </div>`;
 }

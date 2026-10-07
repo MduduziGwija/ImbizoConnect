@@ -53,16 +53,16 @@ export async function render(el, ctx, query) {
       <a class="btn btn-gold" href="#/apply">+ New application</a>
     </div>
     ${check.ready ? '' : `<div class="card nudge"><div class="grow"><h2>Finish your profile (${check.percent}%)</h2><p class="muted">You fill it in once. Every institution you apply to gets the same details, marks and documents.</p>
-      <ul class="checklist">${check.items.map((i) => `<li class="${i.done ? 'done' : ''}"><a href="#/${i.route}">${i.done ? '✓' : '○'} ${esc(i.label)}</a></li>`).join('')}</ul></div>
-      <a class="btn btn-primary" href="#/${check.items.find((i) => !i.done).route}">Continue →</a></div>`}
+      <ul class="checklist">${check.items.map((i) => `<li class="${i.done ? 'done' : ''}"><a href="#/${i.route}">${i.done ? '<span class="i i-check" aria-hidden="true"></span>' : '<span class="i i-circle" aria-hidden="true"></span>'} ${esc(i.label)}</a></li>`).join('')}</ul></div>
+      <a class="btn btn-primary" href="#/${check.items.find((i) => !i.done).route}">Continue <span class="i i-arrow" aria-hidden="true"></span></a></div>`}
     ${accepted ? `<div class="card celebrate" style="${brandVars(byId[accepted.institution_id])}">${ART.skyline(accepted.institution_id, byId[accepted.institution_id].type)}
       <div><span class="eyebrow dark">Your place for ${new Date().getFullYear() + 1}</span><h2>${esc(courseById[accepted.offer_choice || accepted.choice1].name)} at ${esc(byId[accepted.institution_id].name)}</h2>
       <p>Next: watch your email for registration dates, apply for residence, and make sure your NSFAS application is in.</p></div></div>` : ''}
     ${units.length || docsReq.length || offers.length ? `<section class="attention"><h2>Needs your attention</h2><div class="attention-grid">
-      ${units.length ? `<div class="attn pay"><span class="attn-ico">R</span><div><strong>Pay R${due.toLocaleString('en-ZA')} to complete ${units.reduce((n, u) => n + u.apps.length, 0)} application${units.reduce((n, u) => n + u.apps.length, 0) === 1 ? '' : 's'}</strong>
+      ${units.length ? `<div class="attn pay"><span class="attn-ico">${ART.ui('wallet', 20)}</span><div><strong>Pay R${due.toLocaleString('en-ZA')} to complete ${units.reduce((n, u) => n + u.apps.length, 0)} application${units.reduce((n, u) => n + u.apps.length, 0) === 1 ? '' : 's'}</strong>
         <span>Institutions only start reviewing once the fee is paid.</span></div><button class="btn btn-gold" data-pay-all>Pay now</button></div>` : ''}
-      ${docsReq.map((x) => `<div class="attn docs"><span class="attn-ico">!</span><div><strong>${esc(byId[x.institution_id].short)} asked for documents</strong><span>${esc(lastNote(x, 'request_docs'))}</span></div><button class="btn btn-primary" data-act="respond" data-id="${x.id}">Reply</button></div>`).join('')}
-      ${offers.map((x) => `<div class="attn offer"><span class="attn-ico">★</span><div><strong>Offer from ${esc(byId[x.institution_id].short)}</strong><span>${esc(courseById[x.offer_choice || x.choice1].name)}</span></div><button class="btn btn-primary" data-act="accept" data-id="${x.id}">Respond</button></div>`).join('')}
+      ${docsReq.map((x) => `<div class="attn docs"><span class="attn-ico">${ART.ui('clipboard', 20)}</span><div><strong>${esc(byId[x.institution_id].short)} asked for documents</strong><span>${esc(lastNote(x, 'request_docs'))}</span></div><button class="btn btn-primary" data-act="respond" data-id="${x.id}">Reply</button></div>`).join('')}
+      ${offers.map((x) => `<div class="attn offer"><span class="attn-ico">${ART.ui('star', 20)}</span><div><strong>Offer from ${esc(byId[x.institution_id].short)}</strong><span>${esc(courseById[x.offer_choice || x.choice1].name)}</span></div><button class="btn btn-primary" data-act="accept" data-id="${x.id}">Respond</button></div>`).join('')}
     </div></section>` : ''}
     <div class="stat-tiles">
       <div class="tile"><strong>${apps.filter((x) => x.status !== 'withdrawn').length}</strong><span>applications</span></div>
@@ -150,7 +150,7 @@ async function pay(app) {
       : `<ol class="howto"><li>Pay ${rand(unit.amount)} on the ${unit.cao ? 'CAO' : 'institution\'s'} payment page or by EFT, using <strong>${esc(app.ref)}</strong> as your reference.</li>
           <li>Enter the reference from your proof of payment below.</li></ol>
         <label class="field"><span>Payment reference</span><input id="pay-ref" name="payment_ref" required placeholder="e.g. FNB 7731 0942"></label>
-        <p class="hint">${unit.cao ? `<a href="${CAO.url}" target="_blank" rel="noopener">CAO payment options ↗</a>` : `<a href="${esc(byId[app.institution_id].apply)}" target="_blank" rel="noopener">${esc(byId[app.institution_id].short)} fees page ↗</a>`}</p>`}`,
+        <p class="hint">${unit.cao ? `<a href="${CAO.url}" target="_blank" rel="noopener">CAO payment options <span class="i i-ext" aria-hidden="true"></span></a>` : `<a href="${esc(byId[app.institution_id].apply)}" target="_blank" rel="noopener">${esc(byId[app.institution_id].short)} fees page <span class="i i-ext" aria-hidden="true"></span></a>`}</p>`}`,
     buttons: [{ label: 'Cancel', value: null }, { label: demo ? `Pay ${rand(unit.amount)}` : 'Record payment', kind: 'btn-gold', value: 'pay' }],
   });
   if (!r) return false;
@@ -185,7 +185,7 @@ async function onClick(e) {
       const r = await dialog({
         title: `Reply to ${i.short}`,
         body: `<p class="muted">They asked:</p><blockquote>${esc(lastNote(app, 'request_docs'))}</blockquote>
-          <p>Upload anything new under <a href="#/profile?tab=documents">Profile → Documents</a> first, then send a short reply.</p>
+          <p>Upload anything new under <a href="#/profile?tab=documents">Profile, Documents tab</a> first, then send a short reply.</p>
           <label class="field"><span>Your reply</span><textarea id="reply" name="note" rows="3" required placeholder="e.g. I've uploaded my Grade 12 June results."></textarea></label>`,
         buttons: [{ label: 'Cancel', value: null }, { label: 'Send reply', kind: 'btn-primary', value: 'send' }],
       });
@@ -233,6 +233,6 @@ function details(app) {
       </div>
       <h3>History</h3>
       <ol class="feed">${events.map((e) => `<li><span class="dot"></span><div><strong>${esc(ACTION_WORDS[e.action] || e.action)}</strong>${e.note ? `<p>“${esc(e.note)}”</p>` : ''}<small>${fmtDateTime(e.at)} · ${esc(e.actor_id === C.me.id ? 'You' : e.actor_name)}</small></div></li>`).join('')}</ol>
-      <p class="hint"><a href="${esc(i.web)}" target="_blank" rel="noopener">${esc(i.name)} website ↗</a></p>`,
+      <p class="hint"><a href="${esc(i.web)}" target="_blank" rel="noopener">${esc(i.name)} website <span class="i i-ext" aria-hidden="true"></span></a></p>`,
   });
 }

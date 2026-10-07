@@ -5,6 +5,7 @@ import { DOCUMENTS, SUBJECTS } from '../data.js';
 import { validSAID, profileChecklist, analyse, marksProblems, fmtDateTime, fmtDate } from '../logic.js';
 import { $, esc, toast, busy, fmtSize, dialog } from '../ui.js';
 import { fillSubjects, readSubjects, livePoints } from './public.js';
+import { ART } from '../art.js';
 import { refresh, renderAccount } from '../app.js';
 
 const PROVINCES = ['Eastern Cape', 'Free State', 'Gauteng', 'KwaZulu-Natal', 'Limpopo', 'Mpumalanga', 'North West', 'Northern Cape', 'Western Cape'];
@@ -29,9 +30,9 @@ export async function render(main, ctx, query) {
       <div class="grow">
         <h1>${esc(me.full_name || 'Your profile')}</h1>
         <p>${esc(me.email)} · ${check.ready ? 'Your profile is complete. You can apply.' : 'Complete these to apply:'}</p>
-        <ul class="checklist">${check.items.map((i) => `<li class="${i.done ? 'done' : ''}"><a href="#/${i.route}">${i.done ? '✓' : '○'} ${esc(i.label)}</a></li>`).join('')}</ul>
+        <ul class="checklist">${check.items.map((i) => `<li class="${i.done ? 'done' : ''}"><a href="#/${i.route}">${i.done ? '<span class="i i-check" aria-hidden="true"></span>' : '<span class="i i-circle" aria-hidden="true"></span>'} ${esc(i.label)}</a></li>`).join('')}</ul>
       </div>
-      ${check.ready ? '<a class="btn btn-gold" href="#/apply">Start an application →</a>' : ''}
+      ${check.ready ? '<a class="btn btn-gold" href="#/apply">Start an application <span class="i i-arrow" aria-hidden="true"></span></a>' : ''}
     </div>
     <nav class="tabs" role="tablist">
       ${[['details', 'Details'], ['marks', 'Marks'], ['documents', 'Documents']].map(([k, l]) => `<a role="tab" href="#/profile?tab=${k}" class="${tab === k ? 'active' : ''}" aria-selected="${tab === k}">${l}</a>`).join('')}
@@ -88,7 +89,7 @@ function detailsTab(body, ctx) {
   const hint = () => {
     const v = form.elements.id_number.value.trim(); const h = $('#id-hint');
     if (!v) { h.textContent = '13 digits. We check the date of birth and check digit.'; h.className = 'field-hint'; return; }
-    const r = validSAID(v); h.textContent = (r.ok ? '✓ ' : '') + r.msg; h.className = 'field-hint ' + (r.ok ? 'ok' : 'err');
+    const r = validSAID(v); h.textContent = r.msg; h.className = 'field-hint ' + (r.ok ? 'ok' : 'err');
   };
   hint();
   form.elements.id_number.addEventListener('input', hint);
@@ -189,9 +190,9 @@ function documentsTab(body, ctx) {
     <div class="doc-list">${DOCUMENTS.map((d) => {
       const f = byKind[d.id];
       return `<div class="doc ${f ? 'done' : ''}">
-        <div class="doc-ico">${d.icon}</div>
+        <div class="doc-ico">${ART.ui(d.icon, 22)}</div>
         <div><div class="doc-name">${esc(d.name)}${d.required ? '<span class="req-tag">Required</span>' : ''}</div>
-        <div class="doc-hint">${f ? `✓ ${esc(f.name)} · ${fmtSize(f.size)} · uploaded ${fmtDate(f.uploaded_at.slice(0, 10))}` : esc(d.hint)}</div></div>
+        <div class="doc-hint">${f ? `<span class="i i-check" aria-hidden="true"></span> ${esc(f.name)} · ${fmtSize(f.size)} · uploaded ${fmtDate(f.uploaded_at.slice(0, 10))}` : esc(d.hint)}</div></div>
         <div class="btn-row tight">
           ${f ? `<button class="btn btn-text" data-view="${f.id}">View</button><button class="btn btn-text danger" data-del="${f.id}">Remove</button>` : ''}
           <label class="btn btn-outline btn-sm">${f ? 'Replace' : 'Upload'}<input type="file" id="doc-${d.id}" data-kind="${d.id}" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/*"></label>

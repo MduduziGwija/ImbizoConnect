@@ -2,8 +2,9 @@
 // Public pages (no sign-in needed): home, universities with map and details drawer, the APS
 // calculator and career guide. Their markup lives in index.html; this module fills it in.
 import { INSTITUTIONS, COURSES, CAO, FIELDS, TYPES, SUBJECTS, SAMPLE_RESULTS, CAREERS, INTAKE_YEAR } from '../data.js';
-import { PROGRAMMES, programmesOf, sourceOf } from '../programmes.js';
+import { PROGRAMMES, programmesOf, sourceOf, facultiesOf, facultyTitle } from '../programmes.js';
 import { ART } from '../art.js';
+import { alertButton } from './alerts.js';
 import {
   byId, MONTHS, closingStatus, isOpen, daysUntil, fmtDate, rand, analyse, points, isLO, checkReqs, eligibility,
   marksProblems, minLabel,
@@ -11,7 +12,7 @@ import {
 const kindById = Object.fromEntries(COURSES.map((c) => [c.id, c]));
 import { $, $$, esc, toast, store, brandOf, brandVars, monogram, fmtSize, copyText } from '../ui.js';
 
-const FIELD_COLOURS = { health: '#1d9e75', engineering: '#c07e10', science: '#0d7490', commerce: '#0c3864', law: '#7c3aed', humanities: '#be4a6a', education: '#4d7c0f', ict: '#1a4f86' };
+const FIELD_COLOURS = { health: '#1a7f5a', engineering: '#a8792a', science: '#0e6f86', commerce: '#1e3a5f', law: '#5b4a9e', humanities: '#a3485f', education: '#4f7a28', ict: '#2f5d8c' };
 let C = null;       // shared app context
 let shell = null;   // { renderAccount, go }
 let query = new URLSearchParams();
@@ -66,6 +67,7 @@ export function home() {
     : `${INTAKE_YEAR} applications have closed`;
 
   const upcoming = [...open].sort((a, b) => a.closes.localeCompare(b.closes)).slice(0, 6);
+  $('#closing-title').textContent = upcoming.length ? 'Closing soon' : 'Recently closed';
   const list = upcoming.length ? upcoming : [...INSTITUTIONS].sort((a, b) => b.closes.localeCompare(a.closes)).slice(0, 6);
   $('#deadline-list').innerHTML = list.map((i) => {
     const st = closingStatus(i); const [, m, d] = i.closes.split('-').map(Number);
@@ -83,6 +85,13 @@ export function home() {
   $('#stat-range').textContent = `R0 – R${Math.max(...paid)}`;
   $('#stat-pdfs').textContent = INSTITUTIONS.filter((i) => ['local', 'pdf'].includes(prospectus(i).kind)).length;
   $('#free-list').innerHTML = free.map((i) => `<a href="#/universities?open=${i.id}" style="${brandVars(i)}"><b>R0</b> ${esc(i.name)}</a>`).join('');
+  const closed = INSTITUTIONS.filter((i) => !isOpen(i));
+  const strip = $('#closed-strip');
+  if (strip) {
+    strip.hidden = !closed.length;
+    strip.innerHTML = closed.length ? `<div>${ART.ui('bell', 20)}</div><p><strong>${closed.length} of ${INSTITUTIONS.length} institutions have closed applications for ${INTAKE_YEAR}.</strong> Get an email or WhatsApp message when each one opens for the next intake.</p>
+      <button class="btn btn-gold btn-sm" data-alert="${closed.map((i) => i.id).join(',')}">Alert me when they open</button>` : '';
+  }
   renderHeroCards();
   if (!$('#hero-map').children.length) mountMap($('#hero-map'), () => true);
   else paintMap($('#hero-map'), () => true);
@@ -102,14 +111,14 @@ function renderHeroCards() {
   const { marks, confirmed } = currentMarks();
   const a = analyse(marks);
   if (!confirmed || a.count < 4) {
-    apsCard.innerHTML = '<span class="fc-label">Your APS</span><strong>?<small>/42</small></strong><a class="fc-link" href="#/aps">Enter your marks →</a>';
+    apsCard.innerHTML = '<span class="fc-label">Your APS</span><strong>?<small>/42</small></strong><a class="fc-link" href="#/aps">Enter your marks <span class="i i-arrow" aria-hidden="true"></span></a>';
     offer.hidden = true;
     return;
   }
   apsCard.innerHTML = `<span class="fc-label">Your APS</span><strong>${a.aps}<small>/42</small></strong><span class="fc-bar"><i style="width:${Math.round((a.aps / 42) * 100)}%"></i></span>`;
   const m = bestMatch(a);
   offer.hidden = !m;
-  if (m) offer.innerHTML = `<span class="fc-tick">✓</span><div><strong>Likely eligible</strong><span class="fc-sub">${esc(m.inst.short)} · ${esc(m.course.name)}</span></div>`;
+  if (m) offer.innerHTML = `<span class="fc-tick"><span class="i i-check" aria-hidden="true"></span></span><div><strong>Likely eligible</strong><span class="fc-sub">${esc(m.inst.short)} · ${esc(m.course.name)}</span></div>`;
 }
 
 // ─────────────────────────── map
@@ -134,7 +143,7 @@ function paintMap(el, match) {
 }
 function showTip(g) {
   const i = byId[g.dataset.pin]; const st = closingStatus(i); const tip = $('#map-tip');
-  const mark = appliedTo(i.id) ? '<b>✓ Applied</b>' : C.shortlist.has(i.id) ? '<b>✓ Shortlisted</b>' : '';
+  const mark = appliedTo(i.id) ? '<b><span class="i i-check" aria-hidden="true"></span> Applied</b>' : C.shortlist.has(i.id) ? '<b><span class="i i-check" aria-hidden="true"></span> Shortlisted</b>' : '';
   tip.innerHTML = `<strong>${esc(i.name)}</strong><div class="row"><span>${esc(i.city)}</span><b>${i.cao ? 'R' + CAO.fee + ' CAO' : rand(i.fee)}</b></div><div class="row"><span class="badge ${st.key}">${esc(st.label)}</span>${mark}</div>`;
   const r = g.getBoundingClientRect();
   tip.style.left = Math.min(innerWidth - 140, Math.max(140, r.left + r.width / 2)) + 'px';
@@ -207,27 +216,27 @@ function prospectusButton(i, cls = 'btn btn-outline btn-sm') {
   const p = prospectus(i);
   if (p.kind === 'local') return `<a class="${cls}" href="${esc(p.href)}" download>⬇ Prospectus</a>`;
   if (p.kind === 'pdf') return `<a class="${cls}" href="${esc(p.href)}" target="_blank" rel="noopener">⬇ Prospectus</a>`;
-  if (p.kind === 'page') return `<a class="${cls}" href="${esc(p.href)}" target="_blank" rel="noopener">Prospectus ↗</a>`;
-  return `<a class="${cls}" href="${esc(i.web)}" target="_blank" rel="noopener">Prospectus ↗</a>`;
+  if (p.kind === 'page') return `<a class="${cls}" href="${esc(p.href)}" target="_blank" rel="noopener">Prospectus <span class="i i-ext" aria-hidden="true"></span></a>`;
+  return `<a class="${cls}" href="${esc(i.web)}" target="_blank" rel="noopener">Prospectus <span class="i i-ext" aria-hidden="true"></span></a>`;
 }
 const websiteButton = (i) => `<a class="btn btn-outline btn-sm btn-icon" href="${esc(i.web)}" target="_blank" rel="noopener" title="${esc(i.name)} website" aria-label="${esc(i.name)} website">
   <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z"/></svg></a>`;
 
 function shortlistButton(i, size = 'btn-sm') {
-  if (appliedTo(i.id)) return `<a class="btn ${size} btn-added" href="#/applications">✓ Applied</a>`;
+  if (appliedTo(i.id)) return `<a class="btn ${size} btn-added" href="#/applications"><span class="i i-check" aria-hidden="true"></span> Applied</a>`;
   const on = C.shortlist.has(i.id);
   const closed = !canShortlist(i);
-  return `<button class="btn ${size} ${on ? 'btn-added' : 'btn-primary'}" data-cart="${i.id}" ${closed && !on ? 'disabled title="Applications have closed"' : ''}>${on ? '✓ Shortlisted' : closed ? 'Closed' : '+ Shortlist'}</button>`;
+  return `<button class="btn ${size} ${on ? 'btn-added' : 'btn-primary'}" data-cart="${i.id}" ${closed && !on ? 'disabled title="Applications have closed"' : ''}>${on ? '<span class="i i-check" aria-hidden="true"></span> Shortlisted' : closed ? 'Closed' : '+ Shortlist'}</button>`;
 }
 
 /** When searching for a programme, show which of this institution's programmes matched. */
 function progHit(i) {
   const q = uniFilter.q.trim().toLowerCase();
   if (!q || `${i.name} ${i.short} ${i.city} ${i.province}`.toLowerCase().includes(q)) {
-    return `<button class="prog-count" data-open="${i.id}" data-tab="programmes">${programmesOf(i.id).length} programmes →</button>`;
+    return `<button class="prog-count" data-open="${i.id}" data-tab="programmes">${programmesOf(i.id).length} programmes <span class="i i-arrow" aria-hidden="true"></span></button>`;
   }
   const hits = programmesOf(i.id).filter((p) => p.name.toLowerCase().includes(q));
-  return `<button class="prog-count hit" data-open="${i.id}" data-tab="programmes">${esc(hits[0].name)}${hits.length > 1 ? ` +${hits.length - 1} more` : ''} →</button>`;
+  return `<button class="prog-count hit" data-open="${i.id}" data-tab="programmes">${esc(hits[0].name)}${hits.length > 1 ? ` +${hits.length - 1} more` : ''} <span class="i i-arrow" aria-hidden="true"></span></button>`;
 }
 
 function renderUniversities() {
@@ -255,6 +264,7 @@ function renderUniversities() {
         <div class="fact"><small>Closes</small><strong>${fmtDate(i.closes)}</strong></div>
       </div>
       ${progHit(i)}
+      ${isOpen(i) ? '' : `<div class="closed-row"><span>${ART.ui('lock', 14)} Applications closed</span>${alertButton(i, 'btn-ghost btn-sm')}</div>`}
       <div class="uni-actions">
         ${prospectusButton(i)}
         ${websiteButton(i)}
@@ -276,8 +286,8 @@ function renderUniversities() {
       <td class="num">${i.cao ? `R${CAO.fee} (CAO)` : rand(i.fee)}${i.verify ? ' <span class="badge verify">confirm</span>' : ''}</td>
       <td>${fmtDate(i.closes)}</td>
       <td><span class="badge ${st.key}">${esc(st.label)}</span></td>
-      <td><a href="${esc(p.href)}" ${p.kind === 'local' ? 'download' : 'target="_blank" rel="noopener"'}>${['local', 'pdf'].includes(p.kind) ? 'PDF ' + (p.year || '') : 'Page ↗'}</a></td>
-      <td><a href="${esc(i.web)}" target="_blank" rel="noopener">${esc(new URL(i.web).hostname.replace(/^www\./, ''))} ↗</a></td>
+      <td><a href="${esc(p.href)}" ${p.kind === 'local' ? 'download' : 'target="_blank" rel="noopener"'}>${['local', 'pdf'].includes(p.kind) ? 'PDF ' + (p.year || '') : 'Page <span class="i i-ext" aria-hidden="true"></span>'}</a></td>
+      <td><a href="${esc(i.web)}" target="_blank" rel="noopener">${esc(new URL(i.web).hostname.replace(/^www\./, ''))} <span class="i i-ext" aria-hidden="true"></span></a></td>
     </tr>`;
   }).join('');
 }
@@ -292,7 +302,7 @@ export function openDrawer(id, tab = '') {
 
   const attach = ['local', 'pdf'].includes(p.kind)
     ? `<div class="doc-attach"><div class="pdf">PDF</div><div class="meta"><strong>${esc(i.short)} ${p.year || INTAKE_YEAR} undergraduate prospectus</strong><span>${p.kind === 'local' ? `Attached · ${fmtSize(p.size)}` : 'Official PDF from ' + esc(new URL(p.href).hostname)}</span></div><a class="btn btn-primary btn-sm" href="${esc(p.href)}" ${p.kind === 'local' ? 'download' : 'target="_blank" rel="noopener"'}>Download</a></div>`
-    : `<div class="doc-attach"><div class="pdf web">WEB</div><div class="meta"><strong>${esc(i.short)} ${p.year || INTAKE_YEAR} prospectus</strong><span>Published on ${esc(new URL(p.href).hostname)}</span></div><a class="btn btn-outline btn-sm" href="${esc(p.href)}" target="_blank" rel="noopener">Open ↗</a></div>`;
+    : `<div class="doc-attach"><div class="pdf web">WEB</div><div class="meta"><strong>${esc(i.short)} ${p.year || INTAKE_YEAR} prospectus</strong><span>Published on ${esc(new URL(p.href).hostname)}</span></div><a class="btn btn-outline btn-sm" href="${esc(p.href)}" target="_blank" rel="noopener">Open <span class="i i-ext" aria-hidden="true"></span></a></div>`;
 
   $('#drawer-content').innerHTML = `
     <div class="drawer-hero" style="${brandVars(i)}">${ART.skyline(i.id, i.type)}
@@ -303,6 +313,7 @@ export function openDrawer(id, tab = '') {
     </div>
     <div class="drawer-body">
       <div class="badges"><span class="badge ${st.key}">${esc(st.label)}</span>${i.cao ? '<span class="badge cao">Apply via CAO</span>' : ''}${i.verify ? '<span class="badge verify">Confirm fee with the university</span>' : ''}</div>
+      ${isOpen(i) ? '' : `<div class="closed-panel"><div>${ART.ui('lock', 20)}</div><div><strong>Applications for ${INTAKE_YEAR} are closed</strong><p>${esc(i.short)} closed on ${fmtDate(i.closes)}. Get one email or WhatsApp message when applications open for the next intake.</p></div>${alertButton(i, 'btn-primary btn-sm')}</div>`}
       <div class="kv">
         <div class="fact"><small>Fee · SA applicants</small><strong>${feeHTML(i)}</strong></div>
         <div class="fact"><small>Fee · international</small><strong>${i.cao ? 'R' + CAO.feeIntl : i.feeIntl ? rand(i.feeIntl) : 'See website'}</strong></div>
@@ -311,7 +322,7 @@ export function openDrawer(id, tab = '') {
       </div>
       ${i.cao ? `<div class="callout info">${esc(CAO.note)}</div>` : ''}
       ${i.feeNote ? `<div class="callout ${i.verify ? 'warn' : 'info'}">${esc(i.feeNote)}</div>` : ''}
-      ${i.earlyNote ? `<div class="callout warn">⏰ ${esc(i.earlyNote)}</div>` : ''}
+      ${i.earlyNote ? `<div class="callout warn">${esc(i.earlyNote)}</div>` : ''}
       <div class="callout info">${esc(i.apsNote)}</div>
       ${elig ? `<div class="callout ${elig.key === 'yes' ? 'good' : elig.key === 'maybe' ? 'warn' : 'bad'}"><strong>${esc(planned.name)}:</strong> ${esc(elig.label)}${elig.cutoff ? ` (your APS ${a.aps}, estimated cut-off ${elig.cutoff}${elig.diploma ? ', diploma route' : ''})` : ''}</div>` : ''}
       <h3>Prospectus</h3>
@@ -320,10 +331,10 @@ export function openDrawer(id, tab = '') {
       ${programmeList(i, confirmed && a.count >= 4 ? a : null)}
       <h3>Links</h3>
       <ul class="link-list">
-        <li><a href="${esc(i.web)}" target="_blank" rel="noopener"><span>Official website</span><b>${esc(new URL(i.web).hostname)} ↗</b></a></li>
-        ${i.cao ? `<li><a href="${esc(CAO.url)}" target="_blank" rel="noopener"><span>Central Applications Office</span><b>cao.ac.za ↗</b></a></li>` : i.apply !== i.web ? `<li><a href="${esc(i.apply)}" target="_blank" rel="noopener"><span>How to apply</span><b>${esc(new URL(i.apply).hostname)} ↗</b></a></li>` : ''}
+        <li><a href="${esc(i.web)}" target="_blank" rel="noopener"><span>Official website</span><b>${esc(new URL(i.web).hostname)} <span class="i i-ext" aria-hidden="true"></span></b></a></li>
+        ${i.cao ? `<li><a href="${esc(CAO.url)}" target="_blank" rel="noopener"><span>Central Applications Office</span><b>cao.ac.za <span class="i i-ext" aria-hidden="true"></span></b></a></li>` : i.apply !== i.web ? `<li><a href="${esc(i.apply)}" target="_blank" rel="noopener"><span>How to apply</span><b>${esc(new URL(i.apply).hostname)} <span class="i i-ext" aria-hidden="true"></span></b></a></li>` : ''}
       </ul>
-      <div class="btn-row">${shortlistButton(i, '')}${C.me?.role === 'student' && C.shortlist.has(i.id) ? '<a class="btn btn-gold" href="#/apply">Apply now →</a>' : ''}</div>
+      <div class="btn-row">${shortlistButton(i, '')}${C.me?.role === 'student' && C.shortlist.has(i.id) ? '<a class="btn btn-gold" href="#/apply">Apply now <span class="i i-arrow" aria-hidden="true"></span></a>' : ''}</div>
     </div>`;
   const drawer = $('#drawer');
   drawer.dataset.id = id;
@@ -340,10 +351,10 @@ function programmeList(i, a) {
   const progs = programmesOf(i.id);
   const QUAL = { degree: 'Degree', diploma: 'Diploma', hc: 'Higher Certificate' };
   const LBL = { eng: 'English', math: 'Maths', mathOrLit: 'Maths/Maths Lit', sci: 'Physical Sci', life: 'Life Sci', acc: 'Accounting' };
-  const groups = Object.entries(FIELDS).filter(([k]) => progs.some((p) => p.field === k));
+  const groups = facultiesOf(i.id);
   return `<label class="search small"><input type="search" id="prog-q" placeholder="Search ${progs.length} programmes" aria-label="Search programmes"></label>
-    <div class="prog-groups">${groups.map(([k, f]) => `<details class="prog-group" open><summary>${ART.icon(k, 16)} ${esc(f.label)} <span class="muted">${progs.filter((p) => p.field === k).length}</span></summary>
-      <ul class="prog-list">${progs.filter((p) => p.field === k).map((p) => {
+    <div class="prog-groups">${groups.map((f) => `<details class="prog-group" open><summary>${ART.icon(f.programmes[0].field, 16)} ${esc(f.title)} <span class="muted">${f.programmes.length}</span></summary>
+      <ul class="prog-list">${f.programmes.map((p) => {
         const e = a ? eligibility(p, i, a) : null;
         return `<li data-name="${esc(p.name.toLowerCase())}"><div><strong>${esc(p.name)}</strong>
           <small>${QUAL[p.qual]} · ${p.years} yr${p.years === 1 ? '' : 's'} · ${Object.entries(p.req).map(([r, v]) => `${LBL[r]} ${v}%`).join(' · ')}${p.note ? ` · ${esc(p.note)}` : ''}</small></div>
@@ -449,7 +460,7 @@ function renderCareers(a) {
       <div class="career-foot">
         <div><span class="uni-count">Earning</span><br><strong>${esc(r.c.salary)}</strong> <span class="uni-count">/yr</span></div>
         <div class="right"><span class="uni-count">${r.within.length} of ${r.offering.length} institutions in reach</span><br>
-        <button class="btn btn-text" data-plan="${r.course.id}">Apply for this →</button></div>
+        <button class="btn btn-text" data-plan="${r.course.id}">Apply for this <span class="i i-arrow" aria-hidden="true"></span></button></div>
       </div>
     </article>`;
   let html = '';

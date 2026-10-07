@@ -43,7 +43,7 @@ export function dialog({ title, body, buttons = [{ label: 'Close', value: null }
     const d = document.createElement('dialog');
     d.className = `modal${wide ? ' wide' : ''}`;
     d.innerHTML = `<form method="dialog" novalidate>
-      <header><h2>${esc(title)}</h2><button type="button" class="icon-btn" data-close aria-label="Close">✕</button></header>
+      <header><h2>${esc(title)}</h2><button type="button" class="icon-btn" data-close aria-label="Close"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button></header>
       <div class="dialog-body">${body}</div>
       <footer>${buttons.map((b, i) => `<button type="submit" class="btn ${b.kind || 'btn-outline'}" data-i="${i}">${esc(b.label)}</button>`).join('')}</footer>
     </form>`;
@@ -70,7 +70,7 @@ export function statusBadge(status) {
   return `<span class="badge tone-${s.tone}">${esc(s.label)}</span>`;
 }
 
-export const brandOf = (inst) => BRAND[inst.id] || { c: '#0c3864', w: '#f4a535', s: '#f4a535' };
+export const brandOf = (inst) => BRAND[inst.id] || { c: '#10294a', w: '#d4a24c', s: '#d4a24c' };
 export const brandVars = (inst) => { const b = brandOf(inst); return `--c:${b.c};--w:${b.w};--s:${b.s}`; };
 export const monogram = (inst, size = '') => {
   const long = inst.short.length > 4;
@@ -111,7 +111,7 @@ export function confetti() {
   if (!cv) { cv = document.createElement('canvas'); cv.id = 'confetti'; cv.className = 'confetti'; document.body.append(cv); }
   const ctx = cv.getContext('2d');
   cv.width = innerWidth * devicePixelRatio; cv.height = innerHeight * devicePixelRatio; ctx.scale(devicePixelRatio, devicePixelRatio);
-  const colours = ['#f4a535', '#1d9e75', '#0c3864', '#e24b4a', '#fdfaf4'];
+  const colours = ['#d4a24c', '#1a7f5a', '#10294a', '#c0362c', '#f7f6f2'];
   const bits = Array.from({ length: 140 }, () => ({ x: innerWidth / 2 + (Math.random() - 0.5) * 200, y: innerHeight * 0.35, vx: (Math.random() - 0.5) * 14, vy: -Math.random() * 14 - 4, s: 5 + Math.random() * 6, r: Math.random() * 6, vr: (Math.random() - 0.5) * 0.3, c: colours[Math.floor(Math.random() * colours.length)] }));
   const t0 = performance.now();
   const frame = (now) => {

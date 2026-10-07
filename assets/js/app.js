@@ -15,6 +15,7 @@ import * as apply from './pages/apply.js';
 import * as applications from './pages/applications.js';
 import * as admissions from './pages/admissions.js';
 import * as admin from './pages/admin.js';
+import * as alerts from './pages/alerts.js';
 
 const useSupabase = !!(CONFIG.SUPABASE_URL && CONFIG.SUPABASE_ANON_KEY);
 const api = useSupabase ? supabaseApi : demoApi;
@@ -86,6 +87,7 @@ async function route_() {
     document.title = name === 'home' ? 'ImbizoConnect' : `${TITLES[name]} · ImbizoConnect`;
     ({ home: pub.home, universities: pub.universities, aps: pub.aps, funding: () => {} })[name](ctx, query);
     scrollTo(0, 0);
+    reveal($(`[data-screen="${name}"]`));
     return;
   }
 
@@ -111,6 +113,21 @@ async function route_() {
     $('#retry').onclick = () => route_();
   }
   scrollTo(0, 0);
+}
+
+/** Fades static sections in as they scroll into view, a few at a time. Skipped when motion is reduced. */
+let revealer = null;
+function reveal(root) {
+  if (!root || !('IntersectionObserver' in window) || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  revealer ||= new IntersectionObserver((entries) => entries.forEach((e) => {
+    if (e.isIntersecting) { e.target.classList.add('in'); revealer.unobserve(e.target); }
+  }), { rootMargin: '0px 0px -8% 0px' });
+  const els = $$('.section-head, .step, .stat, .closing, .split-cta, .about, .chip-cloud, .fund-card, .faq', root).filter((el) => !el.classList.contains('in'));
+  els.forEach((el, n) => {
+    el.classList.add('reveal');
+    el.style.setProperty('--d', `${(n % 4) * 70}ms`);
+    revealer.observe(el);
+  });
 }
 
 function showScreen(screen, portalName = '') {
@@ -203,6 +220,8 @@ function bind() {
     if (act?.dataset.act === 'signout') signOut();
     if (act?.dataset.act === 'switch') signOut(true);
     if (act?.dataset.act === 'reset-demo') resetDemo();
+    const al = e.target.closest('[data-alert]');
+    if (al) { e.preventDefault(); alerts.openAlertDialog(al.dataset.alert ? al.dataset.alert.split(',') : []); }
     if (!e.target.closest('details.acct')) $$('details.acct[open]').forEach((d) => d.removeAttribute('open'));
   });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { pub.closeDrawer(); closeMenu(); } });
@@ -224,11 +243,12 @@ async function boot() {
   $$('[data-intake]').forEach((el) => { el.textContent = INTAKE_YEAR; });
   $$('[data-verified]').forEach((el) => { el.textContent = DATA_VERIFIED; });
   initTheme();
+  alerts.initAlerts(ctx);
   bind();
   if (api.kind === 'demo') {
     const bar = document.createElement('div');
     bar.className = 'demo-banner';
-    bar.innerHTML = `<span><strong>Demo.</strong> Made-up students and admissions officers. Everything stays in this browser.${window.SITE_ANALYTICS ? ' Visits are counted anonymously (no cookies).' : ''}</span>
+    bar.innerHTML = `<span><strong>Demo of a concept.</strong><span class="demo-more"> Made-up students and admissions officers, not linked to any institution.</span> Everything stays in this browser.${window.SITE_ANALYTICS ? ' Visits are counted anonymously (no cookies).' : ''}</span>
       <button type="button" data-act="switch">Switch user</button><button type="button" data-act="reset-demo">Reset demo</button>`;
     document.body.append(bar);
     document.body.classList.add('has-demo-banner');

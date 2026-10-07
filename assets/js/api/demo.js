@@ -173,6 +173,13 @@ function seed() {
   A('s-nomvula', 'unizulu', 'unizulu-llb', null, [['awaiting_payment', 12, null, 'submit'], paid(12, 'CAO-448812')], g2);
   A('s-ruan', 'ukzn', 'ukzn-bsc-agric', null, [['awaiting_payment', 9, null, 'submit'], paid(9, 'CAO-449901'), ['under_review', 3, 'o-ukzn', 'review']]).fee = 250;
   state.events.sort((a, b) => a.at.localeCompare(b.at));
+  // Made-up visitors who asked to be told when applications open.
+  const ago = (d) => new Date(Date.now() - d * 864e5).toISOString();
+  state.alerts = [
+    { id: uid(), institution_ids: ['uct', 'su', 'uwc'], email: 'learner1@example.org', whatsapp: null, user_id: null, created_at: ago(6) },
+    { id: uid(), institution_ids: ['wits', 'up', 'uj'], email: null, whatsapp: '+27820000001', user_id: null, created_at: ago(4) },
+    { id: uid(), institution_ids: ['ukzn', 'dut'], email: 'learner2@example.org', whatsapp: '+27710000002', user_id: null, created_at: ago(2) },
+  ];
   return state;
 }
 
@@ -367,4 +374,12 @@ export const demoApi = {
     log(app, action, note);
     save();
   },
+
+  // Opening alerts: anyone can ask to be told when applications open; only admins can list them.
+  async addAlert({ institution_ids, email, whatsapp }) {
+    const st = load(); st.alerts ||= [];
+    st.alerts.push({ id: uid(), institution_ids, email: email || null, whatsapp: whatsapp || null, user_id: st.currentUser || null, created_at: new Date().toISOString() });
+    save();
+  },
+  async alerts() { need(['admin']); return clone(load().alerts || []); },
 };

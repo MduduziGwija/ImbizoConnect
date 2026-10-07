@@ -1211,3 +1211,25 @@ revoke all on function public.submit_applications(jsonb) from anon;
 revoke all on function public.student_action(uuid, text, text, text) from anon;
 revoke all on function public.officer_action(uuid, text, text, text) from anon;
 revoke all on function public.set_role(uuid, text, text) from anon;
+
+-- Opening alerts: anyone (signed in or not) can ask to be told by email or WhatsApp when an
+-- institution opens applications. Only admins can read the list. Sending the messages needs a
+-- scheduled job with an email service and the WhatsApp Business API, which this concept leaves out.
+create table if not exists public.open_alerts (
+  id uuid primary key default gen_random_uuid(),
+  institution_ids text[] not null check (cardinality(institution_ids) between 1 and 26),
+  email text check (email is null or email ~ '^[^\s@]+@[^\s@]+\.[^\s@]{2,}$'),
+  whatsapp text check (whatsapp is null or whatsapp ~ '^\+27[6-8][0-9]{8}$'),
+  user_id uuid default auth.uid() references auth.users(id) on delete set null,
+  created_at timestamptz not null default now(),
+  check (email is not null or whatsapp is not null)
+);
+alter table public.open_alerts enable row level security;
+drop policy if exists open_alerts_insert on public.open_alerts;
+create policy open_alerts_insert on public.open_alerts for insert to anon, authenticated
+  with check (institution_ids <@ array(select id from institutions)
+    and (user_id is null or user_id = auth.uid()));
+drop policy if exists open_alerts_read on public.open_alerts;
+create policy open_alerts_read on public.open_alerts for select to authenticated using (is_admin());
+grant insert on public.open_alerts to anon, authenticated;
+revoke update, delete on public.open_alerts from anon, authenticated;
