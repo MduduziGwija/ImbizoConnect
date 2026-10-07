@@ -10,6 +10,7 @@ import {
 import { $, esc, toast, busy, dialog, statusBadge, monogram, brandVars, store, fmtSize } from '../ui.js';
 import { refresh, renderAccount } from '../app.js';
 import { openFile } from './profile.js';
+import { facultyTitle } from '../programmes.js';
 
 let C, main;
 const f = { q: '', status: 'active', course: '', sort: 'new', inst: store.get('adm-inst', '') };
@@ -66,7 +67,7 @@ export async function render(el, ctx) {
       <label class="search"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="m20 20-4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
         <input type="search" id="adm-q" placeholder="Search name, reference or ID number" value="${esc(f.q)}" aria-label="Search applicants"></label>
       <select id="adm-status" aria-label="Status"><option value="active">Needs a decision</option><option value="all">All statuses</option>${Object.entries(STATUS).filter(([k]) => k !== 'awaiting_payment').map(([k, s]) => `<option value="${k}">${s.label}</option>`).join('')}</select>
-      <select id="adm-course" aria-label="Programme"><option value="">All programmes</option>${courses.map((c) => `<option value="${c.id}">${esc(c.name)}</option>`).join('')}</select>
+      <select id="adm-course" aria-label="Programme"><option value="">All programmes</option>${[...new Set(courses.map((c) => c.faculty))].sort().map((f) => `<optgroup label="${esc(facultyTitle(f))}">${courses.filter((c) => c.faculty === f).map((c) => `<option value="${c.id}">${esc(c.name)}</option>`).join('')}</optgroup>`).join('')}</select>
       <select id="adm-sort" aria-label="Sort"><option value="new">Recently updated</option><option value="old">Oldest first</option><option value="aps">Highest APS</option><option value="name">Surname A–Z</option></select>
       <button class="btn btn-outline" id="adm-csv">Export CSV</button>
     </div>

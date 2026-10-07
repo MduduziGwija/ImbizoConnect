@@ -1,12 +1,12 @@
 // © 2026 Mduduzi Gwija. All rights reserved. Proprietary: see LICENSE. Unauthorised copying or use is prohibited.
 // New application: choose several institutions and programmes, check eligibility, then submit
 // them all at once with a single fee total (the CAO fee is charged once for KZN).
-import { INSTITUTIONS, FIELDS, TYPES, CAO } from '../data.js';
+import { INSTITUTIONS, TYPES, CAO } from '../data.js';
 import {
   byId, courseById, closingStatus, isOpen, fmtDate, rand, analyse, eligibility, feeBreakdown, basketProblems,
   profileChecklist, MAX_INSTITUTIONS, programmesOf, minLabel,
 } from '../logic.js';
-import { sourceOf } from '../programmes.js';
+import { sourceOf, facultiesOf, facultyTitle } from '../programmes.js';
 import { $, esc, toast, busy, store, monogram, brandVars, confetti } from '../ui.js';
 import { refresh, renderAccount } from '../app.js';
 
@@ -21,8 +21,8 @@ const QUAL = { degree: '', diploma: ' · Diploma', hc: ' · Higher Certificate' 
 function courseOptions(inst, selected, allowNone) {
   const progs = programmesOf(inst.id);
   return (allowNone ? '<option value="">No second choice</option>' : `<option value="">Choose one of ${progs.length} programmes…</option>`)
-    + Object.entries(FIELDS).filter(([k]) => progs.some((p) => p.field === k)).map(([k, f]) =>
-      `<optgroup label="${esc(f.label)}">${progs.filter((p) => p.field === k).map((p) =>
+    + facultiesOf(inst.id).map((f) =>
+      `<optgroup label="${esc(f.title)}">${f.programmes.map((p) =>
         `<option value="${p.id}" ${p.id === selected ? 'selected' : ''}>${esc(p.name)} (${esc(minLabel(p))})</option>`).join('')}</optgroup>`).join('');
 }
 /** The programme of a given kind at an institution, if it offers one. */
@@ -112,7 +112,7 @@ function progLine(id) {
   const p = courseById[id];
   if (!p) return '';
   const reqs = Object.entries(p.req).map(([k, v]) => `${{ eng: 'English', math: 'Maths', mathOrLit: 'Maths/Maths Lit', sci: 'Physical Sci', life: 'Life Sci', acc: 'Accounting' }[k]} ${v}%`).join(' · ');
-  return `<p class="prog-line"><strong>${esc(minLabel(p))}</strong>${reqs ? ` · ${esc(reqs)}` : ''} · ${p.years} year${p.years === 1 ? '' : 's'}${p.note ? ` · ${esc(p.note)}` : ''}</p>`;
+  return `<p class="prog-line"><span class="prog-fac">${esc(facultyTitle(p.faculty))}</span><strong>${esc(minLabel(p))}</strong>${reqs ? ` · ${esc(reqs)}` : ''} · ${p.years} year${p.years === 1 ? '' : 's'}${p.note ? ` · ${esc(p.note)}` : ''}</p>`;
 }
 
 function addList(chosen, already, kind, q) {

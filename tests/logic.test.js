@@ -138,3 +138,13 @@ test('reference data is complete', () => {
   }
   assert.ok(COURSES.every((c) => Object.keys(c.req).length));
 });
+
+test('every programme sits in its institution\'s own faculty', async () => {
+  const { PROGRAMMES, progById, facultiesOf } = await import('../assets/js/programmes.js');
+  assert.ok(PROGRAMMES.every((p) => p.faculty));
+  assert.equal(progById['uwc-badmin'].faculty, 'Economic and Management Sciences');
+  assert.equal(progById['uwc-bds'].faculty, 'Dentistry');
+  assert.equal(progById['up-bvsc'].faculty, 'Veterinary Science');
+  assert.equal(progById['ukzn-bas'].faculty, 'College of Humanities');
+  assert.equal(facultiesOf('uwc').length, 7);
+});

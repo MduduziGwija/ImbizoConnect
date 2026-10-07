@@ -887,6 +887,78 @@ add('mut', [
   ['dip-community', 'Diploma in Community Extension', 'humanities', 20, E(50)],
 ]);
 
+// ───────────────────────── faculties
+// Each institution's own faculty (or college or school) for every programme, as named in its 2027
+// prospectus (UP, SU, Rhodes, UL, WSU) or its official faculty pages. `field` stays a broad subject
+// area for filters and icons; `faculty` is where the institution actually houses the programme,
+// e.g. UWC's BAdmin sits in Economic and Management Sciences, not Humanities.
+// Per institution: faculty by field, then exceptions by programme slug.
+const F = (byField, bySlug = {}) => ({ byField, bySlug });
+const FACULTIES = {
+  up: F({ commerce: 'Economic and Management Sciences', ict: 'Engineering, Built Environment and Information Technology', engineering: 'Engineering, Built Environment and Information Technology', health: 'Health Sciences', science: 'Natural and Agricultural Sciences', education: 'Education', humanities: 'Humanities', law: 'Law' },
+    { 'bcom-is': 'Economic and Management Sciences', badmin: 'Economic and Management Sciences', bvsc: 'Veterinary Science', bvetnurs: 'Veterinary Science', 'ba-slp': 'Humanities', 'ba-audio': 'Humanities', 'hc-sport': 'Education', btheology: 'Theology and Religion' }),
+  su: F({ commerce: 'Economic and Management Sciences', ict: 'Science', science: 'Science', health: 'Medicine and Health Sciences', engineering: 'Engineering', law: 'Law', humanities: 'Arts and Social Sciences', education: 'Education' },
+    { 'bsc-sport': 'Science', 'bsc-food': 'AgriSciences', 'bsc-cons': 'AgriSciences', 'bsc-forestry': 'AgriSciences', 'bscagric-animal': 'AgriSciences', 'bscagric-plant': 'AgriSciences', 'bagric-agribus': 'AgriSciences', 'dip-sustain': 'Economic and Management Sciences' }),
+  ru: F({ commerce: 'Commerce', humanities: 'Humanities', education: 'Education', law: 'Law', health: 'Pharmacy', science: 'Science', ict: 'Science' }),
+  ul: F({ health: 'Health Sciences', science: 'Science and Agriculture', commerce: 'Management and Law', law: 'Management and Law', humanities: 'Humanities', ict: 'Humanities', education: 'Humanities' },
+    { 'bsc-medsci': 'Health Sciences', badmin: 'Management and Law', 'badmin-lg': 'Management and Law', bdev: 'Management and Law' }),
+  wsu: F({ health: 'Medicine and Health Sciences', commerce: 'Economic and Financial Sciences', humanities: 'Law, Humanities and Social Sciences', law: 'Law, Humanities and Social Sciences', ict: 'Natural Sciences', science: 'Natural Sciences', education: 'Education', engineering: 'Engineering, Built Environment and Information Technology' },
+    { 'dip-hrm': 'Management and Public Administration Sciences', 'dip-mgmt': 'Management and Public Administration Sciences', 'dip-mkt': 'Management and Public Administration Sciences', 'dip-tourism': 'Management and Public Administration Sciences', badmin: 'Management and Public Administration Sciences', 'dip-journ': 'Management and Public Administration Sciences', 'dip-policing': 'Management and Public Administration Sciences', 'dip-ict-app': 'Engineering, Built Environment and Information Technology', 'dip-ict-net': 'Engineering, Built Environment and Information Technology' }),
+  wits: F({ commerce: 'Commerce, Law and Management', law: 'Commerce, Law and Management', ict: 'Science', engineering: 'Engineering and the Built Environment', science: 'Science', health: 'Health Sciences', humanities: 'Humanities', education: 'Humanities' },
+    { 'bcom-is': 'Commerce, Law and Management', 'ba-audio': 'Humanities', 'ba-slp': 'Humanities' }),
+  uct: F({ commerce: 'Commerce', ict: 'Science', engineering: 'Engineering and the Built Environment', science: 'Science', health: 'Health Sciences', law: 'Law', humanities: 'Humanities' },
+    { 'bcom-is': 'Commerce' }),
+  uj: F({ commerce: 'College of Business and Economics', ict: 'Science', engineering: 'Engineering and the Built Environment', science: 'Science', health: 'Health Sciences', law: 'Law', humanities: 'Humanities', education: 'Education' },
+    { 'bcom-is': 'College of Business and Economics', barch: 'Art, Design and Architecture' }),
+  ukzn: F({ commerce: 'College of Law and Management Studies', law: 'College of Law and Management Studies', ict: 'College of Agriculture, Engineering and Science', engineering: 'College of Agriculture, Engineering and Science', science: 'College of Agriculture, Engineering and Science', health: 'College of Health Sciences', humanities: 'College of Humanities', education: 'College of Humanities' },
+    { 'bcom-is': 'College of Law and Management Studies', badmin: 'College of Law and Management Studies', bas: 'College of Humanities', btrp: 'College of Humanities', 'bsc-diet': 'College of Agriculture, Engineering and Science' }),
+  nwu: F({ commerce: 'Economic and Management Sciences', ict: 'Natural and Agricultural Sciences', science: 'Natural and Agricultural Sciences', engineering: 'Engineering', health: 'Health Sciences', law: 'Law', humanities: 'Humanities', education: 'Education' }),
+  ufs: F({ commerce: 'Economic and Management Sciences', humanities: 'The Humanities', engineering: 'Natural and Agricultural Sciences', ict: 'Natural and Agricultural Sciences', science: 'Natural and Agricultural Sciences', health: 'Health Sciences', law: 'Law', education: 'Education' },
+    { badmin: 'Economic and Management Sciences' }),
+  nmu: F({ health: 'Health Sciences', commerce: 'Business and Economic Sciences', ict: 'Engineering, the Built Environment and Technology', law: 'Law', engineering: 'Engineering, the Built Environment and Technology', science: 'Science', humanities: 'Humanities', education: 'Education' }),
+  uwc: F({ health: 'Community and Health Sciences', humanities: 'Arts and Humanities', commerce: 'Economic and Management Sciences', ict: 'Economic and Management Sciences', law: 'Law', science: 'Natural Sciences', education: 'Education' },
+    { bds: 'Dentistry', boh: 'Dentistry', bpharm: 'Natural Sciences', bsw: 'Community and Health Sciences', badmin: 'Economic and Management Sciences', 'bsc-cs': 'Natural Sciences' }),
+  ufh: F({ commerce: 'Management and Commerce', humanities: 'Social Sciences and Humanities', law: 'Law', health: 'Health Sciences', science: 'Science and Agriculture', ict: 'Science and Agriculture', education: 'Education' },
+    { badmin: 'Management and Commerce' }),
+  univen: F({ law: 'Management, Commerce and Law', commerce: 'Management, Commerce and Law', humanities: 'Humanities, Social Sciences and Education', education: 'Humanities, Social Sciences and Education', health: 'Health Sciences', science: 'Science, Engineering and Agriculture', ict: 'Science, Engineering and Agriculture', engineering: 'Science, Engineering and Agriculture' },
+    { badmin: 'Management, Commerce and Law' }),
+  ump: F({ science: 'Agriculture and Natural Sciences', ict: 'Agriculture and Natural Sciences', commerce: 'Economics, Development and Business Sciences', humanities: 'Economics, Development and Business Sciences', education: 'Education' }),
+  spu: F({ education: 'Education', science: 'Natural and Applied Sciences', ict: 'Natural and Applied Sciences', commerce: 'Economic and Management Sciences', humanities: 'Humanities' }),
+  smu: F({ health: 'School of Health Care Sciences', science: 'School of Science and Technology', ict: 'School of Science and Technology' },
+    { mbchb: 'School of Medicine', brad: 'School of Medicine', bds: 'School of Oral Health Sciences', boh: 'School of Oral Health Sciences', bdt: 'School of Oral Health Sciences', bpharm: 'School of Pharmacy' }),
+  unisa: F({ commerce: 'College of Economic and Management Sciences', law: 'College of Law', ict: 'College of Science, Engineering and Technology', science: 'College of Science, Engineering and Technology', humanities: 'College of Human Sciences', education: 'College of Education' },
+    { 'bcom-acc': 'College of Accounting Sciences', 'dip-acc': 'College of Accounting Sciences', 'hc-acc': 'College of Accounting Sciences', 'bsc-env': 'College of Agriculture and Environmental Sciences' }),
+  unizulu: F({ commerce: 'Commerce, Administration and Law', law: 'Commerce, Administration and Law', humanities: 'Humanities and Social Sciences', health: 'Science, Agriculture and Engineering', science: 'Science, Agriculture and Engineering', ict: 'Science, Agriculture and Engineering', education: 'Education' },
+    { badmin: 'Commerce, Administration and Law' }),
+  tut: F({ health: 'Science', engineering: 'Engineering and the Built Environment', ict: 'Information and Communication Technology', commerce: 'Management Sciences', humanities: 'Humanities', law: 'Humanities', science: 'Science', education: 'Humanities' },
+    { 'dip-acc': 'Economics and Finance', 'dip-fin': 'Economics and Finance', 'dip-fashion': 'Arts and Design' }),
+  cput: F({ health: 'Health and Wellness Sciences', engineering: 'Engineering and the Built Environment', ict: 'Informatics and Design', commerce: 'Business and Management Sciences', science: 'Applied Sciences', humanities: 'Informatics and Design', education: 'Education' },
+    { 'dip-envhealth': 'Applied Sciences', 'dip-arch': 'Informatics and Design' }),
+  cut: F({ health: 'Health and Environmental Sciences', engineering: 'Engineering, Built Environment and Information Technology', ict: 'Engineering, Built Environment and Information Technology', commerce: 'Management Sciences', science: 'Health and Environmental Sciences', humanities: 'Humanities', education: 'Humanities' }),
+  vut: F({ engineering: 'Engineering and Technology', ict: 'Applied and Computer Sciences', science: 'Applied and Computer Sciences', commerce: 'Management Sciences', humanities: 'Human Sciences', law: 'Human Sciences' },
+    { 'dip-tourism': 'Human Sciences', 'dip-food': 'Human Sciences' }),
+  dut: F({ health: 'Health Sciences', engineering: 'Engineering and the Built Environment', ict: 'Accounting and Informatics', commerce: 'Management Sciences', science: 'Applied Sciences', humanities: 'Arts and Design' },
+    { 'dip-acc': 'Accounting and Informatics', 'dip-mgt-acc': 'Accounting and Informatics' }),
+  mut: F({ engineering: 'Engineering', ict: 'Applied and Health Sciences', commerce: 'Management Sciences', science: 'Applied and Health Sciences', health: 'Applied and Health Sciences', humanities: 'Applied and Health Sciences' }),
+};
+/** "Economic and Management Sciences" → "Faculty of Economic and Management Sciences"; colleges and schools keep their own names. */
+export const facultyTitle = (name) => (/^(College|School) of /.test(name) ? name : `Faculty of ${name}`);
+for (const [inst, progs] of Object.entries(catalogue)) {
+  const f = FACULTIES[inst];
+  for (const p of progs) {
+    const slug = p.id.slice(inst.length + 1);
+    p.faculty = f.bySlug[slug] || f.byField[p.field];
+    if (!p.faculty) throw new Error(`No faculty for ${p.id}`);
+  }
+}
+/** An institution's faculties, A to Z, each with its programmes. */
+export function facultiesOf(instId) {
+  const groups = new Map();
+  for (const p of catalogue[instId] || []) (groups.get(p.faculty) || groups.set(p.faculty, []).get(p.faculty)).push(p);
+  return [...groups].map(([name, programmes]) => ({ name, title: facultyTitle(name), programmes }))
+    .sort((x, y) => x.name.localeCompare(y.name));
+}
+
 // ───────────────────────── exports
 export const PROGRAMMES = Object.values(catalogue).flat();
 export const progById = Object.fromEntries(PROGRAMMES.map((p) => [p.id, p]));

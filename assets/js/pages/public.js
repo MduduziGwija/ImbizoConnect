@@ -2,7 +2,7 @@
 // Public pages (no sign-in needed): home, universities with map and details drawer, the APS
 // calculator and career guide. Their markup lives in index.html; this module fills it in.
 import { INSTITUTIONS, COURSES, CAO, FIELDS, TYPES, SUBJECTS, SAMPLE_RESULTS, CAREERS, INTAKE_YEAR } from '../data.js';
-import { PROGRAMMES, programmesOf, sourceOf } from '../programmes.js';
+import { PROGRAMMES, programmesOf, sourceOf, facultiesOf, facultyTitle } from '../programmes.js';
 import { ART } from '../art.js';
 import {
   byId, MONTHS, closingStatus, isOpen, daysUntil, fmtDate, rand, analyse, points, isLO, checkReqs, eligibility,
@@ -340,10 +340,10 @@ function programmeList(i, a) {
   const progs = programmesOf(i.id);
   const QUAL = { degree: 'Degree', diploma: 'Diploma', hc: 'Higher Certificate' };
   const LBL = { eng: 'English', math: 'Maths', mathOrLit: 'Maths/Maths Lit', sci: 'Physical Sci', life: 'Life Sci', acc: 'Accounting' };
-  const groups = Object.entries(FIELDS).filter(([k]) => progs.some((p) => p.field === k));
+  const groups = facultiesOf(i.id);
   return `<label class="search small"><input type="search" id="prog-q" placeholder="Search ${progs.length} programmes" aria-label="Search programmes"></label>
-    <div class="prog-groups">${groups.map(([k, f]) => `<details class="prog-group" open><summary>${ART.icon(k, 16)} ${esc(f.label)} <span class="muted">${progs.filter((p) => p.field === k).length}</span></summary>
-      <ul class="prog-list">${progs.filter((p) => p.field === k).map((p) => {
+    <div class="prog-groups">${groups.map((f) => `<details class="prog-group" open><summary>${ART.icon(f.programmes[0].field, 16)} ${esc(f.title)} <span class="muted">${f.programmes.length}</span></summary>
+      <ul class="prog-list">${f.programmes.map((p) => {
         const e = a ? eligibility(p, i, a) : null;
         return `<li data-name="${esc(p.name.toLowerCase())}"><div><strong>${esc(p.name)}</strong>
           <small>${QUAL[p.qual]} · ${p.years} yr${p.years === 1 ? '' : 's'} · ${Object.entries(p.req).map(([r, v]) => `${LBL[r]} ${v}%`).join(' · ')}${p.note ? ` · ${esc(p.note)}` : ''}</small></div>
