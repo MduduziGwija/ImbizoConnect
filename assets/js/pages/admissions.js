@@ -10,6 +10,7 @@ import {
 import { $, esc, toast, busy, dialog, statusBadge, monogram, brandVars, store, fmtSize } from '../ui.js';
 import { refresh, renderAccount } from '../app.js';
 import { openFile } from './profile.js';
+import { ART } from '../art.js';
 import { facultyTitle } from '../programmes.js';
 
 let C, main;
@@ -150,9 +151,9 @@ async function review(appId) {
         <p class="small">${esc(s.pass?.label || '')}</p>
         <h3>Programmes</h3>
         <ul class="prog-check">${[[a.choice1, s.e1], [a.choice2, s.e2]].filter(([c]) => c).map(([c, e], n) => `<li><span class="num-dot">${n + 1}</span><div><strong>${esc(courseById[c].name)}</strong>
-          <small>Estimated cut-off APS ${e.cutoff ?? '—'} · ${e.reqs.map((q) => `${esc(q.label)} ${q.have}%/${q.min}% ${q.ok ? '✓' : '✗'}`).join(' · ')}</small></div>${eligBadge(e)}</li>`).join('')}</ul>
+          <small>Estimated cut-off APS ${e.cutoff ?? '—'} · ${e.reqs.map((q) => `${esc(q.label)} ${q.have}%/${q.min}% ${q.ok ? '<span class="i i-check" aria-hidden="true"></span>' : '<span class="i i-cross" aria-hidden="true"></span>'}`).join(' · ')}</small></div>${eligBadge(e)}</li>`).join('')}</ul>
         <h3>Documents</h3>
-        <ul class="doc-mini">${DOCUMENTS.map((d) => { const x = byKind[d.id]; return `<li class="${x ? 'has' : ''}"><span>${d.icon}</span><div><strong>${esc(d.name)}</strong><small>${x ? `${esc(x.name)} · ${fmtSize(x.size)}` : d.required ? 'Missing (required)' : 'Not uploaded'}</small></div>${x ? `<button type="button" class="btn btn-sm btn-outline" data-doc="${x.id}">Open</button>` : ''}</li>`; }).join('')}</ul>
+        <ul class="doc-mini">${DOCUMENTS.map((d) => { const x = byKind[d.id]; return `<li class="${x ? 'has' : ''}"><span>${ART.ui(d.icon, 18)}</span><div><strong>${esc(d.name)}</strong><small>${x ? `${esc(x.name)} · ${fmtSize(x.size)}` : d.required ? 'Missing (required)' : 'Not uploaded'}</small></div>${x ? `<button type="button" class="btn btn-sm btn-outline" data-doc="${x.id}">Open</button>` : ''}</li>`; }).join('')}</ul>
       </div>
       <aside class="review-side">
         <h3>Decision</h3>

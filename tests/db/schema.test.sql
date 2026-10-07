@@ -144,5 +144,22 @@ select expect((select count(*) from storage.objects) = 1, 'officer can open the 
 select test_login('00000000-0000-0000-0000-000000000002');
 select expect((select count(*) from storage.objects) = 0, 'other students cannot open it');
 
+-- Opening alerts: anyone can ask, only admins can read them.
+select test_login('00000000-0000-0000-0000-000000000002');
+insert into open_alerts (institution_ids, whatsapp) values (array['uwc','up'], '+27821234567');
+select expect_error($$ insert into open_alerts (institution_ids) values (array['uwc']) $$, 'check constraint');
+select expect_error($$ insert into open_alerts (institution_ids, email) values (array['nowhere'], 'a@b.co') $$, 'row-level security');
+select expect_error($$ insert into open_alerts (institution_ids, email, user_id) values (array['uwc'], 'a@b.co', '00000000-0000-0000-0000-000000000001') $$, 'row-level security');
+select expect((select count(*) from open_alerts) = 0, 'students cannot read alerts');
+select test_login('00000000-0000-0000-0000-00000000000a');
+select expect((select count(*) from open_alerts) = 1, 'admin reads alerts');
+select expect_error($$ delete from open_alerts $$, 'permission denied');
+reset role;
+set role anon;
+select set_config('request.jwt.claim.sub', '', false);
+insert into open_alerts (institution_ids, email) values (array['wits'], 'learner@example.org');
+reset role;
+select expect((select count(*) from open_alerts) = 2, 'visitors without an account can ask too');
+set role authenticated;
 reset role;
 select 'All database checks passed' as result;

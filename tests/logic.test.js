@@ -148,3 +148,13 @@ test('every programme sits in its institution\'s own faculty', async () => {
   assert.equal(progById['ukzn-bas'].faculty, 'College of Humanities');
   assert.equal(facultiesOf('uwc').length, 7);
 });
+
+test('opening alerts need a valid email or WhatsApp number', async () => {
+  const { normaliseWhatsApp, alertProblems } = await import('../assets/js/logic.js');
+  assert.equal(normaliseWhatsApp('082 123 4567'), '+27821234567');
+  assert.equal(normaliseWhatsApp('+27 (71) 123-4567'), '+27711234567');
+  assert.equal(normaliseWhatsApp('011 123 4567'), null);
+  assert.deepEqual(alertProblems({ institution_ids: ['uwc'], whatsapp: '0821234567' }), []);
+  assert.equal(alertProblems({ institution_ids: ['uwc'] }).length, 1);
+  assert.equal(alertProblems({ institution_ids: [], email: 'bad' }).length, 2);
+});

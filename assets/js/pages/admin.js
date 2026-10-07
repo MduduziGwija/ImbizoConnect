@@ -13,12 +13,17 @@ export async function render(main, ctx) {
       accepted: apps.filter((a) => a.status === 'accepted').length, unpaid: apps.filter((a) => a.status === 'awaiting_payment').length,
       fees: apps.filter((a) => a.paid_at).reduce((s, a) => s + a.fee, 0), officers: people.filter((p) => p.institution_id === i.id).length };
   }).filter((r) => r.n || r.officers).sort((a, b) => b.n - a.n);
+  const alerts = await ctx.api.alerts().catch(() => []);
+  const alertCounts = INSTITUTIONS.map((i) => ({ i, n: alerts.filter((a) => a.institution_ids.includes(i.id)).length })).filter((r) => r.n).sort((a, b) => b.n - a.n);
   const opts = (sel) => `<option value="">Choose institution…</option>${INSTITUTIONS.map((i) => `<option value="${i.id}" ${i.id === sel ? 'selected' : ''}>${esc(i.short)} · ${esc(i.name)}</option>`).join('')}`;
   main.innerHTML = `
     <div class="portal-head"><div class="grow"><h1>Admin</h1><p>${people.length} accounts · ${ctx.apps.length} applications across ${per.filter((r) => r.n).length} institutions</p></div></div>
     <div class="card"><h2>Institutions</h2><div class="table-scroll"><table class="data-table">
       <thead><tr><th>Institution</th><th class="num">Applications</th><th class="num">Unpaid</th><th class="num">Offers</th><th class="num">Accepted</th><th class="num">Fees paid</th><th class="num">Officers</th></tr></thead>
       <tbody>${per.map((r) => `<tr style="${brandVars(r.i)}"><td><span class="row-inst">${monogram(r.i, 'sm')} ${esc(r.i.name)}</span></td><td class="num">${r.n}</td><td class="num">${r.unpaid}</td><td class="num">${r.offers}</td><td class="num">${r.accepted}</td><td class="num">${rand(r.fees)}</td><td class="num">${r.officers || '<span class="badge tone-warn">none</span>'}</td></tr>`).join('')}</tbody></table></div></div>
+    <div class="card"><h2>Opening alerts</h2>
+      <p class="muted">${alerts.length} request${alerts.length === 1 ? '' : 's'} to be told by email or WhatsApp when applications open. ${alerts.filter((a) => a.whatsapp).length} by WhatsApp, ${alerts.filter((a) => a.email).length} by email. Sending them needs an email service and the WhatsApp Business API, which this concept leaves out.</p>
+      ${alertCounts.length ? `<div class="chip-cloud">${alertCounts.map((r) => `<span class="alert-count" style="${brandVars(r.i)}">${monogram(r.i, 'sm')} ${esc(r.i.short)} <b>${r.n}</b></span>`).join('')}</div>` : ''}</div>
     <div class="card"><h2>People and roles</h2>
       <p class="muted">New sign-ups are students. Make someone an admissions officer to give them their institution's queue. Only admins can change roles; the database enforces this.</p>
       <div class="table-scroll"><table class="data-table people">

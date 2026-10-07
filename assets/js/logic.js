@@ -40,7 +40,7 @@ export function fmtDateTime(value) {
 /** Closing-date status of an institution on `on` (defaults to today). */
 export function closingStatus(inst, on = today()) {
   const days = daysUntil(inst.closes, on);
-  if (days < 0) return { key: 'closed', days, label: `Closed ${fmtDate(inst.closes, false)}` };
+  if (days < 0) return { key: 'closed', days, label: 'Applications closed' };
   if (days === 0) return { key: 'soon', days, label: 'Closes today' };
   if (days <= 14) return { key: 'soon', days, label: `${days} day${days === 1 ? '' : 's'} left` };
   return { key: 'open', days, label: `Open · ${days} days left` };
@@ -288,4 +288,22 @@ export function applicantSummary(app, profile) {
   const e1 = eligibility(courseById[app.choice1], inst, a);
   const e2 = app.choice2 ? eligibility(courseById[app.choice2], inst, a) : null;
   return { aps: a.aps, pass: a.pass, e1, e2, confirmed: !!profile?.marks_confirmed_at };
+}
+
+// ─────────────────────────── opening alerts
+export const validEmail = (s) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(s || '').trim());
+/** South African mobile number for WhatsApp, as +27XXXXXXXXX, or null. Accepts 082 123 4567, 27821234567, +27 82 123 4567. */
+export function normaliseWhatsApp(s) {
+  const d = String(s || '').replace(/[\s()-]/g, '');
+  const m = d.match(/^(?:\+?27|0)([6-8]\d{8})$/);
+  return m ? `+27${m[1]}` : null;
+}
+/** Checks an alert request: at least one institution and at least one valid way to reach the person. */
+export function alertProblems({ institution_ids = [], email = '', whatsapp = '' }) {
+  const p = [];
+  if (!institution_ids.length) p.push('Choose at least one institution.');
+  if (!email && !whatsapp) p.push('Give an email address or a WhatsApp number.');
+  if (email && !validEmail(email)) p.push('That email address doesn\'t look right.');
+  if (whatsapp && !normaliseWhatsApp(whatsapp)) p.push('Use a South African cellphone number, like 082 123 4567.');
+  return p;
 }
