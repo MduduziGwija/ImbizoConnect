@@ -90,12 +90,34 @@ export function home() {
     strip.innerHTML = closed.length ? `<div>${ART.ui('bell', 20)}</div><p><strong>${closed.length} of ${INSTITUTIONS.length} institutions have closed applications for ${INTAKE_YEAR}.</strong> Get an email or WhatsApp message when each one opens for the next intake.</p>
       <button class="btn btn-gold btn-sm" data-alert="${closed.map((i) => i.id).join(',')}">Alert me when they open</button>` : '';
   }
+  renderCampus();
   renderHeroCards();
   if (!$('#hero-map').children.length) mountMap($('#hero-map'), () => true);
   else paintMap($('#hero-map'), () => true);
   countUp();
   const cta = $('#hero-apply');
   if (cta) cta.href = C.me?.role === 'student' ? '#/apply' : '#/signin?next=apply';
+}
+
+/* Campus photography (free Unsplash License, credited). Captions stay generic and never name
+   an institution: the photos show student life, not any particular university. */
+let campusDone = false;
+async function renderCampus() {
+  if (campusDone) return;
+  campusDone = true;
+  let photos = [];
+  try { photos = await (await fetch(new URL('../../img/campus/photos.json', import.meta.url))).json(); } catch { return; }
+  if (!photos.length) return;
+  const src = (p, w) => new URL(`../../img/campus/${p.name}-${w}.webp`, import.meta.url).href;
+  $('#campus-grid').innerHTML = photos.map((p, n) => `
+    <figure class="cg-item cg-${n + 1}">
+      <img src="${src(p, 800)}" srcset="${src(p, 800)} 800w, ${src(p, 1600)} 1600w"
+        sizes="(max-width: 700px) 100vw, ${n === 0 ? '50vw' : '25vw'}" alt="${esc(p.alt)}" loading="lazy" decoding="async">
+      <figcaption>${esc(p.caption)}</figcaption>
+    </figure>`).join('');
+  const by = [...new Map(photos.map((p) => [p.by, p])).values()];
+  $('#campus-credit').innerHTML = `Photos by ${by.map((p) => `<a href="${esc(p.byUrl)}?utm_source=imbizoconnect&utm_medium=referral" target="_blank" rel="noopener">${esc(p.by)}</a>`).join(', ')} on <a href="https://unsplash.com/?utm_source=imbizoconnect&utm_medium=referral" target="_blank" rel="noopener">Unsplash</a>. Stock photography, for illustration only. It does not show, and is not endorsed by, any institution on this site.`;
+  $('.campus').hidden = false;
 }
 
 /* Hero cards show the visitor's own result, and only after they confirmed their marks. */

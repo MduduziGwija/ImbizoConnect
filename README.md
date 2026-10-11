@@ -119,6 +119,7 @@ assets/js/api/supabase.js      real backend
 assets/js/pages/*.js           the screens
 supabase/schema.sql            database, permissions and workflow (run once in Supabase)
 tools/stamp-version.sh         cache-busting on deploy
+tools/photos/                  fetches campus photos for the landing page (Campus photos workflow)
 tests/logic.test.js            npm test
 tests/db/                      npm run test:db (needs PostgreSQL)
 docs/screenshots/              README pictures

@@ -1,8 +1,10 @@
 name: Campus photos
 
-# Review step: changing tools/photos/candidates.mjs on a working branch saves preview
-# thumbnails to photo-candidates/ (never merged). Changing assets/img/campus/photos.json
-# downloads the chosen photos as WebP. Both commit back as the person who pushed.
+# Campus photos for the landing page. On a working branch, listing photos in
+# assets/img/campus/photos.json (Unsplash id, name, caption, alt) downloads them as WebP
+# through the Unsplash API (UNSPLASH_ACCESS_KEY secret) and commits them back as the
+# person who pushed. Without photos.json, tools/photos/candidates.mjs saves review
+# previews to photo-candidates/ instead (never merged).
 on:
   push:
     branches-ignore: [main]
@@ -26,6 +28,8 @@ jobs:
       - name: Chosen photos
         if: ${{ hashFiles('assets/img/campus/photos.json') != '' }}
         run: node tools/photos/fetch.mjs
+        env:
+          UNSPLASH_ACCESS_KEY: ${{ secrets.UNSPLASH_ACCESS_KEY }}
       - name: Commit
         run: |
           git config user.name "${{ github.actor }}"
