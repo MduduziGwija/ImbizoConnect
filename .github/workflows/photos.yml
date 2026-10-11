@@ -30,5 +30,5 @@ jobs:
         run: |
           git config user.name "${{ github.actor }}"
           git config user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
-          for d in photo-candidates assets/img/campus; do [ -e "$d" ] && git add -A "$d"; done
+          for d in photo-candidates assets/img/campus; do if [ -e "$d" ]; then git add -A "$d"; fi; done
           if git diff --cached --quiet; then echo "No changes."; else git commit -m "Update campus photos" && git push; fi

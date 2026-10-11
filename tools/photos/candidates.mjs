@@ -2,7 +2,7 @@
 // Finds candidate student-life photos through Openverse (openly licensed images from Flickr,
 // Wikimedia Commons and others), limited to CC0, CC BY and CC BY-SA, and saves small previews
 // with their licence and creator to photo-candidates/ for review.
-// Run by .github/workflows/photos.yml on working branches. Not part of the site.
+// Run by .github/workflows/photos.yml on working branches (never merged). Not part of the site.
 import { mkdir, writeFile } from 'node:fs/promises';
 
 const QUERIES = ['south african university students', 'african university students', 'african students studying',
