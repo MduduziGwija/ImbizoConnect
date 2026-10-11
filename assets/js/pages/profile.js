@@ -30,9 +30,9 @@ export async function render(main, ctx, query) {
       <div class="grow">
         <h1>${esc(me.full_name || 'Your profile')}</h1>
         <p>${esc(me.email)} · ${check.ready ? 'Your profile is complete. You can apply.' : 'Complete these to apply:'}</p>
-        <ul class="checklist">${check.items.map((i) => `<li class="${i.done ? 'done' : ''}"><a href="#/${i.route}">${i.done ? '<span class="i i-check" aria-hidden="true"></span>' : '<span class="i i-circle" aria-hidden="true"></span>'} ${esc(i.label)}</a></li>`).join('')}</ul>
+        <ul class="checklist">${check.items.map((i) => `<li class="${i.done ? 'done' : ''}"><a href="#/${i.route}">${i.done ? '<svg class="i i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>' : '<svg class="i i-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/></svg>'} ${esc(i.label)}</a></li>`).join('')}</ul>
       </div>
-      ${check.ready ? '<a class="btn btn-gold" href="#/apply">Start an application <span class="i i-arrow" aria-hidden="true"></span></a>' : ''}
+      ${check.ready ? '<a class="btn btn-gold" href="#/apply">Start an application <svg class="i i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>' : ''}
     </div>
     <nav class="tabs" role="tablist">
       ${[['details', 'Details'], ['marks', 'Marks'], ['documents', 'Documents']].map(([k, l]) => `<a role="tab" href="#/profile?tab=${k}" class="${tab === k ? 'active' : ''}" aria-selected="${tab === k}">${l}</a>`).join('')}
@@ -192,7 +192,7 @@ function documentsTab(body, ctx) {
       return `<div class="doc ${f ? 'done' : ''}">
         <div class="doc-ico">${ART.ui(d.icon, 22)}</div>
         <div><div class="doc-name">${esc(d.name)}${d.required ? '<span class="req-tag">Required</span>' : ''}</div>
-        <div class="doc-hint">${f ? `<span class="i i-check" aria-hidden="true"></span> ${esc(f.name)} · ${fmtSize(f.size)} · uploaded ${fmtDate(f.uploaded_at.slice(0, 10))}` : esc(d.hint)}</div></div>
+        <div class="doc-hint">${f ? `<svg class="i i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> ${esc(f.name)} · ${fmtSize(f.size)} · uploaded ${fmtDate(f.uploaded_at.slice(0, 10))}` : esc(d.hint)}</div></div>
         <div class="btn-row tight">
           ${f ? `<button class="btn btn-text" data-view="${f.id}">View</button><button class="btn btn-text danger" data-del="${f.id}">Remove</button>` : ''}
           <label class="btn btn-outline btn-sm">${f ? 'Replace' : 'Upload'}<input type="file" id="doc-${d.id}" data-kind="${d.id}" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/*"></label>

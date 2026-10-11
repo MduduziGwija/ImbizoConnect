@@ -53,8 +53,8 @@ export async function render(el, ctx, query) {
       <a class="btn btn-gold" href="#/apply">+ New application</a>
     </div>
     ${check.ready ? '' : `<div class="card nudge"><div class="grow"><h2>Finish your profile (${check.percent}%)</h2><p class="muted">You fill it in once. Every institution you apply to gets the same details, marks and documents.</p>
-      <ul class="checklist">${check.items.map((i) => `<li class="${i.done ? 'done' : ''}"><a href="#/${i.route}">${i.done ? '<span class="i i-check" aria-hidden="true"></span>' : '<span class="i i-circle" aria-hidden="true"></span>'} ${esc(i.label)}</a></li>`).join('')}</ul></div>
-      <a class="btn btn-primary" href="#/${check.items.find((i) => !i.done).route}">Continue <span class="i i-arrow" aria-hidden="true"></span></a></div>`}
+      <ul class="checklist">${check.items.map((i) => `<li class="${i.done ? 'done' : ''}"><a href="#/${i.route}">${i.done ? '<svg class="i i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>' : '<svg class="i i-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/></svg>'} ${esc(i.label)}</a></li>`).join('')}</ul></div>
+      <a class="btn btn-primary" href="#/${check.items.find((i) => !i.done).route}">Continue <svg class="i i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>`}
     ${accepted ? `<div class="card celebrate" style="${brandVars(byId[accepted.institution_id])}">${ART.skyline(accepted.institution_id, byId[accepted.institution_id].type)}
       <div><span class="eyebrow dark">Your place for ${new Date().getFullYear() + 1}</span><h2>${esc(courseById[accepted.offer_choice || accepted.choice1].name)} at ${esc(byId[accepted.institution_id].name)}</h2>
       <p>Next: watch your email for registration dates, apply for residence, and make sure your NSFAS application is in.</p></div></div>` : ''}
@@ -150,7 +150,7 @@ async function pay(app) {
       : `<ol class="howto"><li>Pay ${rand(unit.amount)} on the ${unit.cao ? 'CAO' : 'institution\'s'} payment page or by EFT, using <strong>${esc(app.ref)}</strong> as your reference.</li>
           <li>Enter the reference from your proof of payment below.</li></ol>
         <label class="field"><span>Payment reference</span><input id="pay-ref" name="payment_ref" required placeholder="e.g. FNB 7731 0942"></label>
-        <p class="hint">${unit.cao ? `<a href="${CAO.url}" target="_blank" rel="noopener">CAO payment options <span class="i i-ext" aria-hidden="true"></span></a>` : `<a href="${esc(byId[app.institution_id].apply)}" target="_blank" rel="noopener">${esc(byId[app.institution_id].short)} fees page <span class="i i-ext" aria-hidden="true"></span></a>`}</p>`}`,
+        <p class="hint">${unit.cao ? `<a href="${CAO.url}" target="_blank" rel="noopener">CAO payment options <svg class="i i-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></a>` : `<a href="${esc(byId[app.institution_id].apply)}" target="_blank" rel="noopener">${esc(byId[app.institution_id].short)} fees page <svg class="i i-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></a>`}</p>`}`,
     buttons: [{ label: 'Cancel', value: null }, { label: demo ? `Pay ${rand(unit.amount)}` : 'Record payment', kind: 'btn-gold', value: 'pay' }],
   });
   if (!r) return false;
@@ -233,6 +233,6 @@ function details(app) {
       </div>
       <h3>History</h3>
       <ol class="feed">${events.map((e) => `<li><span class="dot"></span><div><strong>${esc(ACTION_WORDS[e.action] || e.action)}</strong>${e.note ? `<p>“${esc(e.note)}”</p>` : ''}<small>${fmtDateTime(e.at)} · ${esc(e.actor_id === C.me.id ? 'You' : e.actor_name)}</small></div></li>`).join('')}</ol>
-      <p class="hint"><a href="${esc(i.web)}" target="_blank" rel="noopener">${esc(i.name)} website <span class="i i-ext" aria-hidden="true"></span></a></p>`,
+      <p class="hint"><a href="${esc(i.web)}" target="_blank" rel="noopener">${esc(i.name)} website <svg class="i i-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></a></p>`,
   });
 }

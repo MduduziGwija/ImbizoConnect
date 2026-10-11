@@ -151,7 +151,7 @@ async function review(appId) {
         <p class="small">${esc(s.pass?.label || '')}</p>
         <h3>Programmes</h3>
         <ul class="prog-check">${[[a.choice1, s.e1], [a.choice2, s.e2]].filter(([c]) => c).map(([c, e], n) => `<li><span class="num-dot">${n + 1}</span><div><strong>${esc(courseById[c].name)}</strong>
-          <small>Estimated cut-off APS ${e.cutoff ?? '—'} · ${e.reqs.map((q) => `${esc(q.label)} ${q.have}%/${q.min}% ${q.ok ? '<span class="i i-check" aria-hidden="true"></span>' : '<span class="i i-cross" aria-hidden="true"></span>'}`).join(' · ')}</small></div>${eligBadge(e)}</li>`).join('')}</ul>
+          <small>Estimated cut-off APS ${e.cutoff ?? '—'} · ${e.reqs.map((q) => `${esc(q.label)} ${q.have}%/${q.min}% ${q.ok ? '<svg class="i i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>' : '<svg class="i i-cross" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>'}`).join(' · ')}</small></div>${eligBadge(e)}</li>`).join('')}</ul>
         <h3>Documents</h3>
         <ul class="doc-mini">${DOCUMENTS.map((d) => { const x = byKind[d.id]; return `<li class="${x ? 'has' : ''}"><span>${ART.ui(d.icon, 18)}</span><div><strong>${esc(d.name)}</strong><small>${x ? `${esc(x.name)} · ${fmtSize(x.size)}` : d.required ? 'Missing (required)' : 'Not uploaded'}</small></div>${x ? `<button type="button" class="btn btn-sm btn-outline" data-doc="${x.id}">Open</button>` : ''}</li>`; }).join('')}</ul>
       </div>
