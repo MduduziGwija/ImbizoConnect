@@ -58,11 +58,11 @@ export async function render(el, ctx, query) {
     ${accepted ? `<div class="card celebrate" style="${brandVars(byId[accepted.institution_id])}">${ART.skyline(accepted.institution_id, byId[accepted.institution_id].type)}
       <div><span class="eyebrow dark">Your place for ${new Date().getFullYear() + 1}</span><h2>${esc(courseById[accepted.offer_choice || accepted.choice1].name)} at ${esc(byId[accepted.institution_id].name)}</h2>
       <p>Next: watch your email for registration dates, apply for residence, and make sure your NSFAS application is in.</p></div></div>` : ''}
-    ${units.length || docsReq.length || offers.length ? `<section class="attention"><h2>Needs your attention</h2><div class="attention-grid">
+    ${units.length || docsReq.length || offers.length ? `<section class="attention"><h2>Needs your attention</h2>${C.api.kind === 'demo' ? '<p class="demo-note">Demo data. Every offer and message here is a fictional sample; no university made it.</p>' : ''}<div class="attention-grid">
       ${units.length ? `<div class="attn pay"><span class="attn-ico">${ART.ui('wallet', 20)}</span><div><strong>Pay R${due.toLocaleString('en-ZA')} to complete ${units.reduce((n, u) => n + u.apps.length, 0)} application${units.reduce((n, u) => n + u.apps.length, 0) === 1 ? '' : 's'}</strong>
         <span>Institutions only start reviewing once the fee is paid.</span></div><button class="btn btn-gold" data-pay-all>Pay now</button></div>` : ''}
       ${docsReq.map((x) => `<div class="attn docs"><span class="attn-ico">${ART.ui('clipboard', 20)}</span><div><strong>${esc(byId[x.institution_id].short)} asked for documents</strong><span>${esc(lastNote(x, 'request_docs'))}</span></div><button class="btn btn-primary" data-act="respond" data-id="${x.id}">Reply</button></div>`).join('')}
-      ${offers.map((x) => `<div class="attn offer"><span class="attn-ico">${ART.ui('star', 20)}</span><div><strong>Offer from ${esc(byId[x.institution_id].short)}</strong><span>${esc(courseById[x.offer_choice || x.choice1].name)}</span></div><button class="btn btn-primary" data-act="accept" data-id="${x.id}">Respond</button></div>`).join('')}
+      ${offers.map((x) => `<div class="attn offer"><span class="attn-ico">${ART.ui('star', 20)}</span><div><strong>${C.api.kind === 'demo' ? 'Sample offer' : 'Offer'} from ${esc(byId[x.institution_id].short)}</strong><span>${esc(courseById[x.offer_choice || x.choice1].name)}</span></div><button class="btn btn-primary" data-act="accept" data-id="${x.id}">Respond</button></div>`).join('')}
     </div></section>` : ''}
     <div class="stat-tiles">
       <div class="tile"><strong>${apps.filter((x) => x.status !== 'withdrawn').length}</strong><span>applications</span></div>

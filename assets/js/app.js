@@ -122,7 +122,7 @@ function reveal(root) {
   revealer ||= new IntersectionObserver((entries) => entries.forEach((e) => {
     if (e.isIntersecting) { e.target.classList.add('in'); revealer.unobserve(e.target); }
   }), { rootMargin: '0px 0px -8% 0px' });
-  const els = $$('.section-head, .step, .stat, .closing, .split-cta, .about, .chip-cloud, .fund-card, .faq', root).filter((el) => !el.classList.contains('in'));
+  const els = $$('.section-head, .step, .stat, .closing, .campus-head, .cg-item, .split-cta, .about, .chip-cloud, .fund-card, .faq', root).filter((el) => !el.classList.contains('in'));
   els.forEach((el, n) => {
     el.classList.add('reveal');
     el.style.setProperty('--d', `${(n % 4) * 70}ms`);

@@ -39,9 +39,18 @@ export async function openAlertDialog(ids = []) {
         <label>Email<input type="email" name="email" autocomplete="email" placeholder="you@example.com" value="${esc(saved.email || '')}"></label>
         <label>WhatsApp number<input type="tel" name="whatsapp" autocomplete="tel" inputmode="tel" placeholder="082 123 4567" value="${esc(saved.whatsapp || '')}"></label>
       </div>
-      <label class="check"><input type="checkbox" name="consent" required> I agree to be contacted about application dates only. I can ask to stop at any time.</label>
+      <label class="check"><input type="checkbox" name="consent" required> I agree that ImbizoConnect may use these details only to tell me when applications open, as explained below. I can ask to stop at any time.</label>
       <p class="form-error" role="alert" hidden></p>
-      <p class="hint">ImbizoConnect is a concept and is not affiliated with any institution, so this demo stores your request but sends no messages. Always confirm dates on the institution's own website.</p>`,
+      <details class="privacy"><summary>${ART.ui('shield', 16)} How your details are used</summary>
+        <ul>
+          <li><strong>What:</strong> only the email address and/or WhatsApp number you enter, and the institutions you tick.</li>
+          <li><strong>Why:</strong> only to tell you when those institutions open applications. Never sold, shared or used for marketing.</li>
+          <li><strong>Where:</strong> ${C.api.kind === 'demo' ? 'in this demo, only in this browser on this device. Nothing is sent anywhere.' : 'in the ImbizoConnect database, which only its administrator can read.'}</li>
+          <li><strong>How long:</strong> deleted once the alerts are sent, or after 12 months at most.</li>
+          <li><strong>Your rights (POPIA):</strong> ask to see, correct or delete your details at any time by emailing <a href="mailto:mduduzigwija@gmail.com">mduduzigwija@gmail.com</a>. Responsible party: Mduduzi Gwija.</li>
+        </ul>
+      </details>
+      <p class="hint">ImbizoConnect is a concept and is not affiliated with any institution, so no messages are sent. Always confirm dates on the institution's own website.</p>`,
     buttons: [{ label: 'Cancel', value: null }, { label: 'Set alert', value: 'ok', kind: 'btn-primary', validate: false }],
     onOpen(d) {
       d.querySelector('[data-all]').onclick = () => {

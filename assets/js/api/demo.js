@@ -66,6 +66,9 @@ function demoPdf(title, lines) {
   return new Blob([out], { type: 'application/pdf' });
 }
 
+/** Staff in the demo are made up, and their names say so wherever they appear. */
+const demoName = (p) => (p.role === 'student' ? p.full_name : `${p.full_name} (fictional demo officer)`);
+
 // ───────────────────────── seed
 function seed() {
   const P = (id, role, first_names, surname, extra = {}) => ({
@@ -110,10 +113,10 @@ function seed() {
       guardian_name: `Parent of ${f}`, guardian_phone: '079 555 0170', school: `${city} Secondary School`,
       marks: marks(m), marks_confirmed_at: daysAgo(30 - k),
     }))),
-    P('o-wits', 'officer', 'Naledi', 'Khumalo', { institution_id: 'wits', job_title: 'Admissions Officer, Wits', email: 'n.khumalo@example.org' }),
-    P('o-uj', 'officer', 'Johan', 'Pretorius', { institution_id: 'uj', job_title: 'Admissions Officer, UJ', email: 'j.pretorius@example.org' }),
-    P('o-ukzn', 'officer', 'Priya', 'Naidoo', { institution_id: 'ukzn', job_title: 'Admissions Officer, UKZN (via CAO)', email: 'p.naidoo@example.org' }),
-    P('a-admin', 'admin', 'Lwazi', 'Ndlovu', { job_title: 'Platform administrator', email: 'admin@example.org' }),
+    P('o-wits', 'officer', 'Naledi', 'Khumalo', { institution_id: 'wits', job_title: 'Fictional demo officer · Wits queue', email: 'n.khumalo@example.org' }),
+    P('o-uj', 'officer', 'Johan', 'Pretorius', { institution_id: 'uj', job_title: 'Fictional demo officer · UJ queue', email: 'j.pretorius@example.org' }),
+    P('o-ukzn', 'officer', 'Priya', 'Naidoo', { institution_id: 'ukzn', job_title: 'Fictional demo officer · UKZN queue (via CAO)', email: 'p.naidoo@example.org' }),
+    P('a-admin', 'admin', 'Lwazi', 'Ndlovu', { job_title: 'Fictional demo administrator', email: 'admin@example.org' }),
   ];
 
   const docs = [];
@@ -126,7 +129,7 @@ function seed() {
   addDoc('s-aisha', 'res', 60); addDoc('s-aisha', 'photo', 60);
 
   const state = { currentUser: null, profiles, docs, applications: [], events: [], counters: { ref: 1 } };
-  const name = (id) => profiles.find((p) => p.id === id)?.full_name || 'ImbizoConnect';
+  const name = (id) => { const p = profiles.find((x) => x.id === id); return p ? demoName(p) : 'Demo admissions (fictional)'; };
   const log = (app, actor, action, note, at) => state.events.push({ id: uid(), application_id: app.id, actor_id: actor, actor_name: name(actor), action, note: note || '', at });
 
   // Applications with a history, in the order things happened.
@@ -147,7 +150,7 @@ function seed() {
 
   A('s-thandiwe', 'wits', 'wits-bcom-acc', 'wits-bcom', [['awaiting_payment', 18, null, 'submit'], paid(18, 'PF-83412'), ['under_review', 9, 'o-wits', 'review']]);
   A('s-thandiwe', 'uj', 'uj-bacc-ca', 'uj-bcom-acc', [['submitted', 18, null, 'submit'], ['under_review', 12, 'o-uj', 'review'],
-    ['offer', 3, 'o-uj', 'offer', 'Congratulations! Provisional offer for the Bachelor of Accounting (CA stream), subject to your final NSC results.', { offer_choice: 'uj-bacc-ca', decision_note: 'Provisional offer, subject to final NSC results.' }]]);
+    ['offer', 3, 'o-uj', 'offer', 'Sample offer (fictional): Bachelor of Accounting (CA stream), subject to final NSC results.', { offer_choice: 'uj-bacc-ca', decision_note: 'Sample offer (fictional), subject to final NSC results.' }]]);
   const g = uid();
   const u1 = A('s-thandiwe', 'ukzn', 'ukzn-bcom-acc', 'ukzn-bcom-is', [['awaiting_payment', 2, null, 'submit']], g);
   u1.fee = 250;
@@ -156,13 +159,13 @@ function seed() {
   A('s-aisha', 'uct', 'uct-mbchb', 'uct-bsc-physio', [['awaiting_payment', 80, null, 'submit'], paid(80, 'PF-55120'), ['under_review', 60, null, 'review'],
     ['declined', 40, null, 'decline', 'The MBChB programme was oversubscribed this year. Your application was strong but not ranked high enough for a place.', { decision_note: 'Not ranked high enough in MBChB selection.' }]]);
   A('s-aisha', 'su', 'su-bsc-hls', 'su-bphysio', [['awaiting_payment', 79, null, 'submit'], paid(79, 'PF-55188'), ['under_review', 55, null, 'review'],
-    ['offer', 35, null, 'offer', 'Welcome to Stellenbosch! Offer for BSc Human Life Sciences.', { offer_choice: 'su-bsc-hls' }], ['accepted', 33, null, 'accept']]);
-  A('s-aisha', 'uwc', 'uwc-bphysio', null, [['submitted', 78, null, 'submit'], ['offer', 30, null, 'offer', 'Offer for BSc Physiotherapy.', { offer_choice: 'uwc-bphysio' }], ['offer_declined', 29, null, 'decline_offer', 'Accepted a place elsewhere.']]);
+    ['offer', 35, null, 'offer', 'Sample offer (fictional): BSc Human Life Sciences.', { offer_choice: 'su-bsc-hls' }], ['accepted', 33, null, 'accept']]);
+  A('s-aisha', 'uwc', 'uwc-bphysio', null, [['submitted', 78, null, 'submit'], ['offer', 30, null, 'offer', 'Sample offer (fictional): BSc Physiotherapy.', { offer_choice: 'uwc-bphysio' }], ['offer_declined', 29, null, 'decline_offer', 'Accepted a place elsewhere.']]);
 
   A('s-kabelo', 'wits', 'wits-bsc-eng-civil', 'wits-bsc-eng-elec', [['awaiting_payment', 14, null, 'submit'], paid(14, 'PF-60311')]);
   A('s-lerato', 'wits', 'wits-bsc-cs', 'wits-bsc-actuarial', [['awaiting_payment', 16, null, 'submit'], paid(16, 'PF-60102'), ['under_review', 10, 'o-wits', 'review'],
-    ['offer', 5, 'o-wits', 'offer', 'Provisional offer for BSc (Computer Science).', { offer_choice: 'wits-bsc-cs' }]]);
-  A('s-ruan', 'wits', 'wits-bcom', null, [['awaiting_payment', 11, null, 'submit'], paid(11, 'PF-60877'), ['docs_requested', 6, 'o-wits', 'request_docs', 'Please upload your Grade 12 June results so we can complete the assessment.']]);
+    ['offer', 5, 'o-wits', 'offer', 'Sample offer (fictional): BSc (Computer Science).', { offer_choice: 'wits-bsc-cs' }]]);
+  A('s-ruan', 'wits', 'wits-bcom', null, [['awaiting_payment', 11, null, 'submit'], paid(11, 'PF-60877'), ['docs_requested', 6, 'o-wits', 'request_docs', 'Sample request (fictional): please upload your Grade 12 June results.']]);
   A('s-ayanda', 'wits', 'wits-bnurs', null, [['awaiting_payment', 8, null, 'submit'], paid(7, 'PF-61240')]);
   A('s-lerato', 'uj', 'uj-bsc-cs', null, [['submitted', 15, null, 'submit']]);
   A('s-kabelo', 'uj', 'uj-beng-civil', null, [['submitted', 13, null, 'submit'], ['under_review', 4, 'o-uj', 'review']]);
@@ -206,7 +209,7 @@ function visibleApps(m) {
 }
 function log(app, action, note = '') {
   const m = me();
-  state.events.push({ id: uid(), application_id: app.id, actor_id: m.id, actor_name: m.full_name, action, note, at: new Date().toISOString() });
+  state.events.push({ id: uid(), application_id: app.id, actor_id: m.id, actor_name: demoName(m), action, note, at: new Date().toISOString() });
 }
 
 export const demoApi = {
