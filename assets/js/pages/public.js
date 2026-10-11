@@ -28,9 +28,7 @@ function currentMarks() {
 }
 
 export function prospectus(inst) {
-  const local = (window.PROSPECTUS_LOCAL || {})[inst.id];
   const p = inst.prospectus || {};
-  if (local) return { kind: 'local', href: local.file, size: local.size, year: p.year };
   if (p.pdf) return { kind: 'pdf', href: p.pdf, year: p.year };
   if (p.page && p.page !== inst.web) return { kind: 'page', href: p.page, year: p.year };
   return { kind: 'none', href: inst.web, year: p.year };
@@ -83,7 +81,7 @@ export function home() {
   $('#stat-unis').textContent = INSTITUTIONS.length;
   $('#stat-free').textContent = free.length;
   $('#stat-range').textContent = `R0 – R${Math.max(...paid)}`;
-  $('#stat-pdfs').textContent = INSTITUTIONS.filter((i) => ['local', 'pdf'].includes(prospectus(i).kind)).length;
+  $('#stat-pdfs').textContent = INSTITUTIONS.filter((i) => prospectus(i).kind === 'pdf').length;
   $('#free-list').innerHTML = free.map((i) => `<a href="#/universities?open=${i.id}" style="${brandVars(i)}"><b>R0</b> ${esc(i.name)}</a>`).join('');
   const closed = INSTITUTIONS.filter((i) => !isOpen(i));
   const strip = $('#closed-strip');
@@ -214,8 +212,7 @@ function feeHTML(i) {
 
 function prospectusButton(i, cls = 'btn btn-outline btn-sm') {
   const p = prospectus(i);
-  if (p.kind === 'local') return `<a class="${cls}" href="${esc(p.href)}" download>⬇ Prospectus</a>`;
-  if (p.kind === 'pdf') return `<a class="${cls}" href="${esc(p.href)}" target="_blank" rel="noopener">⬇ Prospectus</a>`;
+  if (p.kind === 'pdf') return `<a class="${cls}" href="${esc(p.href)}" target="_blank" rel="noopener">Prospectus PDF <span class="i i-ext" aria-hidden="true"></span></a>`;
   if (p.kind === 'page') return `<a class="${cls}" href="${esc(p.href)}" target="_blank" rel="noopener">Prospectus <span class="i i-ext" aria-hidden="true"></span></a>`;
   return `<a class="${cls}" href="${esc(i.web)}" target="_blank" rel="noopener">Prospectus <span class="i i-ext" aria-hidden="true"></span></a>`;
 }
@@ -286,7 +283,7 @@ function renderUniversities() {
       <td class="num">${i.cao ? `R${CAO.fee} (CAO)` : rand(i.fee)}${i.verify ? ' <span class="badge verify">confirm</span>' : ''}</td>
       <td>${fmtDate(i.closes)}</td>
       <td><span class="badge ${st.key}">${esc(st.label)}</span></td>
-      <td><a href="${esc(p.href)}" ${p.kind === 'local' ? 'download' : 'target="_blank" rel="noopener"'}>${['local', 'pdf'].includes(p.kind) ? 'PDF ' + (p.year || '') : 'Page <span class="i i-ext" aria-hidden="true"></span>'}</a></td>
+      <td><a href="${esc(p.href)}" target="_blank" rel="noopener">${p.kind === 'pdf' ? 'PDF ' + (p.year || '') : 'Page'} <span class="i i-ext" aria-hidden="true"></span></a></td>
       <td><a href="${esc(i.web)}" target="_blank" rel="noopener">${esc(new URL(i.web).hostname.replace(/^www\./, ''))} <span class="i i-ext" aria-hidden="true"></span></a></td>
     </tr>`;
   }).join('');
@@ -300,8 +297,8 @@ export function openDrawer(id, tab = '') {
   const planned = programmesOf(i.id).find((p) => p.kind === store.get('planned', ''));
   const elig = confirmed && a.count >= 4 && planned ? eligibility(planned, i, a) : null;
 
-  const attach = ['local', 'pdf'].includes(p.kind)
-    ? `<div class="doc-attach"><div class="pdf">PDF</div><div class="meta"><strong>${esc(i.short)} ${p.year || INTAKE_YEAR} undergraduate prospectus</strong><span>${p.kind === 'local' ? `Attached · ${fmtSize(p.size)}` : 'Official PDF from ' + esc(new URL(p.href).hostname)}</span></div><a class="btn btn-primary btn-sm" href="${esc(p.href)}" ${p.kind === 'local' ? 'download' : 'target="_blank" rel="noopener"'}>Download</a></div>`
+  const attach = p.kind === 'pdf'
+    ? `<div class="doc-attach"><div class="pdf">PDF</div><div class="meta"><strong>${esc(i.short)} ${p.year || INTAKE_YEAR} undergraduate prospectus</strong><span>Official PDF on ${esc(new URL(p.href).hostname)}</span></div><a class="btn btn-primary btn-sm" href="${esc(p.href)}" target="_blank" rel="noopener">Open PDF <span class="i i-ext" aria-hidden="true"></span></a></div>`
     : `<div class="doc-attach"><div class="pdf web">WEB</div><div class="meta"><strong>${esc(i.short)} ${p.year || INTAKE_YEAR} prospectus</strong><span>Published on ${esc(new URL(p.href).hostname)}</span></div><a class="btn btn-outline btn-sm" href="${esc(p.href)}" target="_blank" rel="noopener">Open <span class="i i-ext" aria-hidden="true"></span></a></div>`;
 
   $('#drawer-content').innerHTML = `

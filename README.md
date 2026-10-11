@@ -19,7 +19,7 @@ In 2015, two high school friends, **Mduduzi Gwija** and **Karabo Kennedy Mafaral
 ## Highlights
 
 - **One profile, many applications.** Students enter their details, marks and documents once. Every institution they apply to receives the same profile.
-- **Real 2027 data for all 26 public universities.** Application fees, closing dates with live countdowns, faculties, how each one scores applicants, and links to official prospectuses. Five prospectus PDFs are stored in the repository. Where sources disagree on a fee, the site says so.
+- **Real 2027 data for all 26 public universities.** Application fees, closing dates with live countdowns, faculties, how each one scores applicants, and links to official prospectuses. Prospectuses are linked from each institution's own website, never copied. Where sources disagree on a fee, the site says so.
 - **Each institution's real programmes.** 756 undergraduate programmes across the 26 institutions, each with the institution's own name, minimum (APS, or the institution's own score such as Wits APS, UCT FPS, the Mandela Applicant Score or UWC points) and subject requirements. Institutions offer different things: only UP trains vets, UP has no pharmacy school, UCT has no undergraduate BEd, and universities of technology mostly offer diplomas and BEngTech degrees. UP, SU, Rhodes, UL and WSU come from their 2027 prospectuses; the others were compiled from institution websites and 2027 guides, and the site says which.
 - **Real faculties.** Every programme sits under its institution's own faculty, college or school, taken from the 2027 prospectuses (UP, SU, Rhodes, UL, WSU) and each university's official faculty pages. At UWC, for example, the BAdmin is in Economic and Management Sciences.
 - **Alerts when applications open.** Closed institutions say so plainly, and anyone can leave an email address or WhatsApp number to hear when each one opens for the next intake. Admins see the requests; sending them is left to a real deployment.
@@ -91,7 +91,6 @@ Each new intake: update `closes` (and `fee` if it changed) for each institution 
 | --- | --- |
 | Supabase free plan | **R0**. 500 MB database and 1 GB file storage: thousands of student profiles with their documents. |
 | Website hosting | **R0** (GitHub Pages for a public repository; Cloudflare Pages or Netlify for a private one). |
-| Prospectus mirror | **R0** (GitHub Actions minutes on a public repository). |
 
 ## Things to know (challenges)
 
@@ -102,7 +101,7 @@ Each new intake: update `closes` (and `fee` if it changed) for each institution 
 5. **POPIA (personal information).** ID numbers, marks and documents are personal information. Access is restricted in the database itself: officers see only applicants to their own institution, and only after the fee is paid. Students give consent when they sign up and again when they submit. Choose Supabase's Cape Town region to keep data in South Africa.
 6. **Visit counting.** The published site counts visits anonymously with [Umami](https://umami.is) (no cookies, no personal data), added at deploy time from `tools/analytics.html`. Local copies aren't counted.
 7. **Free Supabase projects pause after 7 days without activity.** Daily use keeps it awake. A paused project is restored with one click, with no data lost.
-8. **Large prospectuses stay as links.** The mirror skips files over 40 MB (the UFS prospectus is 56 MB) and links to the official PDF instead.
+8. **Prospectuses stay on the universities' websites.** The site links to each official PDF rather than hosting copies, because prospectuses are the institutions' copyright.
 
 ## Project layout
 
@@ -119,8 +118,6 @@ assets/js/api/demo.js          demo data stored in the browser
 assets/js/api/supabase.js      real backend
 assets/js/pages/*.js           the screens
 supabase/schema.sql            database, permissions and workflow (run once in Supabase)
-prospectuses/                  mirrored prospectus PDFs + manifest.js
-tools/fetch-prospectuses.mjs   downloads prospectuses (run by the Mirror prospectuses workflow)
 tools/stamp-version.sh         cache-busting on deploy
 tests/logic.test.js            npm test
 tests/db/                      npm run test:db (needs PostgreSQL)
@@ -128,8 +125,8 @@ docs/screenshots/              README pictures
 vendor/supabase.min.js         supabase-js (bundled so no CDN is needed)
 ```
 
-Developers: `npm test` runs the rules tests. `PGHOST=… PGUSER=… npm run test:db` loads `supabase/schema.sql` into a throwaway PostgreSQL database and checks every permission and workflow rule as different users. `npm run prospectuses` refreshes the mirrored PDFs.
+Developers: `npm test` runs the rules tests. `PGHOST=… PGUSER=… npm run test:db` loads `supabase/schema.sql` into a throwaway PostgreSQL database and checks every permission and workflow rule as different users.
 
 ## Copyright and licence
 
-© 2026 Mduduzi Gwija. All rights reserved. The source code, database scripts, illustrations and designs are protected by copyright (including the South African Copyright Act 98 of 1978). No licence to copy, use, modify or distribute them is granted unless agreed in writing. See [LICENSE](LICENSE). `vendor/supabase.min.js` keeps its own MIT licence. Prospectuses belong to the institutions that published them.
+© 2026 Mduduzi Gwija. All rights reserved. The source code, database scripts, illustrations and designs are protected by copyright (including the South African Copyright Act 98 of 1978). No licence to copy, use, modify or distribute them is granted unless agreed in writing. See [LICENSE](LICENSE). `vendor/supabase.min.js` keeps its own MIT licence. Prospectuses, names and marks belong to the institutions that published them; the site only links to them.

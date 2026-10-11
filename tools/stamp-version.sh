@@ -7,7 +7,7 @@ set -euo pipefail
 site="$1"
 v="$2"
 # index.html: <script src="..."> and <link href="..."> for our own files.
-sed -i -E "s#(src|href)=\"((assets|vendor|prospectuses)/[^\"?]+\.(js|css))\"#\1=\"\2?v=${v}\"#g" "$site/index.html"
+sed -i -E "s#(src|href)=\"((assets|vendor)/[^\"?]+\.(js|css))\"#\1=\"\2?v=${v}\"#g" "$site/index.html"
 # Module imports: from './x.js' / from '../x.js'. Every import of a file must use the same
 # URL, otherwise the browser would load it twice.
 find "$site/assets/js" -name '*.js' -print0 | xargs -0 sed -i -E "s#(from '\.{1,2}/[^'?]+\.js)'#\1?v=${v}'#g"

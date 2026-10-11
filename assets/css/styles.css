@@ -1249,3 +1249,9 @@ a:hover > .i-arrow, button:hover > .i-arrow { transform: translateX(3px); }
   -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center / contain no-repeat;
   mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center / contain no-repeat; }
 .fc-tick .i { width: 14px; height: 14px; }
+.demo-note { margin: -4px 0 12px; font-size: 13px; color: var(--muted); }
+.privacy { border: 1px solid var(--border); border-radius: 8px; background: var(--surface); font-size: 13px; }
+.privacy summary { padding: 10px 12px; font-weight: 650; display: flex; gap: 8px; align-items: center; list-style: none; color: var(--text); }
+.privacy summary::-webkit-details-marker { display: none; }
+.privacy ul { margin: 0; padding: 0 14px 12px 32px; color: var(--muted); display: grid; gap: 4px; }
+.privacy a { color: inherit; font-weight: 600; }

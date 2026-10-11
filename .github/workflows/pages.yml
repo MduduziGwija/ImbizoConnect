@@ -49,12 +49,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Collect the site files
-        run: mkdir _site && cp -r index.html assets vendor prospectuses _site/
+        run: mkdir _site && cp -r index.html assets vendor _site/
       # Public demo at /demo/: same app with made-up students and officers, data kept in the
       # visitor's browser, not connected to the real database.
       - name: Add the public demo
         run: |
-          mkdir _site/demo && cp -r index.html assets vendor prospectuses _site/demo/
+          mkdir _site/demo && cp -r index.html assets vendor _site/demo/
           sed -i -E "s#SUPABASE_URL: '[^']*'#SUPABASE_URL: ''#; s#SUPABASE_ANON_KEY: '[^']*'#SUPABASE_ANON_KEY: ''#" _site/demo/assets/js/config.js
           grep -q "SUPABASE_URL: ''" _site/demo/assets/js/config.js
       # Anonymous visit counts (Umami, no cookies) on the published site only.
