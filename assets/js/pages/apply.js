@@ -53,7 +53,7 @@ function draw() {
     <div class="portal-head"><div><h1>New application</h1>
       <p>Choose where you want to study and what. We send one application to each institution and give you one fee total.</p></div></div>
     ${check.ready ? '' : `<div class="callout warn gate"><strong>Finish your profile before you submit.</strong>
-      <ul>${check.items.filter((i) => !i.done).map((i) => `<li><a href="#/${i.route}">${esc(i.label)} <span class="i i-arrow" aria-hidden="true"></span></a></li>`).join('')}</ul>
+      <ul>${check.items.filter((i) => !i.done).map((i) => `<li><a href="#/${i.route}">${esc(i.label)} <svg class="i i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></li>`).join('')}</ul>
       You can still choose institutions now. Your choices are saved.</div>`}
     ${C.api.enforceDates ? '' : '<div class="callout info">Demo: closing dates are shown but not enforced, so you can try every institution.</div>'}
     <ol class="stepper three">
@@ -105,7 +105,7 @@ function stepChoices() {
         <label class="search small"><input type="search" id="add-q" placeholder="Search institution or programme, e.g. Pharmacy" aria-label="Search institutions or programmes"></label></div>
       <div class="pick-list" id="add-list">${addList(chosen, already, kind, '')}</div>
     </div>
-    <div class="btn-row end"><button class="btn btn-primary" data-step="2">Check eligibility <span class="i i-arrow" aria-hidden="true"></span></button></div>`;
+    <div class="btn-row end"><button class="btn btn-primary" data-step="2">Check eligibility <svg class="i i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button></div>`;
 }
 
 /** One-line summary of a chosen programme: minimum, subjects, duration. */
@@ -139,7 +139,7 @@ function stepEligibility() {
   if (!C.me.marks_confirmed_at || a.count < 4) {
     $('#step-body').innerHTML = `<div class="card"><h2>Eligibility check</h2>
       <div class="callout info">Confirm your marks in your profile first. The estimate uses only your own confirmed marks.</div>
-      <div class="btn-row"><a class="btn btn-primary" href="#/profile?tab=marks">Enter my marks <span class="i i-arrow" aria-hidden="true"></span></a><button class="btn btn-outline" data-step="1"><span class="i i-back" aria-hidden="true"></span> Back</button></div></div>`;
+      <div class="btn-row"><a class="btn btn-primary" href="#/profile?tab=marks">Enter my marks <svg class="i i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><button class="btn btn-outline" data-step="1"><svg class="i i-back" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg> Back</button></div></div>`;
     return;
   }
   const rows = items.map((it) => {
@@ -167,7 +167,7 @@ function stepEligibility() {
       </tr>`).join('')}</tbody></table></div>
     ${unlikely.length ? `<div class="btn-row"><button class="btn btn-outline" data-act="drop">Remove ${unlikely.length} unlikely choice${unlikely.length === 1 ? '' : 's'}</button></div>` : ''}
   </div>
-  <div class="btn-row between"><button class="btn btn-outline" data-step="1"><span class="i i-back" aria-hidden="true"></span> Back</button><button class="btn btn-primary" data-step="3">Review &amp; submit <span class="i i-arrow" aria-hidden="true"></span></button></div>`;
+  <div class="btn-row between"><button class="btn btn-outline" data-step="1"><svg class="i i-back" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg> Back</button><button class="btn btn-primary" data-step="3">Review &amp; submit <svg class="i i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button></div>`;
   $('#step-body').dataset.drop = unlikely.map((r) => r.i.id).join(',');
 }
 
@@ -198,7 +198,7 @@ function stepReview() {
       <label class="check"><input type="checkbox" id="d3" required> I understand application fees are not refundable.</label>
     </fieldset>
     <div class="callout info">ImbizoConnect is a concept and is not affiliated with any institution. Submitting here shows how the process would work; it does not apply to a real university. Apply on each institution's official website.</div>
-    <div class="btn-row between"><button class="btn btn-outline" data-step="2"><span class="i i-back" aria-hidden="true"></span> Back</button>
+    <div class="btn-row between"><button class="btn btn-outline" data-step="2"><svg class="i i-back" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg> Back</button>
       <button class="btn btn-gold btn-lg" data-act="submit" ${problems.length ? 'disabled' : ''}>Submit ${items.length} application${items.length === 1 ? '' : 's'}</button></div>
   </div>`;
 }

@@ -131,14 +131,14 @@ function renderHeroCards() {
   const { marks, confirmed } = currentMarks();
   const a = analyse(marks);
   if (!confirmed || a.count < 4) {
-    apsCard.innerHTML = '<span class="fc-label">Your APS</span><strong>?<small>/42</small></strong><a class="fc-link" href="#/aps">Enter your marks <span class="i i-arrow" aria-hidden="true"></span></a>';
+    apsCard.innerHTML = '<span class="fc-label">Your APS</span><strong>?<small>/42</small></strong><a class="fc-link" href="#/aps">Enter your marks <svg class="i i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>';
     offer.hidden = true;
     return;
   }
   apsCard.innerHTML = `<span class="fc-label">Your APS</span><strong>${a.aps}<small>/42</small></strong><span class="fc-bar"><i style="width:${Math.round((a.aps / 42) * 100)}%"></i></span>`;
   const m = bestMatch(a);
   offer.hidden = !m;
-  if (m) offer.innerHTML = `<span class="fc-tick"><span class="i i-check" aria-hidden="true"></span></span><div><strong>Likely eligible</strong><span class="fc-sub">${esc(m.inst.short)} · ${esc(m.course.name)}</span></div>`;
+  if (m) offer.innerHTML = `<span class="fc-tick"><svg class="i i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></span><div><strong>Likely eligible</strong><span class="fc-sub">${esc(m.inst.short)} · ${esc(m.course.name)}</span></div>`;
 }
 
 // ─────────────────────────── map
@@ -163,7 +163,7 @@ function paintMap(el, match) {
 }
 function showTip(g) {
   const i = byId[g.dataset.pin]; const st = closingStatus(i); const tip = $('#map-tip');
-  const mark = appliedTo(i.id) ? '<b><span class="i i-check" aria-hidden="true"></span> Applied</b>' : C.shortlist.has(i.id) ? '<b><span class="i i-check" aria-hidden="true"></span> Shortlisted</b>' : '';
+  const mark = appliedTo(i.id) ? '<b><svg class="i i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> Applied</b>' : C.shortlist.has(i.id) ? '<b><svg class="i i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> Shortlisted</b>' : '';
   tip.innerHTML = `<strong>${esc(i.name)}</strong><div class="row"><span>${esc(i.city)}</span><b>${i.cao ? 'R' + CAO.fee + ' CAO' : rand(i.fee)}</b></div><div class="row"><span class="badge ${st.key}">${esc(st.label)}</span>${mark}</div>`;
   const r = g.getBoundingClientRect();
   tip.style.left = Math.min(innerWidth - 140, Math.max(140, r.left + r.width / 2)) + 'px';
@@ -234,28 +234,28 @@ function feeHTML(i) {
 
 function prospectusButton(i, cls = 'btn btn-outline btn-sm') {
   const p = prospectus(i);
-  if (p.kind === 'pdf') return `<a class="${cls}" href="${esc(p.href)}" target="_blank" rel="noopener">Prospectus PDF <span class="i i-ext" aria-hidden="true"></span></a>`;
-  if (p.kind === 'page') return `<a class="${cls}" href="${esc(p.href)}" target="_blank" rel="noopener">Prospectus <span class="i i-ext" aria-hidden="true"></span></a>`;
-  return `<a class="${cls}" href="${esc(i.web)}" target="_blank" rel="noopener">Prospectus <span class="i i-ext" aria-hidden="true"></span></a>`;
+  if (p.kind === 'pdf') return `<a class="${cls}" href="${esc(p.href)}" target="_blank" rel="noopener">Prospectus PDF <svg class="i i-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></a>`;
+  if (p.kind === 'page') return `<a class="${cls}" href="${esc(p.href)}" target="_blank" rel="noopener">Prospectus <svg class="i i-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></a>`;
+  return `<a class="${cls}" href="${esc(i.web)}" target="_blank" rel="noopener">Prospectus <svg class="i i-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></a>`;
 }
 const websiteButton = (i) => `<a class="btn btn-outline btn-sm btn-icon" href="${esc(i.web)}" target="_blank" rel="noopener" title="${esc(i.name)} website" aria-label="${esc(i.name)} website">
   <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z"/></svg></a>`;
 
 function shortlistButton(i, size = 'btn-sm') {
-  if (appliedTo(i.id)) return `<a class="btn ${size} btn-added" href="#/applications"><span class="i i-check" aria-hidden="true"></span> Applied</a>`;
+  if (appliedTo(i.id)) return `<a class="btn ${size} btn-added" href="#/applications"><svg class="i i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> Applied</a>`;
   const on = C.shortlist.has(i.id);
   const closed = !canShortlist(i);
-  return `<button class="btn ${size} ${on ? 'btn-added' : 'btn-primary'}" data-cart="${i.id}" ${closed && !on ? 'disabled title="Applications have closed"' : ''}>${on ? '<span class="i i-check" aria-hidden="true"></span> Shortlisted' : closed ? 'Closed' : '+ Shortlist'}</button>`;
+  return `<button class="btn ${size} ${on ? 'btn-added' : 'btn-primary'}" data-cart="${i.id}" ${closed && !on ? 'disabled title="Applications have closed"' : ''}>${on ? '<svg class="i i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> Shortlisted' : closed ? 'Closed' : '+ Shortlist'}</button>`;
 }
 
 /** When searching for a programme, show which of this institution's programmes matched. */
 function progHit(i) {
   const q = uniFilter.q.trim().toLowerCase();
   if (!q || `${i.name} ${i.short} ${i.city} ${i.province}`.toLowerCase().includes(q)) {
-    return `<button class="prog-count" data-open="${i.id}" data-tab="programmes">${programmesOf(i.id).length} programmes <span class="i i-arrow" aria-hidden="true"></span></button>`;
+    return `<button class="prog-count" data-open="${i.id}" data-tab="programmes">${programmesOf(i.id).length} programmes <svg class="i i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>`;
   }
   const hits = programmesOf(i.id).filter((p) => p.name.toLowerCase().includes(q));
-  return `<button class="prog-count hit" data-open="${i.id}" data-tab="programmes">${esc(hits[0].name)}${hits.length > 1 ? ` +${hits.length - 1} more` : ''} <span class="i i-arrow" aria-hidden="true"></span></button>`;
+  return `<button class="prog-count hit" data-open="${i.id}" data-tab="programmes">${esc(hits[0].name)}${hits.length > 1 ? ` +${hits.length - 1} more` : ''} <svg class="i i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>`;
 }
 
 function renderUniversities() {
@@ -305,8 +305,8 @@ function renderUniversities() {
       <td class="num">${i.cao ? `R${CAO.fee} (CAO)` : rand(i.fee)}${i.verify ? ' <span class="badge verify">confirm</span>' : ''}</td>
       <td>${fmtDate(i.closes)}</td>
       <td><span class="badge ${st.key}">${esc(st.label)}</span></td>
-      <td><a href="${esc(p.href)}" target="_blank" rel="noopener">${p.kind === 'pdf' ? 'PDF ' + (p.year || '') : 'Page'} <span class="i i-ext" aria-hidden="true"></span></a></td>
-      <td><a href="${esc(i.web)}" target="_blank" rel="noopener">${esc(new URL(i.web).hostname.replace(/^www\./, ''))} <span class="i i-ext" aria-hidden="true"></span></a></td>
+      <td><a href="${esc(p.href)}" target="_blank" rel="noopener">${p.kind === 'pdf' ? 'PDF ' + (p.year || '') : 'Page'} <svg class="i i-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></a></td>
+      <td><a href="${esc(i.web)}" target="_blank" rel="noopener">${esc(new URL(i.web).hostname.replace(/^www\./, ''))} <svg class="i i-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></a></td>
     </tr>`;
   }).join('');
 }
@@ -320,8 +320,8 @@ export function openDrawer(id, tab = '') {
   const elig = confirmed && a.count >= 4 && planned ? eligibility(planned, i, a) : null;
 
   const attach = p.kind === 'pdf'
-    ? `<div class="doc-attach"><div class="pdf">PDF</div><div class="meta"><strong>${esc(i.short)} ${p.year || INTAKE_YEAR} undergraduate prospectus</strong><span>Official PDF on ${esc(new URL(p.href).hostname)}</span></div><a class="btn btn-primary btn-sm" href="${esc(p.href)}" target="_blank" rel="noopener">Open PDF <span class="i i-ext" aria-hidden="true"></span></a></div>`
-    : `<div class="doc-attach"><div class="pdf web">WEB</div><div class="meta"><strong>${esc(i.short)} ${p.year || INTAKE_YEAR} prospectus</strong><span>Published on ${esc(new URL(p.href).hostname)}</span></div><a class="btn btn-outline btn-sm" href="${esc(p.href)}" target="_blank" rel="noopener">Open <span class="i i-ext" aria-hidden="true"></span></a></div>`;
+    ? `<div class="doc-attach"><div class="pdf">PDF</div><div class="meta"><strong>${esc(i.short)} ${p.year || INTAKE_YEAR} undergraduate prospectus</strong><span>Official PDF on ${esc(new URL(p.href).hostname)}</span></div><a class="btn btn-primary btn-sm" href="${esc(p.href)}" target="_blank" rel="noopener">Open PDF <svg class="i i-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></a></div>`
+    : `<div class="doc-attach"><div class="pdf web">WEB</div><div class="meta"><strong>${esc(i.short)} ${p.year || INTAKE_YEAR} prospectus</strong><span>Published on ${esc(new URL(p.href).hostname)}</span></div><a class="btn btn-outline btn-sm" href="${esc(p.href)}" target="_blank" rel="noopener">Open <svg class="i i-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></a></div>`;
 
   $('#drawer-content').innerHTML = `
     <div class="drawer-hero" style="${brandVars(i)}">${ART.skyline(i.id, i.type)}
@@ -350,10 +350,10 @@ export function openDrawer(id, tab = '') {
       ${programmeList(i, confirmed && a.count >= 4 ? a : null)}
       <h3>Links</h3>
       <ul class="link-list">
-        <li><a href="${esc(i.web)}" target="_blank" rel="noopener"><span>Official website</span><b>${esc(new URL(i.web).hostname)} <span class="i i-ext" aria-hidden="true"></span></b></a></li>
-        ${i.cao ? `<li><a href="${esc(CAO.url)}" target="_blank" rel="noopener"><span>Central Applications Office</span><b>cao.ac.za <span class="i i-ext" aria-hidden="true"></span></b></a></li>` : i.apply !== i.web ? `<li><a href="${esc(i.apply)}" target="_blank" rel="noopener"><span>How to apply</span><b>${esc(new URL(i.apply).hostname)} <span class="i i-ext" aria-hidden="true"></span></b></a></li>` : ''}
+        <li><a href="${esc(i.web)}" target="_blank" rel="noopener"><span>Official website</span><b>${esc(new URL(i.web).hostname)} <svg class="i i-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></b></a></li>
+        ${i.cao ? `<li><a href="${esc(CAO.url)}" target="_blank" rel="noopener"><span>Central Applications Office</span><b>cao.ac.za <svg class="i i-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></b></a></li>` : i.apply !== i.web ? `<li><a href="${esc(i.apply)}" target="_blank" rel="noopener"><span>How to apply</span><b>${esc(new URL(i.apply).hostname)} <svg class="i i-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></b></a></li>` : ''}
       </ul>
-      <div class="btn-row">${shortlistButton(i, '')}${C.me?.role === 'student' && C.shortlist.has(i.id) ? '<a class="btn btn-gold" href="#/apply">Apply now <span class="i i-arrow" aria-hidden="true"></span></a>' : ''}</div>
+      <div class="btn-row">${shortlistButton(i, '')}${C.me?.role === 'student' && C.shortlist.has(i.id) ? '<a class="btn btn-gold" href="#/apply">Apply now <svg class="i i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>' : ''}</div>
     </div>`;
   const drawer = $('#drawer');
   drawer.dataset.id = id;
@@ -479,7 +479,7 @@ function renderCareers(a) {
       <div class="career-foot">
         <div><span class="uni-count">Earning</span><br><strong>${esc(r.c.salary)}</strong> <span class="uni-count">/yr</span></div>
         <div class="right"><span class="uni-count">${r.within.length} of ${r.offering.length} institutions in reach</span><br>
-        <button class="btn btn-text" data-plan="${r.course.id}">Apply for this <span class="i i-arrow" aria-hidden="true"></span></button></div>
+        <button class="btn btn-text" data-plan="${r.course.id}">Apply for this <svg class="i i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button></div>
       </div>
     </article>`;
   let html = '';

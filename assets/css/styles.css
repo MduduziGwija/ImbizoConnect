@@ -1235,19 +1235,14 @@ dialog.modal[open] { animation: pop .22s var(--ease); }
 .banner.warn .ico { color: var(--amber); }
 .icon-btn { display: inline-grid; place-items: center; }
 
-/* Inline line icons drawn as CSS masks, so any text colour applies (no emoji, no font glyphs) */
-.i { display: inline-block; width: 1em; height: 1em; vertical-align: -.14em; background: currentColor; flex-shrink: 0;
-  -webkit-mask: var(--i) center / contain no-repeat; mask: var(--i) center / contain no-repeat; }
-.i-arrow { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12h14M13 6l6 6-6 6'/%3E%3C/svg%3E"); transition: transform .18s var(--ease); }
+/* Inline line icons: real inline SVG (no emoji, no font glyphs), sized to the text */
+.i { display: inline-block; width: 1em; height: 1em; vertical-align: -.14em; flex-shrink: 0; overflow: visible; }
+.i-arrow { transition: transform .18s var(--ease); }
 a:hover > .i-arrow, button:hover > .i-arrow { transform: translateX(3px); }
-.i-back { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M19 12H5M11 6l-6 6 6 6'/%3E%3C/svg%3E"); }
-.i-ext { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 17 17 7M8 7h9v9'/%3E%3C/svg%3E"); width: .9em; height: .9em; }
-.i-check { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E"); }
-.i-cross { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='M18 6 6 18M6 6l12 12'/%3E%3C/svg%3E"); }
-.i-circle { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2'%3E%3Ccircle cx='12' cy='12' r='8'/%3E%3C/svg%3E"); opacity: .55; }
-.field-hint.ok::before { content: ''; display: inline-block; width: 1em; height: 1em; margin-right: 4px; vertical-align: -.15em; background: currentColor;
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center / contain no-repeat;
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center / contain no-repeat; }
+.i-ext { width: .9em; height: .9em; }
+.i-circle { opacity: .55; }
+.field-hint.ok::before { content: ''; display: inline-block; width: 1em; height: 1em; margin-right: 4px; vertical-align: -.15em;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231a7f5a' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center / contain no-repeat; }
 .fc-tick .i { width: 14px; height: 14px; }
 .demo-note { margin: -4px 0 12px; font-size: 13px; color: var(--muted); }
 .privacy { border: 1px solid var(--border); border-radius: 8px; background: var(--surface); font-size: 13px; }
@@ -1288,3 +1283,6 @@ a:hover > .i-arrow, button:hover > .i-arrow { transform: translateX(3px); }
   .cg-1, .cg-4 { grid-column: auto; }
   .cg-1 { grid-row: span 1; }
 }
+/* Dark mode: lighten brand colours on date badges so every university stays readable */
+:root[data-theme="dark"] .closing .dl-badge { color: color-mix(in srgb, var(--c, var(--gold)) 40%, #fff); background: color-mix(in srgb, var(--c, var(--gold)) 30%, var(--surface)); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .closing .dl-badge { color: color-mix(in srgb, var(--c, var(--gold)) 40%, #fff); background: color-mix(in srgb, var(--c, var(--gold)) 30%, var(--surface)); } }
