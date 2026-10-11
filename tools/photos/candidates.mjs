@@ -1,33 +1,37 @@
 // © 2026 Mduduzi Gwija. All rights reserved. Proprietary: see LICENSE.
-// Finds candidate campus photos on Unsplash (free Unsplash License only: no Unsplash+,
-// no sponsored iStock results) and saves small previews to photo-candidates/ for review.
-// Run by .github/workflows/photos.yml. Not part of the site.
+// Finds candidate campus photos on Unsplash's public search pages, filtered to the free
+// Unsplash License (license=free), and saves small previews to photo-candidates/ for review.
+// Run by .github/workflows/photos.yml on working branches. Not part of the site.
 import { mkdir, writeFile } from 'node:fs/promises';
 
-const QUERIES = ['african university students', 'black university students campus', 'african students studying',
-  'south africa university', 'african graduation', 'students library africa', 'african student lecture', 'johannesburg students'];
-const UA = { 'User-Agent': 'Mozilla/5.0 (ImbizoConnect photo review; +https://github.com/MduduziGwija/ImbizoConnect)', Accept: 'application/json' };
+const QUERIES = ['african-university-students', 'black-university-students', 'african-students-studying', 'south-africa-university',
+  'african-graduation', 'black-graduation', 'african-student-library', 'black-students-studying', 'african-college-students', 'university-lecture-hall'];
+const UA = { 'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126 Safari/537.36', 'Accept-Language': 'en' };
 await mkdir('photo-candidates', { recursive: true });
 const seen = new Map();
 for (const q of QUERIES) {
-  for (const page of [1, 2]) {
-    const r = await fetch(`https://unsplash.com/napi/search/photos?query=${encodeURIComponent(q)}&per_page=30&page=${page}`, { headers: UA });
-    if (!r.ok) { console.log('search failed', q, r.status); continue; }
-    const j = await r.json();
-    for (const p of j.results || []) {
-      if (p.premium || p.plus || p.sponsorship || seen.has(p.id)) continue;
-      seen.set(p.id, { id: p.id, slug: p.slug, alt: p.alt_description, desc: p.description, w: p.width, h: p.height,
-        by: p.user?.name, byUrl: p.user?.links?.html, page: p.links?.html, raw: p.urls?.raw, query: q });
-    }
+  const r = await fetch(`https://unsplash.com/s/photos/${q}?license=free`, { headers: UA });
+  const html = await r.text();
+  console.log(q, r.status, html.length);
+  for (const m of html.matchAll(/href="\/photos\/([a-z0-9-]*?-?([A-Za-z0-9_-]{11}))"/g)) {
+    const [, slug, id] = m;
+    if (!seen.has(id)) seen.set(id, { id, slug, query: q });
   }
 }
-const list = [...seen.values()].slice(0, 120);
+console.log('found', seen.size);
 let n = 0;
-for (const p of list) {
-  const r = await fetch(`${p.raw}&w=360&q=60&fm=jpg&fit=max`);
+const out = [];
+for (const p of [...seen.values()].slice(0, 140)) {
+  const page = await (await fetch(`https://unsplash.com/photos/${p.slug}`, { headers: UA })).text();
+  if (/Unsplash\+ License|unsplash\.com\/plus/i.test(page.slice(0, 200000)) && !/Unsplash License/.test(page)) continue;
+  const title = (page.match(/<title>([^<]*)<\/title>/) || [])[1] || '';
+  const img = (page.match(/https:\/\/images\.unsplash\.com\/photo-[^"?\s]+/) || [])[0];
+  if (!img || /premium_photo/.test(img)) continue;
+  const r = await fetch(`${img}?w=360&q=60&fm=jpg&fit=max`);
   if (!r.ok) continue;
-  await writeFile(`photo-candidates/${String(++n).padStart(3, '0')}-${p.id}.jpg`, Buffer.from(await r.arrayBuffer()));
-  p.n = n;
+  n += 1;
+  await writeFile(`photo-candidates/${String(n).padStart(3, '0')}-${p.id}.jpg`, Buffer.from(await r.arrayBuffer()));
+  out.push({ n, ...p, title, img });
 }
-await writeFile('photo-candidates/candidates.json', JSON.stringify(list.filter((p) => p.n), null, 1));
-console.log(`${list.length} candidates, ${n} previews`);
+await writeFile('photo-candidates/candidates.json', JSON.stringify(out, null, 1));
+console.log(`${n} previews`);
